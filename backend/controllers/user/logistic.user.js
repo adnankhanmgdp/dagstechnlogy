@@ -36,7 +36,7 @@ exports.ShortestDistanceforUser = async (req, res) => {
             })
         }
 
-        if (order.orderStatus.status[order.orderStatus.length - 1] != "initiated") {
+        if (order.orderStatus[order.orderStatus.length - 1].status != "initiated") {
             return res.status(400).json("Invalid Status")
         }
 

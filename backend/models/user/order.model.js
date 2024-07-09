@@ -13,7 +13,7 @@ const OrderSchema = new mongoose.Schema({
         status: {
             type: String,
             default: "pending" //0-pending , 1-initiated, 2-readyToPickup, 3-pickedUp, 4-cleaning, 
-            //5-readyToDelivery, 6-outForDelivery, 7-delivered, 8-cancelled, 9-refunded
+            //5-readyToDelivery, 6-outOfDelivery, 7-delivered, 8-cancelled, 9-refunded
         },
         time: {
             type: Date,
@@ -42,6 +42,9 @@ const OrderSchema = new mongoose.Schema({
         deafult: null
     },
     discount: {
+        type: String
+    },
+    distance: {
         type: String
     },
     deliveryFee: { //amount that is charged by vendor for this order

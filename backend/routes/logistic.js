@@ -18,7 +18,9 @@ const { getLogisticDashboard,
     pickedUpStatus,
     outOfDeliveryStatus,
     confirmDelivery,
-    fetchPastOrders
+    fetchPastOrders,
+    dashboard,
+    deliveryOTP
 } = require("../controllers/logistic/orders.logistic")
 const { settlement, calculateLogisticsFee, calculateAmount } = require("../controllers/logistic/settlement.logistic")
 
@@ -33,7 +35,7 @@ router.post("/switchAvailability", verifyLogistic, switchAvailability)
 router.post("/trackLoaction", verifyLogistic, trackLocation)
 
 //orders
-router.post("/dashboard", verifyLogistic, getLogisticDashboard)
+router.post("/dashboard", verifyLogistic, dashboard)
 router.post("/getAllOrders", verifyLogistic, getAllOrders)
 router.post("/fetchActiveOrders", verifyLogistic, fetchActiveOrders)
 router.post("/getOrder", verifyLogistic, getOrder)
@@ -41,6 +43,7 @@ router.post("/pickedUp", verifyLogistic, pickedUpStatus)
 router.post("/outOfDelivery", verifyLogistic, outOfDeliveryStatus)
 router.post("/delivered", verifyLogistic, confirmDelivery)
 router.post("/pastOrders", verifyLogistic, fetchPastOrders)
+router.post("/deliveryOTP", verifyLogistic, deliveryOTP)
 
 //settlement
 router.post("/settlement", verifyLogistic, settlement)

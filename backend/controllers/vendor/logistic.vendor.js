@@ -1,7 +1,7 @@
 const Logistic = require('../../models/logistic/delivery.model');
 const { calculateDistance } = require('../../utils/logistic/mapBoxDistance');
 // const { calculateShortestDistance } = require('../../utils/logistic/shortestdistance');
-
+const Order = require('../../models/user/order.model')
 
 exports.findShortestDistance = async (req, res) => {
   try {

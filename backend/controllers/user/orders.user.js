@@ -9,6 +9,7 @@ const { v4: uuidv4 } = require('uuid');
 const Razorpay = require("razorpay");
 const crypto = require('crypto')
 const Notification = require("../../models/user/notifications.model");
+const { calculateDistance } = require("../../utils/logistic/shortestdistance");
 const razorpay = new Razorpay({
     key_id: process.env.RAZORPAY_SECRET_ID,
     key_secret: process.env.RAZORPAY_SECRET_KEY,
@@ -37,6 +38,7 @@ exports.createOrder = async (req, res) => {
         const { orders, vendorId, deliveryFee, phone, orderPics, deliveryType, ...updates } = req.body;
         console.log("response-->", req.body)
         const misc = await Misc.findOne();
+        const vendor = await Vendor.findOne({ vendorId })
         const orderItems = [];
         let allAmount = 0;
         let allCommission = 0;
@@ -131,6 +133,14 @@ exports.createOrder = async (req, res) => {
                 updates
             )
         );
+
+        const distance = calculateDistance(
+            user.geoCoordinates.latitude,
+            user.geoCoordinates.longitude,
+            vendor.geoCoordinates.latitude,
+            vendor.geoCoordinates.longitude
+        );
+        newOrder.distance = distance;
         await newOrder.save();
 
         const orderId = newOrder.orderId; //to push newly created order into user data

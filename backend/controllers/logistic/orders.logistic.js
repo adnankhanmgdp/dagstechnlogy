@@ -4,6 +4,7 @@ const Vendor = require('../../models/vendor/vendor.model');
 const Service = require('../../models/vendor/service.model');
 const Logistic = require('../../models/logistic/delivery.model');
 const User = require('../../models/user/user.model');
+const Notification = require('../../models/user/notifications.model')
 const { sendOTP, generateOTP } = require('../../utils/admin/generateOTP');
 const bcrypt = require('bcryptjs')
 
@@ -36,7 +37,7 @@ exports.getLogisticDashboard = async (req, res) => {
             logisticId: logisticId,
             'orderStatus': {
                 $elemMatch: {
-                    status: 'complete',
+                    status: 'delivered',
                     time: {
                         $gte: startOfDay(today),
                         $lte: endOfDay(today)
@@ -58,7 +59,7 @@ exports.getLogisticDashboard = async (req, res) => {
                 $gte: startOfDay(yesterday),
                 $lt: startOfDay(today)
             },
-            'orderStatus.status': 'complete'
+            'orderStatus.status': 'delivered'
         });
 
         // Iterate over previous day's completed orders to calculate total income for today
@@ -85,7 +86,7 @@ exports.getLogisticDashboard = async (req, res) => {
                 $lt: startOfDay(today)
             },
             'orderStatus.status': {
-                $nin: ['complete', 'cancelled']
+                $nin: ['delivered', 'cancelled']
             }
         });
 
@@ -223,7 +224,7 @@ exports.pickedUpStatus = async (req, res) => {
         }
         order.secretKey = secretKey;
 
-        if (order.orderStatus.status[order.orderStatus.length - 1] != "readyToPickup") {
+        if (order.orderStatus[order.orderStatus.length - 1].status !== "readyToPickup") {
             return res.status(400).json("Invalid Status")
         }
 
@@ -249,17 +250,14 @@ exports.pickedUpStatus = async (req, res) => {
             order
         });
     } catch (error) {
-        {
-            console.error("Error updating order status:", error);
-            res.status(500).json({ error: "Failed to update order status" });
-        }
+        res.status(500).json({ message: "Internal server error", error: error.message });
     }
 };
 
 exports.outOfDeliveryStatus = async (req, res) => {
     try {
-        const { orderId, secretKey } = req.body;
-        const order = await Order.findOne({ orderId });
+        const { secretKey } = req.body;
+        const order = await Order.findOne({ secretKey });
         const user = await User.findOne({ phone: order.userId })
 
         if (!order) {
@@ -270,7 +268,7 @@ exports.outOfDeliveryStatus = async (req, res) => {
             return res.status(403).json({ error: "Invalid secret key" });
         }
 
-        if (order.orderStatus.status[order.orderStatus.length - 1] != "readyForDelivery") {
+        if (order.orderStatus[order.orderStatus.length - 1].status != "readyToDelivery") {
             return res.status(400).json("Invalid Status")
         }
 
@@ -279,22 +277,12 @@ exports.outOfDeliveryStatus = async (req, res) => {
             time: new Date(Date.now() + (5.5 * 60 * 60 * 1000)).toISOString()
         });
 
-        const phoneOTP = generateOTP();
-        const hashedOTP = await bcrypt.hash(phoneOTP, 10);
-        user.OTP = hashedOTP;
-        sendOTP(phoneOTP, user.phone);
-
-        const logisticId = order.logisticId[1]
-        const logistic = await Logistic.findOne({ logisticId })
-        logistic.currentActiveOrder += 1;
-
         order.settlementToVendor = order.vendorFee;
         await order.save();
         await user.save();
-        await logistic.save();
         await Notification.create({
             id: order.userId,
-            orderId: orderId,
+            orderId: order.orderId,
             title: "Your order is out of delivery",
             notificationFor: "user"
         })
@@ -304,16 +292,13 @@ exports.outOfDeliveryStatus = async (req, res) => {
             order
         });
     } catch (error) {
-        {
-            console.error("Error updating order status:", error);
-            res.status(500).json({ error: "Failed to update order status" });
-        }
+        res.status(500).json({ message: "Internal server error", error: error.message });
     }
 };
 
 exports.confirmDelivery = async (req, res) => {
     try {
-        const { otp, orderId } = req.body;
+        const { otp, orderId, otpStored } = req.body;
         const order = await Order.findOne({ orderId })
         const user = await User.findOne({ phone: order.userId });
         if (!user) {
@@ -321,14 +306,13 @@ exports.confirmDelivery = async (req, res) => {
                 message: "User not found"
             });
         }
-        const otpMatch = await bcrypt.compare(otp, user.OTP);
-        if (!otpMatch) {
+        if (otp !== otpStored) {
             return res.status(401).json({
                 message: "Invalid OTP"
             });
         }
 
-        if (order.orderStatus.status[order.orderStatus.length - 1] != "outForDelivery"){
+        if (order.orderStatus[order.orderStatus.length - 1].status != "outOfDelivery") {
             return res.status(400).json("Invalid Status")
         }
 
@@ -337,7 +321,10 @@ exports.confirmDelivery = async (req, res) => {
             time: new Date(Date.now() + (5.5 * 60 * 60 * 1000)).toISOString()
         });
         order.settlementForLogisticsOnDelivery = order.deliveryFee / 2;
+        const logistic = await Logistic.findOne({ logisticId: order.logisticId[1] })
+        logistic.currentActiveOrder -= 1;
         await order.save();
+        await logistic.save();
         await Notification.create({
             id: order.userId,
             orderId: orderId,
@@ -349,5 +336,102 @@ exports.confirmDelivery = async (req, res) => {
             message: "Order is Delivered Successfully",
             order
         })
-    } catch { }
+    } catch (error) {
+        res.status(500).json({ message: "Internal server error", error: error.message });
+    }
+}
+
+exports.deliveryOTP = async (req, res) => {
+    try {
+        const { orderId } = req.body;
+        const order = await Order.findOne({ orderId })
+        const phoneOTP = generateOTP().substring(0,4)
+        console.log(phoneOTP)
+        
+        // const hashedOTP = await bcrypt.hash(phoneOTP, 10);
+        // user.OTP = hashedOTP;
+        const otp = sendOTP(phoneOTP, order.userId);
+        res.json({
+            message: "OTP send successfully",
+            phoneOTP
+        })
+    } catch (error) {
+        res.status(500).json({ message: "Internal server error", error: error.message });
+    }
+}
+
+exports.dashboard = async (req, res) => {
+    const logisticId = req.body.logisticId;
+    const today = new Date(Date.now() + (5.5 * 60 * 60 * 1000)).toISOString();
+    const yesterday = subDays(new Date(), 1); // Calculate yesterday's date
+
+    try {
+        const todayOrdersOnPickup = await Order.find({
+            'logisticId.0': logisticId,
+            'orderStatus': {
+                $elemMatch: {
+                    $and: [
+                        { status: 'cleaning' },
+                        { status: { $ne: 'cancelled' } },
+                        { time: { $gte: startOfDay(today), $lte: endOfDay(today) } }
+                    ]
+                }
+            }
+        });
+
+        const todayOrdersOnDelivery = await Order.find({
+            'logisticId.1': logisticId,
+            'orderStatus': {
+                $elemMatch: {
+                    $and: [
+                        { status: 'delivered' },
+                        { status: { $ne: 'cancelled' } },
+                        { time: { $gte: startOfDay(today), $lte: endOfDay(today) } }
+                    ]
+                }
+            }
+        });
+
+        // Initialize variables to track total amounts and income for today
+        let totalAmountTodayOnPickup = 0;
+        let totalAmountTodayOnDelivery = 0;
+        let totalAmount = 0;
+        let distance = 0;
+
+        // Calculate total amount for today's orders
+        todayOrdersOnPickup.forEach(order => {
+            totalAmountTodayOnPickup += order.deliveryFee / 2;
+            distance += order.distance
+        });
+        todayOrdersOnDelivery.forEach(order => {
+            totalAmountTodayOnDelivery += order.deliveryFee / 2;
+            distance += order.distance
+        });
+        const totalOrder = todayOrdersOnPickup.length + todayOrdersOnDelivery.length
+
+        totalAmount = totalAmountTodayOnPickup + totalAmountTodayOnDelivery
+
+        // Calculate total completed orders for today
+        // const totalCompletedOrders = completedOrdersToday.length + completedOrdersYesterday.length;
+
+        // Fetch previous day's orders with status other than 'complete' or 'cancelled'
+        // const previousDaysOrders = await Order.find({
+        //     logisticId: logisticId,
+        //     'orderDate': {
+        //         $lt: startOfDay(today)
+        //     },
+        //     'orderStatus.status': {
+        //         $nin: ['delivered', 'cancelled']
+        //     }
+        // });
+
+        // Send response with the calculated data
+        res.status(200).json({
+            totalAmount,
+            distance,
+            totalOrder
+        });
+    } catch (error) {
+        res.status(500).json({ message: "Internal server error", error: error.message });
+    }
 }

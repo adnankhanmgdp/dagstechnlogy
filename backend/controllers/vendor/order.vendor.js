@@ -10,7 +10,6 @@ exports.getVendorDashboard = async (req, res) => {
     const { vendorId } = req.body;
     console.log(vendorId)
     const today = new Date(Date.now() + (5.5 * 60 * 60 * 1000))
-    console.log(startOfDay(today), " j", endOfDay(today))
     // const per = await Commission.find();
 
     try {
@@ -45,8 +44,6 @@ exports.getVendorDashboard = async (req, res) => {
                 }
             }
         });
-
-
 
         const totalCompletedOrders = completedOrders.length;
 
@@ -181,29 +178,30 @@ exports.acceptOrder = async (req, res) => {
             return res.status(403).json({ error: "Order does not belong to this vendor" });
         }
 
-        const lastStatus = order.orderStatus[order.orderStatus.length - 1];
-        if (lastStatus.status === "pickedUp") {
-            //marking his active order as -1
-            const logisticId = order.logisticId[0];
-            const logistic = await Logistic.findOne({ logisticId })
-            logistic.currentActiveOrder -= 1
-            await logistic.save();
-
-            order.orderStatus.push({
-                status: "cleaning",
-                time: new Date(Date.now() + (5.5 * 60 * 60 * 1000)).toISOString()
-            });
-            const orderId = order.orderId;
-            order.settlementForLogisticsOnPickup = order.deliveryFee / 2;
-            await order.save();
-            await Notification.create({
-                id: order.userId,
-                orderId: orderId,
-                title: `Your Order \"${orderId}\" Getting Processsed`,
-                notificationFor: "user"
-            })
+        if (order.orderStatus[order.orderStatus.length - 1].status !== "pickedUp") {
+            return res.status(400).json("Invalid Status")
         }
-        order = await Order.findOne({ secretKey });
+
+        // const lastStatus = order.orderStatus[order.orderStatus.length - 1];
+        //marking his active order as -1
+        const logisticId = order.logisticId[0];
+        const logistic = await Logistic.findOne({ logisticId })
+        logistic.currentActiveOrder -= 1
+        await logistic.save();
+
+        order.orderStatus.push({
+            status: "cleaning",
+            time: new Date(Date.now() + (5.5 * 60 * 60 * 1000)).toISOString()
+        });
+        const orderId = order.orderId;
+        order.settlementForLogisticsOnPickup = order.deliveryFee / 2;
+        await order.save();
+        await Notification.create({
+            id: order.userId,
+            orderId: orderId,
+            title: `Your Order \"${orderId}\" Getting Processsed`,
+            notificationFor: "user"
+        })
         res.status(200).json({ order });
     } catch (error) {
         {
@@ -227,45 +225,49 @@ exports.readyForDelivery = async (req, res) => {
             return res.status(403).json({ error: "Vendor not found" });
         }
 
-        if (order.orderStatus[order.orderStatus.length - 1].status === "cleaning") {
-            const deliveryPartners = await Logistic.find({ availability: true });
-            let shortestDistance = Infinity;
-            let closestPartner = null;
-
-            deliveryPartners.forEach(partner => {
-                const distance = calculateDistance(vendor.geoCoordinates.latitude, vendor.geoCoordinates.longitude, partner.geoCoordinates.latitude, partner.geoCoordinates.longitude);
-                if (distance < shortestDistance) {
-                    shortestDistance = distance;
-                    closestPartner = partner;
-                }
-            });
-            order.logisticId[1] = closestPartner.logisticId
-
-            vendor.currentActiveOrders -= 1;
-            await vendor.save();
-
-            order.orderStatus.push({
-                status: "readyForDelivery",
-                time: new Date(Date.now() + (5.5 * 60 * 60 * 1000)).toISOString()
-            });
-
-            await order.save();
-
-            await Notification.create({
-                id: order.userId,
-                orderId: orderId,
-                title: `Your Order ${orderId} is ready for Delivery`,
-                notificationFor: "user"
-            })
-
-            return res.json({
-                message: "Order is ready to be picked up by delivery service",
-                order
-            });
+        if (order.orderStatus[order.orderStatus.length - 1].status !== "cleaning") {
+            return res.status(400).json("Invalid Status")
         }
-        else {
-            return res.status(402).json({ error: "Could not update status at this moment" });
-        }
+
+        const deliveryPartners = await Logistic.find({ availability: true });
+        let shortestDistance = Infinity;
+        let closestPartner = null;
+
+        deliveryPartners.forEach(partner => {
+            const distance = calculateDistance(vendor.geoCoordinates.latitude, vendor.geoCoordinates.longitude, partner.geoCoordinates.latitude, partner.geoCoordinates.longitude);
+            if (distance < shortestDistance) {
+                shortestDistance = distance;
+                closestPartner = partner;
+            }
+        });
+        order.logisticId[1] = closestPartner.logisticId;
+        order.settlementToVendor = order.vendorFee;
+
+        const logistic = await Logistic.findOne({ logisticId: closestPartner.logisticId })
+        logistic.currentActiveOrder += 1;
+
+        vendor.currentActiveOrders -= 1;
+        await vendor.save();
+        await logistic.save();
+
+        order.orderStatus.push({
+            status: "readyForDelivery",
+            time: new Date(Date.now() + (5.5 * 60 * 60 * 1000)).toISOString()
+        });
+
+        await order.save();
+
+        await Notification.create({
+            id: order.userId,
+            orderId: orderId,
+            title: `Your Order ${orderId} is ready for Delivery`,
+            notificationFor: "user"
+        })
+
+        return res.json({
+            message: "Order is ready to be picked up by delivery service",
+            order
+        });
     } catch (error) {
         return res.status(500).json({ error: "Internal server error", message: error.message });
     }

@@ -55,3 +55,14 @@ exports.verifyLogistic = async (req, res, next) => {
         res.status(500).json({ error: "Internal Server Error" });
     }
 };
+
+exports.checkOrder = async (req, res, next) => {
+    try {
+        const { logisticId , orderId } = req.body;
+        const logistic = await Logistic.findOne({ logisticId });
+        const order = await Order.findOne({orderId})
+    } catch (error) {
+        console.error("Error verifying Logistic:", error);
+        res.status(500).json({ error: "Internal Server Error" });
+    }
+}
