@@ -12,6 +12,7 @@ exports.giveReview = async (req, res) => {
     const feed = await Feedback.create({
         feedback,
         rating,
+        orderId:orderId,
         userId: order.userId,
         vendorId: order.vendorId,
         feedbackFor:"vendor"

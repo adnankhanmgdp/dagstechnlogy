@@ -1,4 +1,4 @@
-import React,{useState} from "react";
+import React, { useState } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Home from "./Pages/Home";
 import Order from "./Pages/Order/Orderss";
@@ -56,12 +56,16 @@ import useTokenExpiryChecker from "./utils/useTokenExpiryChecker";
 import Faq from "./Pages/miscellaneous/Faq";
 import DeactivatedVendors from "./Pages/Vendors/DeactivatedVendors";
 import TimeSlot from "./Pages/Categories/TimeSlot";
+import Coupon from "./Pages/Coupon/Coupon";
+import EditCoupon from "./Pages/Coupon/EditCoupon";
+import CreateCoupon from "./Pages/Coupon/CreateCoupon";
+import InactiveCoupon from "./Pages/Coupon/InactiveCoupon";
 
 const App = () => {
 
   const { currentUser } = useSelector((state) => state.user);
   console.log(currentUser);
-  
+
 
   // const currentUser = true;
 
@@ -95,8 +99,8 @@ const App = () => {
                   {/* users routes */}
 
                   <Route path="/users/allUsers" element={<AllUsers />} />
-                    <Route path="/users/createUser" element={<CreateUser />} />
-                    <Route path="/users/UserProfile" element={ <UserProfile/>} />
+                  <Route path="/users/createUser" element={<CreateUser />} />
+                  <Route path="/users/UserProfile" element={<UserProfile />} />
 
                   {/* orders routes */}
 
@@ -111,7 +115,7 @@ const App = () => {
                     element={<CancelledOrders />}
                   />
 
-                  <Route path="/orders/orderDetails" element={<OrderDetails/>} />
+                  <Route path="/orders/orderDetails" element={<OrderDetails />} />
 
                   {/* invoice routes */}
 
@@ -121,7 +125,7 @@ const App = () => {
                   />
 
                   <Route path="/invoice/invoiceDetail" element={<InvoiceDetails />} />
-                  
+
                   {/* vendors Routes*/}
 
                   <Route path="/vendors/allVendors" element={<VendorsList />} />
@@ -136,7 +140,7 @@ const App = () => {
                   <Route path="/vendors/ApproveVendors" element={<Approve />} />
                   <Route path="/vendors/vendorProfile" element={<VendorProfile />} />
                   <Route path="/vendors/approveVendorProfile" element={<ApproveVendor />} />
-                  <Route path="/vendors/deactivatedVendors" element={ <DeactivatedVendors/>} />
+                  <Route path="/vendors/deactivatedVendors" element={<DeactivatedVendors />} />
 
                   {/* Payments Routes */}
 
@@ -158,11 +162,11 @@ const App = () => {
                   />
 
                   {/* Settlement Routes */}
-                  
-                  <Route path="/settlement/VendorSettlement" element={<VendorSettlement/>} />
+
+                  <Route path="/settlement/VendorSettlement" element={<VendorSettlement />} />
                   <Route path="/settlement/LogisticSettlementPickup" element={<LogisticSettlementPickup />} />
-                  <Route path="/settlement/LogisticSettlementDelivery" element={<LogisticSettlementDelivery/>} />
-                  <Route path="/settlement/SettlementHistory" element={<SettlementHistory/> } />
+                  <Route path="/settlement/LogisticSettlementDelivery" element={<LogisticSettlementDelivery />} />
+                  <Route path="/settlement/SettlementHistory" element={<SettlementHistory />} />
 
                   {/* Logistic Partners routes */}
 
@@ -200,16 +204,16 @@ const App = () => {
                   <Route
                     path="/categories/ManageSubServices"
                     element={<ManageSubServices />}
-                    />
-                    <Route path="/categories/CategoryServiceTable/:item" element={<CategoryServiceTable/>}>
+                  />
+                  <Route path="/categories/CategoryServiceTable/:item" element={<CategoryServiceTable />}>
 
-                    </Route>
+                  </Route>
                   <Route
                     path="/categories/ServiceProvidingList/:serviceId"
                     element={<ServiceProvidingList />}
                   />
-                  <Route path="/categories/timeSlot" element={<TimeSlot/>} />
-                  
+                  <Route path="/categories/timeSlot" element={<TimeSlot />} />
+
                   {/* miscellaneous routes */}
 
                   <Route path="/miscellaneous/returnPolicy" element={<ReturnandCancellationPolicy />} />
@@ -217,8 +221,15 @@ const App = () => {
                   <Route path="/miscellaneous/privacyPolicy" element={<PrivacyPolicy />} />
                   <Route path="/miscellaneous/shippingPolicy" element={<ShippingPolicy />} />
                   <Route path="/miscellaneous/deliveryCharges" element={<DeliveryCharges />} />
-                  <Route path="/miscellaneous/faq" element={ <Faq/>} />
+                  <Route path="/miscellaneous/faq" element={<Faq />} />
                   <Route path="*" element={<Error />} />
+
+                  {/* Coupon */}
+
+                  <Route path="/coupon/allCoupons" element={<Coupon />} />
+                  <Route path="/coupon/editCoupon/:id" element={<EditCoupon />} />
+                  <Route path="/coupon/createCoupon" element={<CreateCoupon />} />
+                  <Route path="/coupon/inactiveCoupons" element={<InactiveCoupon />} />
                 </Routes>
               </div>
             </div>
@@ -231,7 +242,7 @@ const App = () => {
             <Route path="/verify/ForgotPasswordOtp" element={<ForgotPasswordOtp />} />
             <Route path="/verify/forgotPassword" element={<ForgotPassword />} />
             <Route path="/verify/forgotPasscode" element={<ForgotPasscode />} />
-            <Route path="/verify/passcodeOTPVerification" element={<OTPforPasscode/>}/>
+            <Route path="/verify/passcodeOTPVerification" element={<OTPforPasscode />} />
             <Route path="*" element={<Error />} />
           </Routes>
         )}

@@ -19,7 +19,7 @@ exports.ShortestDistanceforUser = async (req, res) => {
             // currentActiveOrders: { $lt: "$capacity" }
         });
         console.log(logistics)
-        console.log("user ",user)
+        console.log("user ", user)
         let shortestDistanceL = Infinity;
         let closestlogistic = null;
         logistics.forEach(logistic => {
@@ -30,9 +30,9 @@ exports.ShortestDistanceforUser = async (req, res) => {
             }
         });
 
-        if(!closestlogistic){
+        if (!closestlogistic) {
             return res.status(404).json({
-                message:"No nearby Logistic Found"
+                message: "No nearby Logistic Found"
             })
         }
 
@@ -68,7 +68,7 @@ exports.ShortestDistanceforUser = async (req, res) => {
 
         res.json({ shortestDistanceL, closestlogistic, vendor });
     } catch (error) {
-        res.status(500).json({ message: 'Internal Server Error' ,error:error.message });
+        res.status(500).json({ message: 'Internal Server Error', error: error.message });
     }
 }
 
@@ -89,11 +89,15 @@ exports.ShortestDistanceForVendor = async (req, res) => {
             return res.status(404).json({ message: "Vendor not found" });
         }
 
-        const logistics = await Logistic.find({
+        let logistics = await Logistic.find({
             availability: true,
             verificationStatus: 'active',
             // currentActiveOrders: { $lt: "$capacity" }
         });
+
+        logistics = logistics.filter((logistic) => {
+            return logistic.currentActiveOrder < logistic.capacity
+        })
 
         let shortestDistanceL = Infinity;
         let closestlogistic = null;
@@ -134,12 +138,20 @@ exports.findNearestVendor = async (req, res) => {
                 message: "No user found"
             })
         }
-        const vendors = await Vendor.find({
+        // console.log(req.body)
+        let vendors = await Vendor.find({
             availability: true,
             verificationStatus: 'active',
-            // currentActiveOrders: { $lt: "$capacity" }
+            // currentActiveOrders: { $lt: '$capacity' }
         });
-        // console.log(vendors)
+
+        vendors = vendors.filter((vendor) => {
+            return vendor.currentActiveOrders < vendor.capacity
+        })
+
+        if (!vendors) {
+            return res.json("No vendors found")
+        }
         let shortestDistance = Infinity;
         let closestvendor = null;
         if (!vendors) {
@@ -159,6 +171,8 @@ exports.findNearestVendor = async (req, res) => {
                 closestvendor = vendor;
             }
         });
+
+        console.log("shortest distance---------->", shortestDistance)
 
         let deliveryFee = 0;
         if (shortestDistance <= 5) {

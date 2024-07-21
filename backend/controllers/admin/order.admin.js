@@ -33,6 +33,7 @@ exports.viewOrders = async (req, res) => {
             vendor: vendorMap.get(order.vendorId),
             logistics: order.logisticId.map(id => logisticMap.get(id))
         }));
+        console.log(populatedOrders)
         return res.status(200).json({
             populatedOrders,
             message: "Orders fetched successfully"
@@ -435,13 +436,18 @@ exports.fetchmonthlyIncome = async (req, res) => {
         }
 
         const orders = await Order.find({
-            orderDate: { $gte: start, $lte: end }
+            orderDate: { $gte: start, $lte: end },
+            'orderStatus.status': 'delivered'
         });
         let totalAmount = 0;
 
         orders.forEach((order) => {
-            totalAmount += order.amount;
+            if (order.amount) {
+                console.log(order.amount)
+                totalAmount += parseFloat(order.amount);
+            }
         })
+        console.log(totalAmount)
         res.status(200).json({ message: "Monthly Income fetched successfully", monthly: totalAmount });
     } catch (error) {
         console.error(`Error fetching orders by date range: ${error.message}`);
@@ -453,8 +459,14 @@ exports.initiateRefund = async (req, res) => {
     try {
         const { orderId } = req.body;
         const order = await Order.findOne({ orderId })
+        if (order.refundRequest == false) {
+            return res.json({
+                message: "Inavlid request for refund"
+            })
+        }
         const lastStatus = order.orderStatus[order.orderStatus.length - 1].status
-        if (lastStatus != "cancelled" && lastStatus != "pending" && lastStatus != "refunded") {
+        // if (lastStatus != "pending" && lastStatus != "refunded") {
+        if (lastStatus == "cancelled") {
             order.orderStatus.push({
                 status: "refunded",
                 time: new Date(Date.now() + (5.5 * 60 * 60 * 1000)).toISOString()

@@ -313,6 +313,39 @@ const Sidebar = () => {
                 </li>
               </ul>
             </li>
+
+            <li>
+              <Link
+                className="waves-effect"
+                onClick={() => toggleSubMenu("coupon")}
+              >
+                <i
+                  className="bx bx-link-external"
+                  style={{ color: "#ffffff !important " }}
+                ></i>
+                <span key="t-crypto">Coupon</span>
+              </Link>
+              <ul
+                className={
+                  subMenuStates.coupon ? "sub-menu" : "sub-menu collapse"
+                }
+              >
+                <li>
+                  <Link to="/coupon/allCoupons" key="t-buy">
+                    View Coupon
+                  </Link>
+                  <Link to="/coupon/inactiveCoupons" key="t-buy">
+                    View Inactive Coupon
+                  </Link>
+                </li>
+                <li>
+                  <Link to="/coupon/createCoupon" key="t-exchange">
+                    Create Coupon
+                  </Link>
+                </li>
+              </ul>
+            </li>
+
           </ul>
         </div>
       </div>

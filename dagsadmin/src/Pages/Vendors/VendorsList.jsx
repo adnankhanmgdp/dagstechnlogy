@@ -40,10 +40,10 @@ useEffect(() => {
         );
         const data = await res.json();
         const activeVendors = data.vendors.filter(
-          (vendor) => vendor.status === "active",
+          (vendor) => vendor.verificationStatus === "active",
         );
         const inactiveVendors = data.vendors.filter(
-          (vendor) => vendor.status === "inactive",
+          (vendor) => vendor.verificationStatus === "inactive",
         );
         setInactiveVendor(inactiveVendors)
         setVendors(activeVendors);

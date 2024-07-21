@@ -251,7 +251,7 @@ const path = require('path');
 const { v4: uuidv4 } = require('uuid');
 
 exports.register = async (req, res) => {
-    const { phone, isNewIP, name , email } = req.body;
+    const { phone, isNewIP, name, email } = req.body;
     const ip = req.ip;
     if (!phone) {
         return res.status(400).json({
@@ -270,7 +270,7 @@ exports.register = async (req, res) => {
     const hashedOTP = await bcrypt.hash(phoneOTP, 10);
 
     try {
-        const vendor = await Vendor.create({ phone, OTP: hashedOTP, name: name , email });
+        const vendor = await Vendor.create({ phone, OTP: hashedOTP, name: name, email });
         console.log(phoneOTP)
         sendOTP(phoneOTP, phone);
         const currentTime = new Date(Date.now() + (330 * 60000)).toISOString();
@@ -421,7 +421,7 @@ exports.updateProfile = async (req, res) => {
         if (docs) {
             document = await Profile(docs)
             const vendorProfile = `${process.env.UPLOAD_URL}` + document.slice(5);
-            
+
             updatedVendor.profilePic = vendorProfile
             await updatedVendor.save();
         }
@@ -467,13 +467,13 @@ exports.updateDocs = async (req, res) => {
         if (!updatedVendor) {
             return res.status(404).json({ message: 'Vendor not found' });
         }
-        if (docs) {
+        if (docs && docs != 'test docs not needed') {
             document = await Docs(docs)
+            const vendorDoc = `${process.env.UPLOAD_URL}` + document.slice(5);
+            updatedVendor.document = vendorDoc;
+            console.log(document)
         }
-        console.log(document)
 
-        const vendorDoc = `${process.env.UPLOAD_URL}` + document.slice(5);
-        updatedVendor.document = vendorDoc;
         await updatedVendor.save();
 
         res.status(200).json({

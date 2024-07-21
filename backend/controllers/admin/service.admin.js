@@ -4,28 +4,33 @@ const path = require('path');
 const { v4: uuidv4 } = require('uuid');
 
 exports.createService = async (req, res) => {
+
+    console.log("Req", req.body)
+
     const { serviceName, vendorCommission, imgData } = req.body;
+
     let data;
+
     try {
         if (imgData) {
-             data = await ServiceIcon(imgData)
+            data = await ServiceIcon(imgData)
         }
-
-        const iconPath = `${process.env.UPLOAD_URL}`+data.slice(5);
 
         const newService = await Service.create({
             serviceName,
             vendorCommission,
-            serviceIcon: iconPath
+            serviceIcon: data
         });
 
         res.status(201).json(newService);
     } catch (err) {
-        return res.status(500).json({ message: "Internal server error.", error: error.message });
+        console.error('Error creating service:', err);
+        res.status(500).json({ error: 'Could not create service' });
     }
 }
 
 exports.addItemToService = async (req, res) => {
+    console.log("new data adding", req.body)
     const { serviceId, itemName, unitPrice, imgData } = req.body;
 
     try {
@@ -44,13 +49,10 @@ exports.addItemToService = async (req, res) => {
         if (!itemName && !unitPrice) {
             return res.status(404).json({ error: 'No item details provided' });
         }
-
-        const iconPath = `${process.env.UPLOAD_URL}`+data.slice(5);
-
         service.items.push({
             name: itemName,
             unitPrice: unitPrice,
-            itemIcon: iconPath
+            itemIcon: data
         });
 
         await service.save();
@@ -67,17 +69,17 @@ exports.addItemToService = async (req, res) => {
 exports.deleteItem = async (req, res) => {
     const { serviceId, itemId } = req.body;
     try {
-        if (!serviceId || !itemId) { 
-        res.status(400).json({error:'complete data not found'});
-    }
+        if (!serviceId || !itemId) {
+            res.status(400).json({ error: 'complete data not found' });
+        }
 
-    const service = await Service.findOne({ serviceId:serviceId })
-    
-    if (!service) {
-        res.status(400).json({error:'service not found'});
-    }
+        const service = await Service.findOne({ serviceId: serviceId })
 
-    const itemIndex = service.items.findIndex(item => item.itemId.toString() === itemId);
+        if (!service) {
+            res.status(400).json({ error: 'service not found' });
+        }
+
+        const itemIndex = service.items.findIndex(item => item.itemId.toString() === itemId);
 
         if (itemIndex === -1) {
             return res.status(404).json({ error: 'Item not found in the service' });
@@ -98,20 +100,23 @@ exports.deleteItem = async (req, res) => {
 exports.getServiceDetails = async (req, res) => {
     const { serviceId } = req.body;
     try {
-        const service = await Service.find({serviceId:serviceId})
-        
+        const service = await Service.find({ serviceId: serviceId })
+
         res.status(201).json(service);
-    } catch (error) {
-        return res.status(500).json({ message: "Internal server error.", error: error.message });
+    } catch (err) {
+        console.error('Error getting service:', err);
+        res.status(500).json({ error: 'Could not get services' });
     }
 }
 
 exports.deleteService = async (req, res) => {
     const { serviceId } = req.body;
+    console.log("serviceIscsdd", serviceId);
 
     try {
-        const service = await Service.findOneAndDelete(serviceId);
-
+        console.log(serviceId)
+        const service = await Service.findOneAndDelete({ serviceId: serviceId });
+        // const service = await Service.findOne(serviceId)
         if (!service) {
             return res.status(404).json({ error: 'Service not found' });
         }
@@ -122,17 +127,15 @@ exports.deleteService = async (req, res) => {
     }
 };
 
+
 exports.editService = async (req, res) => {
-    
+    console.log("req.body", req.body);
+
     const { imgData, serviceName, serviceId, vendorCommission } = req.body;
 
     try {
         const service = await Service.findOne({ serviceId: serviceId });
-
-        if (service.serviceIcon) {
-            await deleteFile(service.serviceIcon);
-        }
-        
+        console.log("service", service)
 
         if (!service) {
             return res.status(404).json({ error: 'Service not found' });
@@ -140,8 +143,7 @@ exports.editService = async (req, res) => {
 
         if (imgData) {
             const data = await ServiceIcon(imgData);
-            const iconPath = `${process.env.UPLOAD_URL}`+data.slice(5);
-            service.serviceIcon = iconPath;
+            service.serviceIcon = data;
         }
 
         if (serviceName) {
@@ -161,7 +163,6 @@ exports.editService = async (req, res) => {
 
 exports.editItemInService = async (req, res) => {
     const { serviceId, itemId, newName, newUnitPrice, imgData } = req.body;
-    let data;
 
     try {
         const service = await Service.findOne({ serviceId });
@@ -172,18 +173,13 @@ exports.editItemInService = async (req, res) => {
 
         const item = service.items.find(item => item.itemId === itemId);
 
-        if (item.itemIcon) {
-            await deleteFile(item.itemIcon);
-        }
-
         if (!item) {
             return res.status(404).json({ error: 'Item not found in service' });
         }
 
         if (imgData) {
-             data = await ItemIcon(imgData)
-             const iconPath = `${process.env.UPLOAD_URL}`+data.slice(5);
-            item.itemIcon = iconPath
+            const data = await ItemIcon(imgData)
+            item.itemIcon = data
         }
 
         if (newName) {
@@ -245,9 +241,10 @@ async function ServiceIcon(icon) {
 
     const picBuffer = Buffer.from(icon, 'base64');
     const picFilename = `${uuidv4()}.jpg`;
-    const picPath = path.join(DocsDir, picFilename);
+    let picPath = path.join(DocsDir, picFilename);
 
     fs.writeFileSync(picPath, picBuffer);
+    picPath = `${process.env.UPLOAD_URL}` + picPath.slice(5);
 
     return picPath;
 }
@@ -265,25 +262,10 @@ async function ItemIcon(icon) {
 
     const picBuffer = Buffer.from(icon, 'base64');
     const picFilename = `${uuidv4()}.jpg`;
-    const picPath = path.join(DocsDir, picFilename);
+    let picPath = path.join(DocsDir, picFilename);
 
     fs.writeFileSync(picPath, picBuffer);
+    picPath = `${process.env.UPLOAD_URL}` + picPath.slice(5);
 
     return picPath;
-}
-
-function deleteFile(filePath) {
-    return new Promise((resolve, reject) => {
-        fs.unlink(filePath, (err) => {
-            if (err) {
-                if (err.code === 'ENOENT') {
-                    resolve();
-                } else {
-                    reject(err);
-                }
-            } else {
-                resolve();
-            }
-        });
-    });
 }

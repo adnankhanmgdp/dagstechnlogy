@@ -25,14 +25,13 @@ const Order = () => {
           },
         );
         const data = await res.json();
+        console.log("this is dataaaaaaaa",data)
 
         if (res.ok) {
-          // Filter orders to only include those with status "Delivered"
-          const deliveredOrders = data.orders.filter((order) =>
-            order.orderStatus.some(
-              (status) =>
-                status.status === "cancelled" || status.status === "delivered",
-            ),
+          const deliveredOrders = data.populatedOrders.filter(
+            (order) =>
+              order.orderStatus[order.orderStatus.length - 1].status === "delivered" ||
+              order.orderStatus[order.orderStatus.length - 1].status === "cancelled",
           );
           setOrders(deliveredOrders);
         }
@@ -132,7 +131,7 @@ const Order = () => {
                                 width: "100px",
                               }}
                             >
-                              {order.orderStatus[0].status}
+                          {order.orderStatus[order.orderStatus.length-1].status}
                             </span>
                           </div>
                         </td>

@@ -34,7 +34,8 @@ const VendorSchema = new mongoose.Schema({
         type: Number
     },
     availability: {
-        type: Boolean
+        type: Boolean,
+        default: true
     },
     geoCoordinates: {
         latitude: {
@@ -75,7 +76,7 @@ VendorSchema.pre('save', async function (next) {
     try {
         if (!this.vendorId) {
             const highestVendor = await mongoose.model('Vendor').findOne({}, { vendorId: 1 }, { sort: { vendorId: -1 } });
-            let newVendorId = 'VE000001'; 
+            let newVendorId = 'VE000001';
 
             if (highestVendor) {
                 const lastVendorIdNumber = parseInt(highestVendor.vendorId.replace(/[^\d]/g, ''), 10);

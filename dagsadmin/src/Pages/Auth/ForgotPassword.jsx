@@ -1,28 +1,30 @@
-import React,{useState} from "react";
+import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 
 const ForgotPassword = () => {
 
   const [formData, setFormData] = useState({})
   // console.log(formData);
+  const token = localStorage.getItem("token");
 
   const navigate = useNavigate()
-  
+
   const handleChange = async (e) => {
-    setFormData({...formData,[e.target.id]:e.target.value})
+    setFormData({ ...formData, [e.target.id]: e.target.value })
   }
 
-  const handleSubmit = async(e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
     try {
-      const res = await fetch(`${process.env.REACT_APP_API_URL}/forgotPassword`,{
+      const res = await fetch(`${process.env.REACT_APP_API_URL}/forgotPassword`, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`
         },
-        body: JSON.stringify({cpassword:formData.cpassword, password:formData.password, phone:'6386923401'})
+        body: JSON.stringify({ cpassword: formData.cpassword, password: formData.password, phone: '8299112380' })
       })
-      
+
       const data = res.json()
       if (res.ok) {
         // console.log(data)
@@ -30,7 +32,7 @@ const ForgotPassword = () => {
       }
 
     } catch (error) {
-      // console.log(error)
+      console.log(error)
     }
   }
 
@@ -45,7 +47,7 @@ const ForgotPassword = () => {
                 style={{ backgroundColor: "#D5DAFA" }}
                 class="bg-primary-subtle"
               >
-                
+
                 <div class="row">
                   <div class="col-7">
                     <div class="text-primary p-4">

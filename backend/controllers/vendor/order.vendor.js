@@ -229,7 +229,14 @@ exports.readyForDelivery = async (req, res) => {
             return res.status(400).json("Invalid Status")
         }
 
-        const deliveryPartners = await Logistic.find({ availability: true });
+        let deliveryPartners = await Logistic.find({
+            availability: true,
+            verificationStatus: "active",
+        });
+
+        deliveryPartners = deliveryPartners.filter((logistic) => {
+            return logistic.currentActiveOrder < logistic.capacity
+        })
         let shortestDistance = Infinity;
         let closestPartner = null;
 
@@ -251,7 +258,7 @@ exports.readyForDelivery = async (req, res) => {
         await logistic.save();
 
         order.orderStatus.push({
-            status: "readyForDelivery",
+            status: "readyToDelivery",
             time: new Date(Date.now() + (5.5 * 60 * 60 * 1000)).toISOString()
         });
 
@@ -287,7 +294,9 @@ exports.activeOrders = async (req, res) => {
         //     ]
         // });
         const activeOrders = []
-        const orders = await Order.find({ vendorId })
+        const orders = await Order.find({ vendorId }).sort({
+            pickupDate: -1
+        });
         orders.forEach((order) => {
             const lastStatus = order.orderStatus[order.orderStatus.length - 1].status
             if (lastStatus != "cancelled" && lastStatus != "delivered" && lastStatus != "refunded") {
@@ -342,7 +351,9 @@ exports.pastOrders = async (req, res) => {
         //     ]
         // });
         const activeOrders = []
-        const orders = await Order.find({ vendorId })
+        const orders = await Order.find({ vendorId }).sort({
+            pickupDate: -1
+        });
         orders.forEach((order) => {
             const lastStatus = order.orderStatus[order.orderStatus.length - 1].status
             if (lastStatus === "cancelled" || lastStatus === "delivered" || lastStatus === "refunded") {

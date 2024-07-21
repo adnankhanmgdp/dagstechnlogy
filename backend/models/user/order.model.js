@@ -29,28 +29,42 @@ const OrderSchema = new mongoose.Schema({
     feedbackRating: {
         type: String
     },
+    platformFee: {
+        type: Number
+    },
     settlementToVendor: {
         type: Number,
-        deafult: null
+        default: null
     },
     settlementForLogisticsOnPickup: {
         type: Number,
-        deafult: null
+        default: null
     },
     settlementForLogisticsOnDelivery: {
         type: Number,
-        deafult: null
+        default: null
     },
     discount: {
+        type: Number,
+        default: 0
+    },
+    coupon: {
         type: String
     },
+    refundRequest: {
+        type: Boolean,
+        default: false
+    },
     distance: {
-        type: String
+        type: Number
     },
     deliveryFee: { //amount that is charged by vendor for this order
         type: Number
     },
     vendorFee: {
+        type: Number
+    },
+    finalAmount: {
         type: Number
     },
     taxes: {

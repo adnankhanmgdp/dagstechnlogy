@@ -8,7 +8,8 @@ const {
     forgotPassword,
     forgotPasscode,
     resendOTP,
-    getIP
+    getIP,
+    phone
 } = require("../controllers/admin/auth.admin")
 
 const {
@@ -82,7 +83,8 @@ const {
     additionaldetails,
     fetchMisc,
     updateDeliveryCharge,
-    updateMinAmount
+    updateMinAmount,
+    updatePlatformFee
 } = require("../controllers/admin/charges.admin")
 
 const {
@@ -98,6 +100,8 @@ const {
 const { createBankDetails, fetchBankDetails } = require("../controllers/admin/bankDetails.admin")
 const { vendorFeedback } = require("../controllers/admin/feedback.admin")
 const { getTimeSlots, createTimeSlot, deleteTimeSlot } = require("../controllers/admin/timeSlot.admin")
+const { createCoupon, fetchCoupon, editCoupon, deleteCoupon, coupon } = require("../controllers/admin/coupon.admin")
+const { fetchCarousel, deleteCarousel, createCarousel } = require("../controllers/admin/carousel.admin")
 
 //auth
 router.post("/credintials", logIP, credentials)
@@ -107,6 +111,7 @@ router.post("/forgotPassword", auth, logIP, forgotPassword)
 router.post("/forgotPasscode", logIP, forgotPasscode)
 router.post("/resendOTP", logIP, resendOTP)
 router.get("/getip", getIP)
+router.get("/phone", phone)
 
 //logistic
 router.get("/fetchLogistic", auth, logIP, fetchLogistic)
@@ -151,7 +156,7 @@ router.post("/fetchOrdersByMonthRange", fetchOrdersByMonthRange)
 router.get("/order", getTodaysOrders)
 router.post("/monthlyIncome", fetchmonthlyIncome)
 router.post("/updateOrderStatus", updateOrderStatus)
-router.post("/initiateRefund",auth, logIP, initiateRefund)
+router.post("/initiateRefund", auth, logIP, initiateRefund)
 
 // dashboard
 router.get("/day", auth, logIP, day);
@@ -183,8 +188,9 @@ router.post("/addFAQ", auth, logIP, addFAQ)
 router.put("/updateFAQ", auth, logIP, updateFAQ)
 router.delete("/deleteFAQ", auth, logIP, deleteFAQ)
 router.post("/additionaldetails", auth, logIP, additionaldetails)
-router.get("/fetchMisc",auth, fetchMisc)
+router.get("/fetchMisc", fetchMisc)
 router.put("/minAmount", auth, logIP, updateMinAmount)
+router.put("/platform", auth, logIP, updatePlatformFee)
 
 //feedback
 
@@ -192,5 +198,18 @@ router.put("/minAmount", auth, logIP, updateMinAmount)
 router.post("/createTimeSlot", auth, logIP, createTimeSlot)
 router.get("/getTimeSlots", auth, logIP, getTimeSlots)
 router.post("/deleteTimeSlot", auth, logIP, deleteTimeSlot)
+
+//coupon
+router.post("/coupon", auth, logIP, createCoupon)
+router.get("/coupon", auth, logIP, fetchCoupon)
+router.get("/coupon/:id", auth, logIP, coupon)
+router.put("/coupon/:id", auth, logIP, editCoupon)
+router.delete("/coupon/:id", auth, logIP, deleteCoupon)
+
+//carousel
+router.get("/carousel", auth, logIP, fetchCarousel)
+router.post("/carousel", auth, logIP, createCarousel)
+router.delete("/carousel/:id", auth, logIP, deleteCarousel)
+
 
 module.exports = { adminRoutes: router }; 

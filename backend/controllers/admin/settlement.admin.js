@@ -36,6 +36,7 @@ exports.vendorSettlement = async (req, res) => {
 }
 
 exports.settleVendorAmount = async (req, res) => {
+    console.log(req.body)
     try {
         const { _id, orders, totalSettlement } = req.body;
         const orderIds = orders.map(order => order._id);
@@ -60,6 +61,7 @@ exports.settleVendorAmount = async (req, res) => {
             settledOrders: orderIds
         });
     } catch (error) {
+        console.log(error)
         res.status(500).json({
             error: 'An error occurred while settling vendor amounts',
             message: error.message
@@ -124,7 +126,7 @@ exports.logisticPickupSettlement = async (req, res) => {
         });
     }
 };
-  
+
 exports.logisticDeliverySettlement = async (req, res) => {
     try {
         const pickupSettlements = await Order.aggregate([

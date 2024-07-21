@@ -1,7 +1,7 @@
-import React,{useState} from "react";
+import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { useNavigate } from 'react-router-dom'
-import { useDispatch,useSelector } from'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { emailInSuccess, phoneInSuccess } from "../../redux/PhoneSlice";
 import { clearError } from "../../redux/UserSlice";
 import { ToastContainer, toast } from "react-toastify";
@@ -11,17 +11,17 @@ const Login = () => {
 
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const {error} = useSelector((state)=>state.user)
+  const { error } = useSelector((state) => state.user)
 
   const [formData, setFormData] = useState({});
   // console.log(formData);
 
   const handleChange = (e) => {
-    setFormData({...formData,[e.target.id]:e.target.value})
+    setFormData({ ...formData, [e.target.id]: e.target.value })
   }
 
   const handleSubmit = async (e) => {
-    
+
     e.preventDefault();
     dispatch(emailInSuccess(formData.email));
     try {
@@ -34,21 +34,57 @@ const Login = () => {
       });
 
       const data = await res.json();
-      
+
       if (res.ok) {
-          localStorage.setItem("token",data.token)
-          if (data.isNewIP) {
-            dispatch(phoneInSuccess(data.phone))
-            navigate("/verify/otp");
-          } else {
-            dispatch(clearError())
-            dispatch(phoneInSuccess(data.phone));
-            navigate('/verify/passcode')
-          }
+        localStorage.setItem("token", data.token)
+        if (data.isNewIP) {
+          dispatch(phoneInSuccess(data.phone))
+          navigate("/verify/otp");
         } else {
+          dispatch(clearError())
+          dispatch(phoneInSuccess(data.phone));
+          navigate('/verify/passcode')
+        }
+      } else {
         // dispatch(signInFailure(data.message))
         toast.warning(data.message)
-        }
+      }
+    } catch (error) {
+      toast.warning(error.message)
+      // console.log(error)
+    }
+  }
+
+  const handleSendOTP = async (e) => {
+
+    // e.preventDefault();
+    // dispatch(emailInSuccess(formData.email));
+    try {
+      const res = await fetch(`${process.env.REACT_APP_API_URL}/resendOTP`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
+      });
+
+      const data = await res.json();
+
+      // if (res.ok) {
+      //     localStorage.setItem("token",data.token)
+      //     if (data.isNewIP) {
+      //       dispatch(phoneInSuccess(data.phone))
+      //       navigate("/verify/otp");
+      //     } else {
+      //       dispatch(clearError())
+      //       dispatch(phoneInSuccess(data.phone));
+      //       navigate('/verify/passcode')
+      //     }
+      //   } else {
+      //   // dispatch(signInFailure(data.message))
+      //   toast.warning(data.message)
+      //   }
+
     } catch (error) {
       toast.warning(error.message)
       // console.log(error)
@@ -145,6 +181,7 @@ const Login = () => {
                           to="/verify/ForgotPasswordOtp"
                           href="auth-recoverpw.html"
                           class="text-muted"
+                          onClick={handleSendOTP}
                         >
                           <i class="mdi mdi-lock me-1"></i> Forgot your
                           password?

@@ -7,6 +7,11 @@ import { Modal, Button } from "react-bootstrap";
 
 const ServiceProvidingList = () => {
   const { serviceId } = useParams();
+
+  useEffect(() => {
+      console.log(serviceId);
+  },[])
+
   const navigate = useNavigate();
 
   const [newItem, setNewItem] = useState({
@@ -21,6 +26,7 @@ const ServiceProvidingList = () => {
   // console.log("decoded",decodedUser)
   const lastInputRef = useRef(null);
   const [showModal, setShowModal] = useState(false);
+   const [showOtherModal, setOtherModal] = useState(false);
   const [itemIdToDelete, setItemIdToDelete] = useState(null);
   const [showEditModal, setShowEditModal] = useState(false);
   const [editFormData, setEditFormData] = useState({
@@ -98,8 +104,9 @@ const ServiceProvidingList = () => {
  };
 
 
-  const handleDeleteService = async () => {
-    // e.preventDefault();
+  const handleDeleteService = async (e) => {
+    e.preventDefault();
+    console.log("delete service",servicee.serviceId)
     try {
       const res = await fetch(
         `${process.env.REACT_APP_API_URL}/deleteService`,
@@ -109,7 +116,7 @@ const ServiceProvidingList = () => {
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
           },
-          body: JSON.stringify({ serviceId }),
+          body: JSON.stringify({ serviceId: servicee.serviceId }),
         },
       );
 
@@ -145,7 +152,7 @@ const ServiceProvidingList = () => {
     setShowModal(false);
   };
 
-  const openModal = (itemId = null) => {
+  const openModal = (itemId) => {
     setItemIdToDelete(itemId);
     setShowModal(true);
   };
@@ -154,33 +161,32 @@ const ServiceProvidingList = () => {
     setShowModal(false);
   };
 
-  const confirmAction = () => {
-    if (itemIdToDelete === null) {
-      handleDeleteService();
-    } else {
-      handleDeleteItem();
-    }
-  };
+    const openOtherModal = () => {
+      setOtherModal(true);
+    };
+
+    const closeOtherModal = () => {
+      setOtherModal(false);
+    };
 
   const handleUploadItemIcon = (e) => {
     const file = e.target.files[0];
-    const reader = new FileReader();
-
     if (!file) {
       return;
     } else {
+      const reader = new FileReader();
+
       reader.onloadend = () => {
-      const base64String = reader.result.split(",")[1];
-      setNewItem({
-        ...newItem,
-        imgData: base64String,
-      });
-    };
+        const base64String = reader.result.split(",")[1];
+        setNewItem({
+          ...newItem,
+          imgData: base64String,
+        });
+      };
+      
 
-    reader.readAsDataURL(file);
+      reader.readAsDataURL(file);
     }
-
-    
   };
 
   const handleEditService = () => {
@@ -287,7 +293,7 @@ const ServiceProvidingList = () => {
                       </button>
 
                       <button
-                        onClick={() => openModal(null)}
+                        onClick={() => openOtherModal()}
                         style={{ borderRadius: "7px" }}
                         className="bg-danger border-0 text-white pt-1 pb-1 pl-4 pr-4"
                       >
@@ -312,42 +318,44 @@ const ServiceProvidingList = () => {
                         </tr>
                       </thead>
                       <tbody>
-                        {decodedUser.map((item) => (
-                          <tr
-                            className="text-center"
-                            key={item.itemId}
-                            data-id={item.itemId}
-                          >
-                            <td data-field="image text-center">
-                              <div
-                                className="border mx-auto newImageBorder overflow-hidden"
-                                style={{ width: "50px", height: "50px" }}
+                        {decodedUser?.length > 0
+                          ? decodedUser.map((item) => (
+                              <tr
+                                className="text-center"
+                                key={item.itemId}
+                                data-id={item.itemId}
                               >
-                                <img
-                                  src={item.itemIcon}
-                                  width="60"
-                                  height="60"
-                                  className=" p-2"
-                                  alt="icon"
-                                />
-                              </div>
-                            </td>
+                                <td data-field="image text-center">
+                                  <div
+                                    className="border mx-auto newImageBorder overflow-hidden"
+                                    style={{ width: "50px", height: "50px" }}
+                                  >
+                                    <img
+                                      src={item.itemIcon}
+                                      width="60"
+                                      height="60"
+                                      className=" p-2"
+                                      alt="icon"
+                                    />
+                                  </div>
+                                </td>
 
-                            <td data-field="id">{item.itemId}</td>
-                            <td data-field="name">{item.name}</td>
-                            <td data-field="price">₹ {item.unitPrice}</td>
-                            <td className="text-center">
-                              <Link
-                                to="#"
-                                className="btn btn-outline-secondary btn-sm delete"
-                                title="delete"
-                                onClick={() => openModal(item.itemId)}
-                              >
-                                <i className="fa fa-trash"></i>
-                              </Link>
-                            </td>
-                          </tr>
-                        ))}
+                                <td data-field="id">{item.itemId}</td>
+                                <td data-field="name">{item.name}</td>
+                                <td data-field="price">₹ {item.unitPrice}</td>
+                                <td className="text-center">
+                                  <Link
+                                    to="#"
+                                    className="btn btn-outline-secondary btn-sm delete"
+                                    title="delete"
+                                    onClick={() => openModal(item.itemId)}
+                                  >
+                                    <i className="fa fa-trash"></i>
+                                  </Link>
+                                </td>
+                              </tr>
+                            ))
+                          : "No item in the service"}
                       </tbody>
                     </table>
                   </div>
@@ -423,20 +431,29 @@ const ServiceProvidingList = () => {
 
       <Modal show={showModal} onHide={closeModal}>
         <Modal.Header closeButton>
-          <Modal.Title>
-            Delete {itemIdToDelete === null ? "Service" : "Item"}
-          </Modal.Title>
+          <Modal.Title>Delete Item</Modal.Title>
         </Modal.Header>
-        <Modal.Body>
-          {itemIdToDelete === null
-            ? "Do you want to delete the service?"
-            : "Do you want to delete the item?"}
-        </Modal.Body>
+        <Modal.Body>Do you want to delete the item?</Modal.Body>
         <Modal.Footer>
           <Button variant="secondary" onClick={closeModal}>
             No
           </Button>
-          <Button variant="danger" onClick={confirmAction}>
+          <Button variant="danger" onClick={handleDeleteItem}>
+            Yes
+          </Button>
+        </Modal.Footer>
+      </Modal>
+
+      <Modal show={showOtherModal} onHide={closeOtherModal}>
+        <Modal.Header>
+          <Modal.Title>Delete Service</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>Do you want to delete the Service?</Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={closeOtherModal}>
+            No
+          </Button>
+          <Button variant="danger" onClick={handleDeleteService}>
             Yes
           </Button>
         </Modal.Footer>

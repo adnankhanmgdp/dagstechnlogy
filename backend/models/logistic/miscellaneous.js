@@ -46,6 +46,10 @@ const MiscellaneousSchema = new mongoose.Schema({
     },
     refundPolicy: {
         type: String
+    },
+    platformFee: {
+        type: Number,
+        default: 0
     }
 }, { versionKey: false });
 

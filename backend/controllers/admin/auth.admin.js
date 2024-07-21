@@ -33,7 +33,7 @@ exports.credentials = async (req, res) => {
                 const phoneOTP = generateOTP();
                 otps[phone] = { otp: phoneOTP, timestamp: Date.now() };
                 sendOTP(phoneOTP, phone);
-                console.log(phoneOTP , phone);
+                console.log(phoneOTP, phone);
                 res
                     .status(200)
                     .json({
@@ -79,19 +79,20 @@ exports.credentials = async (req, res) => {
 exports.verifyOTP = async (req, res) => {
     try {
         const { OTP, phone } = req.body;
+        console.log("hiiii", req.body)
         // console.log(`Verifying OTP`, OTP, phone);
 
         // console.log("otps[phone]", otps[phone])
         // console.log("resendedPhoneOTP[phone]",resendedPhoneOTP[phone])
 
-        const sessionData = otps[phone]? otps[phone]:resendedPhoneOTP[phone]; // Check both variables for OTP
+        const sessionData = otps[phone] ? otps[phone] : resendedPhoneOTP[phone]; // Check both variables for OTP
         if (!sessionData) {
             return res
                 .status(400)
                 .json({ success: false, message: "Session not found" });
         }
 
-        const admin = await Admin.findOne({ phone: phone });
+        const admin = await Admin.findOne({});
         if (!admin) {
             return res.status(404).json({ message: "Admin not found" });
         }
@@ -180,7 +181,7 @@ exports.twoSV = async (req, res) => {
 
 exports.forgotPassword = async (req, res) => {
     const { password, cpassword, phone } = req.body;
-
+    console.log(req.body)
     if (password !== cpassword) {
         return res.status(401).json({
             success: false,
@@ -190,7 +191,7 @@ exports.forgotPassword = async (req, res) => {
 
     try {
         const hashedPassword = await bcrypt.hash(password, 10);
-        const admin = await Admin.findOne({ phone });
+        const admin = await Admin.findOne({});
         if (!admin) {
             return res.status(404).json({ success: false, message: "Admin not found" });
         }
@@ -211,15 +212,15 @@ exports.forgotPassword = async (req, res) => {
 };
 
 exports.resendOTP = async (req, res) => {
-    const { email } = req.body;
+    // const { email } = req.body;
 
-    if (!email) {
-        return res
-            .status(400)
-            .json({ success: false, message: "Missing Fields" });
-    }
+    // if (!email) {
+    //     return res
+    //         .status(400)
+    //         .json({ success: false, message: "Missing Fields" });
+    // }
 
-    const admin = await Admin.findOne({ email: email });
+    const admin = await Admin.findOne({});
     if (!admin) {
         return res.status(404).json({ message: "Admin not found" });
     }
@@ -275,11 +276,22 @@ exports.forgotPasscode = async (req, res) => {
     }
 };
 
-exports.getIP = async(req,res)=>{
-    try{
-        const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress ;
-        res.send( `Your ip address is ${ip}`)
-    }catch(error){
+exports.getIP = async (req, res) => {
+    try {
+        const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+        res.send(`Your ip address is ${ip}`)
+    } catch (error) {
         res.send("Internal Server Error")
+    }
+}
+
+exports.phone = async (req, res) => {
+    try {
+        const admin = await Admin.findOne({})
+        res.json({
+            phone: admin.phone
+        })
+    } catch (error) {
+        res.json("Internal Server Error")
     }
 }

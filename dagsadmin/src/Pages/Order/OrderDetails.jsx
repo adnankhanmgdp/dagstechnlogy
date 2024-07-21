@@ -10,16 +10,46 @@ const OrderDetails = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const tableRef = useRef();
-  
   const order = location.state?.order;
-  // console.log("order",order)
+  console.log("order", order);
+  const [showModal, setShowModal] = useState(false);
+
+
+  const token = localStorage.getItem("token");
+
+  const handleShow = () => setShowModal(true);
+  const handleRefund = async () => {
+
+    try {
+      const res = await fetch(
+        `${process.env.REACT_APP_API_URL}/initiateRefund`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`
+          },
+          body: JSON.stringify({ orderId: order.orderId }),
+        },
+      );
+      const data = await res.json();
+      if (res.ok) {
+        toast.success("Refund initiated successfully");
+      }
+    } catch (error) {
+      console.log(error)
+    }
+    setShowModal(false);
+
+  };
+
+
 
   const [status, setStatus] = useState("");
   const [vendorDetail, setVendor] = useState({});
   const [logisticPickupDetail, setPickup] = useState({});
   const [logisticDeliveryDetail, setDelivery] = useState({});
   const [userData, setUser] = useState({});
-  const token = localStorage.getItem("token");
   const currentYear = new Date().getFullYear();
 
   // console.log("order", location.state.order);
@@ -34,6 +64,8 @@ const OrderDetails = () => {
       $(tableRef.current).DataTable();
     }
   }, [order]);
+
+  const handleClose = () => setShowModal(false);
 
   useEffect(() => {
     const getVendor = async () => {
@@ -97,6 +129,8 @@ const OrderDetails = () => {
       }
     };
 
+
+
     const getUser = async () => {
       try {
         const res = await fetch(`${process.env.REACT_APP_API_URL}/getUser`, {
@@ -109,7 +143,7 @@ const OrderDetails = () => {
         });
         const data = await res.json();
         if (res.ok) {
-          // console.log("user", data);
+          console.log("user", data);
           setUser(data.user[0]);
         }
       } catch (error) {
@@ -151,7 +185,6 @@ const OrderDetails = () => {
     navigate("/invoice/invoiceDetail", {
       state: {
         order,
-        location : order.orderLocation
       },
     });
   };
@@ -159,6 +192,11 @@ const OrderDetails = () => {
   if (!order) {
     return <div>Loading...</div>; // Show a loading message or spinner while order data is being fetched
   }
+
+  console.log(
+    "orderSttatus",
+    order.orderStatus[order.orderStatus.length - 1].status,
+  );
 
   return (
     <div className="main-content" style={{ minHeight: "220vh" }}>
@@ -171,7 +209,16 @@ const OrderDetails = () => {
 
               {/* Order Information Card */}
               <div className="card shadow-sm mb-4">
-                <div className="card-header text-dark">Order Information</div>
+                <div className="card-header d-flex flex-row justify-content-between align-items-center text-dark">
+                  <span>Order Information</span>
+                  {order.orderStatus[order.orderStatus.length - 1].status ===
+                    "cancelled" &&
+                    order.refundRequest === true && (
+                      <button onClick={handleShow} className="btn btn-primary">
+                        Refund
+                      </button>
+                    )}
+                </div>
                 <div className="card-body">
                   <p>
                     <strong>Order ID:</strong> {order.orderId}
@@ -184,7 +231,9 @@ const OrderDetails = () => {
                     <strong>Order Status:</strong>{" "}
                     <select
                       className="form-select"
-                      value={status}
+                      value={
+                        order.orderStatus[order.orderStatus.length - 1].status
+                      }
                       onChange={handleStatusChange}
                     >
                       <option value="pending">pending</option>
@@ -218,9 +267,9 @@ const OrderDetails = () => {
                     {userData ? userData.phone : "---"}
                   </p>
                   <p>
-                     <strong>Order Location:</strong>{" "}
-                     {order.orderLocation ? order.orderLocation : "N/A"}
-                   </p>
+                    <strong>Order Location:</strong>{" "}
+                    {order.orderLocation ? order.orderLocation : "N/A"}
+                  </p>
                 </div>
               </div>
 
@@ -310,8 +359,8 @@ const OrderDetails = () => {
                               <td>
                                 {order.deliveryDate
                                   ? new Date(
-                                      order.deliveryDate,
-                                    ).toLocaleDateString()
+                                    order.deliveryDate,
+                                  ).toLocaleDateString()
                                   : "In process"}
                               </td>
                             </tr>
@@ -429,11 +478,7 @@ const OrderDetails = () => {
                           <td>
                             <strong>Total items:</strong>
                           </td>
-                          <td>
-                            <td>
-                            {order.items.length}
-                          </td>
-                          </td>
+                          <td>{order.items.length}</td>
                         </tr>
                         <tr>
                           <td>
@@ -467,7 +512,7 @@ const OrderDetails = () => {
                         </tr>
                         <tr>
                           <td>
-                            <strong>Grand Total:</strong>
+                            <strong>Grand total:</strong>
                           </td>
                           <td>{order.amount ? `₹${order.amount}` : "N/A"}</td>
                         </tr>
@@ -477,11 +522,10 @@ const OrderDetails = () => {
                           </td>
                           <td>
                             {order.amount
-                              ? `₹${
-                                  order.amount -
-                                  order.deliveryFee -
-                                  order.vendorFee
-                                }`
+                              ? `₹${order.amount -
+                              order.deliveryFee -
+                              order.vendorFee
+                              }`
                               : "N/A"}
                           </td>
                         </tr>
@@ -558,36 +602,68 @@ const OrderDetails = () => {
                   </div>
                 </div>
               </div>
-            {/* Additional Information Card */}
-               <div className="card shadow-sm mb-4">
-                 <div className="card-header text-dark">
-                   Additional Information
-                 </div>
-                 <div className="card-body">
-                   <p>
-                     <strong>Notes:</strong> {order.notes ? order.notes : "N/A"}
-                   </p>
-                 </div>
-               </div>
+              {/* Additional Information Card */}
+              <div className="card shadow-sm mb-4">
+                <div className="card-header text-dark">
+                  Additional Information
+                </div>
+                <div className="card-body">
+                  <p>
+                    <strong>Notes:</strong> {order.notes ? order.notes : "N/A"}
+                  </p>
+                </div>
+              </div>
 
-               <div className="text-center">
-                 <button
-                   className="btn btn-primary mb-3"
-                   onClick={() => handleViewInvoice(order)}
-                 >
+              <div className="text-center">
+                <button
+                  className="btn w-100 btn-primary mb-3"
+                  onClick={() => handleViewInvoice(order)}
+                >
                   View Invoice
                 </button>
-               </div>
-               <footer className="text-center text-dark">
-                 <p>&copy; {currentYear} Dags</p>
-               </footer>
-             </div>
-           </div>
-         </div>
-       </div>
+              </div>
+              <footer className="text-center text-dark">
+                <p>&copy; {currentYear} Dags</p>
+              </footer>
+            </div>
+          </div>
+        </div>
+      </div>
+      {showModal && (
+        <div className="modal show" style={{ display: "block" }}>
+          <div className="modal-dialog">
+            <div className="modal-content">
+              <div className="modal-header">
+                <h5 className="modal-title">Refund Confirmation</h5>
+                <button type="button" className="close" onClick={handleClose}>
+                  <span>&times;</span>
+                </button>
+              </div>
+              <div className="modal-body">
+                <p>You have refunded</p>
+              </div>
+              <div className="modal-footer">
+                <button
+                  type="button"
+                  className="btn btn-secondary"
+                  onClick={handleClose}
+                >
+                  No
+                </button>
+                <button
+                  type="button"
+                  className="btn btn-primary"
+                  onClick={handleRefund}
+                >
+                  Yes
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
 
 export default OrderDetails;
-

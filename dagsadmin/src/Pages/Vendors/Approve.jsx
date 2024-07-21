@@ -99,19 +99,23 @@ useEffect(() => {
                 <tbody>
                   {vendors.map((vendors) => (
                     <tr className="text-center" key={vendors.vendorId}>
-                      <td>{vendors.name?vendors.name:"---"}</td>
-                      <td>{vendors.phone?vendors.phone:"---"}</td>
-                      <td>{vendors.email?vendors.email:"---"}</td>
-                      <td>{vendors.address?vendors.address:"---"}</td>
-                      <td>{vendors.status?vendors.status:"---"}</td>
+                      <td>{vendors.name ? vendors.name : "---"}</td>
+                      <td>{vendors.phone ? vendors.phone : "---"}</td>
+                      <td>{vendors.email ? vendors.email : "---"}</td>
+                      <td>{vendors.address ? vendors.address : "---"}</td>
+                      <td>
+                        {vendors.verificationStatus
+                          ? vendors.verificationStatus
+                          : "---"}
+                      </td>
                       <td>
                         {/* <Link to="/logistic/approvePartnerProfile"> */}
-                          <button
-                          onClick={()=>handleSendPartnerProfile(vendors)}
-                            className="btn bg-success text-white"
-                          >
-                            View Details
-                          </button>
+                        <button
+                          onClick={() => handleSendPartnerProfile(vendors)}
+                          className="btn bg-success text-white"
+                        >
+                          View Details
+                        </button>
                         {/* </Link> */}
                       </td>
                     </tr>

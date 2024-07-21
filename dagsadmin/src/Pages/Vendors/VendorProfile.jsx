@@ -14,7 +14,7 @@ const VendorProfile = () => {
   const [orders, setOrders] = useState([]);
   const [bankDetails, setBankDetails] = useState({});
   const [vendorOrder, setVendorOrder] = useState([]);
-  const[feedbacks,setFeedbacks]=useState([]);
+  const [feedbacks, setFeedbacks] = useState([]);
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -148,10 +148,14 @@ const VendorProfile = () => {
   };
 
   const vendorOrderModal = (order) => {
-    navigate("/invoice/invoiceDetail", {
-      state: { order },
-    });
+    navigate("/orders/orderDetails", { state: { order } });
   };
+
+  // const vendorOrderModal = (order) => {
+  //   navigate("/invoice/invoiceDetail", {
+  //     state: { order },
+  //   });
+  // };
 
   const [showModal, setShowModal] = useState(false);
 
@@ -168,7 +172,7 @@ const VendorProfile = () => {
     e.preventDefault();
     // console.log(vendorData.vendorId);
     // console.log("formData", formData);
-    const updatedFormData = { ...formData, vendorId: vendor.vendorId } 
+    const updatedFormData = { ...formData, vendorId: vendor.vendorId }
     // console.log("updatedFormData", updatedFormData);
     try {
       const res = await fetch(`${process.env.REACT_APP_API_URL}/editVendor`, {
@@ -203,70 +207,70 @@ const VendorProfile = () => {
     }
   };
 
-   const renderStars = (rating) => {
-     const stars = [];
-     for (let i = 1; i <= 5; i++) {
-       if (i <= rating) {
-         stars.push(
-           <span key={i} className="text-warning">
-             &#9733;
-           </span>,
-         );
-       } else {
-         stars.push(
-           <span key={i} className="text-secondary">
-             &#9733;
-           </span>,
-         );
-       }
-     }
-     return stars;
+  const renderStars = (rating) => {
+    const stars = [];
+    for (let i = 1; i <= 5; i++) {
+      if (i <= rating) {
+        stars.push(
+          <span key={i} className="text-warning">
+            &#9733;
+          </span>,
+        );
+      } else {
+        stars.push(
+          <span key={i} className="text-secondary">
+            &#9733;
+          </span>,
+        );
+      }
+    }
+    return stars;
   };
   // const { latitude, longitude } = vendor.geoCoordinates;
 
- const handleDownload = async (option) => {
-   // Determine the date range based on the selected option
-   let start = moment();
-   let end = moment();
+  const handleDownload = async (option) => {
+    // Determine the date range based on the selected option
+    let start = moment();
+    let end = moment();
 
-   if (option === "week") {
-     start = moment().startOf("week");
-     end = moment().endOf("week");
-   } else if (option === "month") {
-     start = moment().startOf("month");
-     end = moment().endOf("month");
-   } else if (option === "year") {
-     start = moment().startOf("year");
-     end = moment().endOf("year");
-   }
+    if (option === "week") {
+      start = moment().startOf("week");
+      end = moment().endOf("week");
+    } else if (option === "month") {
+      start = moment().startOf("month");
+      end = moment().endOf("month");
+    } else if (option === "year") {
+      start = moment().startOf("year");
+      end = moment().endOf("year");
+    }
 
-   // Filter orders within the date range
-   const filteredOrders = vendorOrder.filter((order) => {
-     const orderDate = moment(order.orderDate); // Assuming `orderDate` is a date field in your order object
-     return orderDate.isBetween(start, end, null, "[]"); // '[]' includes both start and end dates
-   });
+    // Filter orders within the date range
+    const filteredOrders = vendorOrder.filter((order) => {
+      const orderDate = moment(order.orderDate); // Assuming `orderDate` is a date field in your order object
+      return orderDate.isBetween(start, end, null, "[]"); // '[]' includes both start and end dates
+    });
 
-  //  console.log("filtered",filteredOrders)
+    //  console.log("filtered",filteredOrders)
 
-   // Generate CSV content
-   let csvContent =
-     "Order Date,User Name,User Phone,Order Id,Vendor Id, Total Amount,Total Items,Logistic Pickup Name,Logistic Pickup Phone,Logistic Delivery Name, Logistic Delivery Phone  \n";
-   filteredOrders.forEach((order) => {
-     const logisticPickup = order.logisticId[0] || ""; // Assuming logistic pickup is the first element in logisticId array
-     const logisticDelivery = order.logisticId[1] || ""; // Assuming logistic delivery is the second element in logisticId array
+    // Generate CSV content
+    let csvContent =
+      "Order Date,User Name,User Phone,Order Id,Vendor Id, Total Amount,Total Items,Logistic Pickup Name,Logistic Pickup Phone,Logistic Delivery Name, Logistic Delivery Phone  \n";
+    filteredOrders.forEach((order) => {
+      const logisticPickup = order.logisticId[0] || ""; // Assuming logistic pickup is the first element in logisticId array
+      const logisticDelivery = order.logisticId[1] || ""; // Assuming logistic delivery is the second element in logisticId array
 
-     csvContent += `${order.orderDate},${order.user.name},${order.user.phone},${order.orderId},${order.vendorId},${order.amount},${order.items.length},${order.logistics[0]?.name ? order.logistics[0].name : "Not assigned yet"},${order.logistics[0]?.phone ? order.logistics[0].phone : "N/A"},${order.logistics[1]?.name ? order.logistics[1].name : "Not Assigned Yet"},${order.logistics[1]?.phone ? order.logistics[1].phone : "N/A"}\n`;
-   });
+      csvContent += `${order.orderDate},${order.user.name},${order.user.phone},${order.orderId},${order.vendorId},${order.amount},${order.items.length},${order.logistics[0]?.name ? order.logistics[0].name : "Not assigned yet"},${order.logistics[0]?.phone ? order.logistics[0].phone : "N/A"},${order.logistics[1]?.name ? order.logistics[1].name : "Not Assigned Yet"},${order.logistics[1]?.phone ? order.logistics[1].phone : "N/A"}\n`;
+    });
 
-   // Create a Blob object to hold the CSV content
-   const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    // Create a Blob object to hold the CSV content
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
 
-   // Save the Blob as a file using FileSaver.js
-   saveAs(
-     blob,
-     `orders_${option}_${start.format("YYYY-MM-DD")}_${end.format("YYYY-MM-DD")}.csv`,
-   );
- };
+    // Save the Blob as a file using FileSaver.js
+    saveAs(
+      blob,
+      `orders_${option}_${start.format("YYYY-MM-DD")}_${end.format("YYYY-MM-DD")}.csv`,
+    );
+  };
 
   return (
     <div className="main-content" style={{ backgroundColor: "#F6F6F9" }}>
@@ -280,7 +284,11 @@ const VendorProfile = () => {
                   <div className="row">
                     <div className="mx-auto mt-3">
                       <img
-                        src="https://tse2.mm.bing.net/th?id=OIP.6UhgwprABi3-dz8Qs85FvwHaHa&pid=Api&P=0&h=180"
+                        src={
+                          vendor?.profilePic
+                            ? vendor?.profilePic
+                            : "https://tse3.mm.bing.net/th?id=OIP.K4jXSK4XQahOLPEliCtvlwHaHa&pid=Api&P=0&h=180"
+                        }
                         className="avatarCustom"
                         alt="user's img"
                       />
@@ -543,22 +551,22 @@ const VendorProfile = () => {
                                   style={{
                                     backgroundColor:
                                       order.orderStatus[0].status ===
-                                      "Delivered"
+                                        "Delivered"
                                         ? "#a7ebc0"
                                         : order.orderStatus[0].status ===
-                                            "Pending"
+                                          "Pending"
                                           ? "#ffa8a8"
                                           : order.orderStatus[0].status ===
-                                              "Processing"
+                                            "Processing"
                                             ? "#ffe38b"
                                             : order.orderStatus[0].status ===
-                                                "Shipped"
+                                              "Shipped"
                                               ? "#c9ecc3"
                                               : "",
                                     width: "100px",
                                   }}
                                 >
-                                  {order.orderStatus[0].status}
+                                  {order.orderStatus[order.orderStatus.length - 1].status}
                                 </span>
                               </div>
                             </td>
@@ -583,23 +591,23 @@ const VendorProfile = () => {
                 <div className="d-flex flex-wrap">
                   {feedbacks?.length > 0
                     ? feedbacks?.map((feedback, index) => (
-                        <div key={index} className="col-md-4 mb-3">
-                          <div className="card border h-100">
-                            <div className="card-body d-flex flex-column">
-                              <p className="card-text mb-auto">
-                                <i>Order ID: {feedback.orderId}</i>
-                              </p>
-                              <h5 className="card-title">
-                                {feedback.feedback}
-                              </h5>
+                      <div key={index} className="col-md-4 mb-3">
+                        <div className="card border h-100">
+                          <div className="card-body d-flex flex-column">
+                            <p className="card-text mb-auto">
+                              <i>Order ID: {feedback.orderId}</i>
+                            </p>
+                            <h5 className="card-title">
+                              {feedback.feedback}
+                            </h5>
 
-                              <div className="mt-auto">
-                                {renderStars(parseInt(feedback.rating))}
-                              </div>
+                            <div className="mt-auto">
+                              {renderStars(parseInt(feedback.rating))}
                             </div>
                           </div>
                         </div>
-                      ))
+                      </div>
+                    ))
                     : "No Reviews"}
                 </div>
               </div>

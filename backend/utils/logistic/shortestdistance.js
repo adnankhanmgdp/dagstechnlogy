@@ -8,14 +8,13 @@ exports.calculateDistance = (lat1, lon1, lat2, lon2) => {
   // const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
   // const distance = R * c;
 
-
   let radius = 6571;
   let startingLat = toRadians(lat1);
   let startingLong = toRadians(lon1);
   let destinationLat = toRadians(lat2);
   let destinationLong = toRadians(lon2);
   let distance = Math.acos(Math.sin(startingLat) * Math.sin(destinationLat) + Math.cos(startingLat) * Math.cos(destinationLat) * Math.cos(startingLong - destinationLong)) * radius;
-  console.log("----> Distance: "+distance+"km")
+  console.log("----> Distance: " + distance + "km")
   return distance;
 }
 

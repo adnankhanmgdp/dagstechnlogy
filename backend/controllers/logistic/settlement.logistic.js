@@ -55,7 +55,7 @@ exports.calculateAmount = async (req, res) => {
         // ]);
 
         //pickup
-       
+
         const ordersDueOnPickup = await Order.aggregate([
             {
                 $match: {
@@ -99,7 +99,7 @@ exports.calculateAmount = async (req, res) => {
         ]);
 
         const dueSettlementOnPickup = ordersDueOnPickup.length ? ordersDueOnPickup[0].totalSettlement : 0;
-        const totalSettlementOnPickup = ordersTotalOnPickup.length ? ordersTotalOnPickup[0].totalAmount/2 : 0;
+        const totalSettlementOnPickup = ordersTotalOnPickup.length ? ordersTotalOnPickup[0].totalAmount / 2 : 0;
         const amountEarnedOnPickup = totalSettlementOnPickup - dueSettlementOnPickup;
 
         //delivery
@@ -156,7 +156,7 @@ exports.calculateAmount = async (req, res) => {
 
         //delivery
         const dueSettlementOnDelivery = ordersDueOnDelivery.length ? ordersDueOnDelivery[0].totalSettlement : 0;
-        const totalSettlementOnDelivery = ordersTotalOnDelivery.length ? ordersTotalOnDelivery[0].totalAmount/2 : 0;
+        const totalSettlementOnDelivery = ordersTotalOnDelivery.length ? ordersTotalOnDelivery[0].totalAmount / 2 : 0;
         const amountEarnedOnDelivery = totalSettlementOnDelivery - dueSettlementOnDelivery;
         // const orders = await Order.aggregate([
         //     {
@@ -202,6 +202,7 @@ exports.calculateAmount = async (req, res) => {
         })
     }
 }
+
 //not using this one - optimised but some issue coming in calculation
 exports.calculateLogisticsFee = async (req, res) => {
     try {

@@ -10,6 +10,9 @@ const DeliveryCharges = () => {
   const [minAmount, setMinAmount] = useState();
   const [isEditing, setIsEditing] = useState(false);
   const [newMinAmount, setNewMinAmount] = useState(minAmount);
+  //added by A1
+  const [minPlatform, setMinPlatform] = useState();
+  const [IsEditingForPlatform, setIsEditingForPlatform] = useState(false);
 
   const token = localStorage.getItem("token");
 
@@ -29,6 +32,7 @@ const DeliveryCharges = () => {
         const data = await res.json();
         setCharges(data.charges.dist);
         setMinAmount(data.charges.minOrderAmount);
+        setMinPlatform(data.charges.platformFee);
       } catch (error) {
         console.error("Error fetching delivery charges:", error);
         setError("Failed to fetch delivery charges. Please try again later.");
@@ -46,9 +50,9 @@ const DeliveryCharges = () => {
     setEditedValues({ ...editedValues, [key]: e.target.value });
   };
 
-    const handleSaveClick = async (key) => {
-        // console.log(key)
-        console.log(editedValues[key])
+  const handleSaveClick = async (key) => {
+    // console.log(key)
+    console.log(editedValues[key])
     try {
       const res = await fetch(
         `${process.env.REACT_APP_API_URL}/DeliveryCharge`,
@@ -62,13 +66,13 @@ const DeliveryCharges = () => {
         },
       );
 
-        if (res.ok) {
-          setCharges({ ...charges, [key]: editedValues[key] });
-          setEditing(null);
-          toast.success("delivery charges updated successfully")  
-       }
+      if (res.ok) {
+        setCharges({ ...charges, [key]: editedValues[key] });
+        setEditing(null);
+        toast.success("delivery charges updated successfully")
+      }
 
-      
+
     } catch (error) {
       console.error("Error saving delivery charge:", error);
       setError("Failed to save delivery charge. Please try again later.");
@@ -82,8 +86,8 @@ const DeliveryCharges = () => {
   };
 
   const handleAmountSaveClick = () => {
-    
-    const updateMinAmount = async() => {
+
+    const updateMinAmount = async () => {
       const res = await fetch(`${process.env.REACT_APP_API_URL}/minAmount`, {
         method: "PUT",
         headers: {
@@ -98,8 +102,8 @@ const DeliveryCharges = () => {
         setMinAmount(data.updatedMisc.minOrderAmount);
         setIsEditing(false);
       }
-        
-    } 
+
+    }
     updateMinAmount();
     setIsEditing(false);
   };
@@ -107,6 +111,40 @@ const DeliveryCharges = () => {
   const handleCancelClick = () => {
     setNewMinAmount(minAmount);
     setIsEditing(false);
+  };
+
+  const handleCancelClickForPlatform = () => {
+    setMinPlatform(minPlatform);
+    setIsEditingForPlatform(false);
+  };
+
+  //added by A1
+  const handlePlatformEditClick = () => {
+    setIsEditingForPlatform(true);
+  };
+
+  //added by A1
+  const handlePlatformSaveClick = () => {
+
+    const updatePlatformAmount = async () => {
+      const res = await fetch(`${process.env.REACT_APP_API_URL}/platform`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ fee: minPlatform }),
+      })
+      const data = await res.json();
+      if (res.ok) {
+        toast.success("Plaform fee updated successfully");
+        setMinPlatform(data.updatedMisc.platformFee);
+        setIsEditingForPlatform(false);
+      }
+
+    }
+    updatePlatformAmount();
+    setIsEditingForPlatform(false);
   };
 
   return (
@@ -164,6 +202,8 @@ const DeliveryCharges = () => {
               </table>
             </div>
           </div>
+
+          {/* <!-- min amount for the order --> */}
           <div className="container-fluid mt-4 p-5 bg-white rounded shadow-sm">
             <div className="d-flex justify-content-between align-items-center">
               <h5 className="mb-0">Min Amount for the Orders</h5>
@@ -201,6 +241,52 @@ const DeliveryCharges = () => {
                     type="number"
                     value={newMinAmount}
                     onChange={(e) => setNewMinAmount(Number(e.target.value))}
+                    className="form-control w-25 mr-2"
+                  />
+                  <span>₹</span>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* <!--platform fee--> */}
+          <div className="container-fluid mt-4 p-5 bg-white rounded shadow-sm">
+            <div className="d-flex justify-content-between align-items-center">
+              <h5 className="mb-0">Platform Fee</h5>
+              {!IsEditingForPlatform ? (
+                <button
+                  onClick={handlePlatformEditClick}
+                  className="btn btn-primary"
+                >
+                  Edit
+                </button>
+              ) : (
+                <div>
+                  <button
+                    onClick={handlePlatformSaveClick}
+                    className="btn btn-success mr-2"
+                  >
+                    Save
+                  </button>
+                  <button
+                    onClick={handleCancelClickForPlatform}
+                    className="btn btn-danger"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              )}
+            </div>
+            <hr />
+            <div className="mt-3">
+              {!IsEditingForPlatform ? (
+                <h4 className="text-center">Amount: ₹{minPlatform}</h4>
+              ) : (
+                <div className="d-flex justify-content-center align-items-center">
+                  <input
+                    type="number"
+                    value={minPlatform}
+                    onChange={(e) => setMinPlatform(Number(e.target.value))}
                     className="form-control w-25 mr-2"
                   />
                   <span>₹</span>

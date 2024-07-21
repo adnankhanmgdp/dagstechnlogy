@@ -18,32 +18,44 @@ const { findNearestVendor, ShortestDistanceForVendor, ShortestDistanceforUser } 
 const { giveReview, showReview } = require("../controllers/user/vendor.user")
 const { fetchNotifications } = require("../controllers/user/notifications.user")
 const { tnc } = require("../controllers/user/tnc.user")
+const { getActiveCoupons } = require("../controllers/user/coupon.user")
+const { getTimeSlots } = require("../controllers/user/timeSlot.user")
+const { fetchCarousel } = require("../controllers/user/carousel.user")
 
 router.post("/signup", register)
 router.post("/verifyOTP", verifyOTP)
 router.post("/login", login)
 router.put("/addAddress", addAddress)
-router.post("/fetchAddress",  fetchAddress)
-router.post("/updateAddress",  updateAddress)
-router.put("/updateUser",  updateUser)
-router.post("/fetchProfile",  fetchProfile)
+router.post("/fetchAddress", fetchAddress)
+router.post("/updateAddress", updateAddress)
+router.put("/updateUser", updateUser)
+router.post("/fetchProfile", fetchProfile)
 
 //orders
-router.get("/fetchServices",  fetchServices)
-router.post("/createOrder",  createOrder)
-router.post("/verifyPayment",  verifyPayment)
-router.post("/fetchAllOrders",  fetchAllOrders)
-router.get("/viewOrder",  viewOrder)
-router.get("/viewItem",  viewItem)
-router.post("/cancel",  cancelledStatus)
+router.get("/fetchServices", fetchServices)
+router.post("/createOrder", createOrder)
+router.post("/verifyPayment", verifyPayment)
+router.post("/fetchAllOrders", fetchAllOrders)
+router.get("/viewOrder", viewOrder)
+router.get("/viewItem", viewItem)
+router.post("/cancel", cancelledStatus)
 
 //logistic
-router.post("/findNearestVendor",  findNearestVendor)
-router.post("/ShortestDistanceForVendor",  ShortestDistanceForVendor)
-router.post("/ShortestDistanceforUser",  ShortestDistanceforUser)
+router.post("/findNearestVendor", findNearestVendor)
+router.post("/ShortestDistanceForVendor", ShortestDistanceForVendor)
+router.post("/ShortestDistanceforUser", ShortestDistanceforUser)
 
 //notigications
 router.get("/notifications", fetchNotifications)
+
+//timeslot
+router.get('/timeSlot', getTimeSlots)
+
+//coupons
+router.get("/coupon", getActiveCoupons)
+
+//carousel
+router.get("/carousel", fetchCarousel)
 
 router.get("/tnc", tnc)
 

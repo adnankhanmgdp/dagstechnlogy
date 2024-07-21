@@ -13,6 +13,7 @@ const ApprovePartnerProfile = () => {
 
   const location = useLocation();
   const logistic = location.state?.logistic;
+  console.log(logistic)
 
   // console.log("vendor",logistic);
 
@@ -66,11 +67,11 @@ const ApprovePartnerProfile = () => {
           }),
         },
       );
-     
+
       if (res.ok) {
         toast.warning("Logistic Unapproved")
       }
-      
+
     } catch (error) {
       toast.warning("error deleting the logistic")
     }
@@ -181,20 +182,34 @@ const ApprovePartnerProfile = () => {
                   <h4 className="card-title text-center mt-2 font-size-20 mb-2">
                     Verify Documents
                   </h4>
-                  <div className="mt-4 ml-3">
-                    <div className="text-center">
+                  <div className="mt-4 ml-3 row">
+
+                  <div className="text-center col-6 ">
                       <img
-                        className="img-responsive object-contain"
+                        className="img-responsive object-contain w-50"
+                        src={
+                          logistic?.profilePic
+                            ? logistic.profilePic
+                            : "https://tse3.mm.bing.net/th?id=OIP.K4jXSK4XQahOLPEliCtvlwHaHa&pid=Api&P=0&h=180"
+                        }
+                        alt="DocumentImage"
+                      />
+                      <h4>Logistic Profile</h4>
+                    </div>
+
+                    <div className="text-center col-6 ">
+                      <img
+                        className="img-responsive object-contain w-50"
                         src={
                           logistic?.document
                             ? logistic.document
                             : "https://tse3.mm.bing.net/th?id=OIP.K4jXSK4XQahOLPEliCtvlwHaHa&pid=Api&P=0&h=180"
                         }
                         alt="DocumentImage"
-                        width="300px"
-                        height="200px"
                       />
+                      <h4>Document: {logistic?.docType}</h4>
                     </div>
+
                   </div>
                 </div>
               </div>

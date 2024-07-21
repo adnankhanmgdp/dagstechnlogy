@@ -28,25 +28,15 @@ exports.updateDeliveryCharge = async (req, res) => {
     try {
         const { five, ten, twenty, thirty } = req.body;
 
-        const existingMisc = await Misc.findOne();
-        if (!existingMisc) {
-            return res.status(404).json({ message: "No existing charges found" });
-        }
+        let update = {};
+        if (five !== undefined) update['dist.five'] = five;
+        if (ten !== undefined) update['dist.ten'] = ten;
+        if (twenty !== undefined) update['dist.twenty'] = twenty;
+        if (thirty !== undefined) update['dist.thirty'] = thirty;
 
-        if (five) {
-            existingMisc.dist.five = five;
-        }
-        if (ten) {
-            existingMisc.dist.ten = ten;
-        }
-        if (twenty) {
-            existingMisc.dist.twenty = twenty;
-        }
-        if (thirty) {
-            existingMisc.dist.thirty = thirty;
+        // Update the document
+        const existingMisc = await Misc.findOneAndUpdate({}, { $set: update }, { new: true });
 
-        }
-        await existingMisc.save();
 
         res.status(200).json(existingMisc);
     } catch (error) {
@@ -163,6 +153,25 @@ exports.updateMinAmount = async (req, res) => {
         const updatedMisc = await Misc.findOneAndUpdate(
             {}, // Filter to find the document
             { $set: { minOrderAmount: minAmount } }, // Update operation
+            { new: true, upsert: true } // Options: return the updated document, create if not found
+        );
+        return res.json({ updatedMisc })
+    } catch (error) {
+        res.status(500).json({ message: "Error updating min amount.", error: error.message });
+    }
+}
+
+exports.updatePlatformFee = async (req, res) => {
+    try {
+        const { fee } = req.body
+        if (!('fee' in req.body)) {
+            return res.status(400).json({
+                message: "Please provide valid details"
+            });
+        }
+        const updatedMisc = await Misc.findOneAndUpdate(
+            {}, // Filter to find the document
+            { $set: { platformFee: fee } }, // Update operation
             { new: true, upsert: true } // Options: return the updated document, create if not found
         );
         return res.json({ updatedMisc })

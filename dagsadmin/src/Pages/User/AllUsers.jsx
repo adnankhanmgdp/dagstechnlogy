@@ -58,7 +58,7 @@ const AllUsers = () => {
     },
     {
       name: "Email",
-      selector: (row) => row.email?row.email:"---",
+      selector: (row) => row.email ? row.email : "---",
       sortable: true,
       center: true,
     },

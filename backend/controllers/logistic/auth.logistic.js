@@ -486,8 +486,8 @@ exports.fetchProfile = async (req, res) => {
 
 exports.switchAvailability = async (req, res) => {
     try {
-        const { phone } = req.body;
-        const logistic = await Logistic.findOne({ phone })
+        const { logisticId } = req.body;
+        const logistic = await Logistic.findOne({ logisticId })
         if (!logistic) {
             return res.status(404).json({ error: 'Logistic not found' });
         }
@@ -504,8 +504,8 @@ exports.switchAvailability = async (req, res) => {
 
 exports.trackLocation = async (req, res) => {
     try {
-        const { phone, latitude, longitude } = req.body;
-        const logistic = await Logistic.findOne({ phone })
+        const { logisticId, latitude, longitude } = req.body;
+        const logistic = await Logistic.findOne({ logisticId })
         console.log(logistic)
         if (!logistic) {
             return res.json({ message: "Delivery partner not found" });

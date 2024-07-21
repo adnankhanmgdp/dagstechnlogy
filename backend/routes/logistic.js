@@ -32,7 +32,7 @@ router.post("/fetchProfile",  fetchProfile)
 router.put("/updateProfile",  updateProfile)
 router.put("/updateDocs", updateDocs)
 router.post("/switchAvailability", verifyLogistic, switchAvailability)
-router.post("/trackLoaction", verifyLogistic, trackLocation)
+router.post("/trackLocation", verifyLogistic, trackLocation)
 
 //orders
 router.post("/dashboard", verifyLogistic, dashboard)

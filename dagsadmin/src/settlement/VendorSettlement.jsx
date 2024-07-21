@@ -13,7 +13,7 @@ const VendorSettlement = () => {
   const [vendorSettlements, setVendorSettlements] = useState([]);
   const [show, setShow] = useState(false);
   const [modalData, setModalData] = useState({});
-    const [yesClick, setYesClick] = useState({});
+  const [yesClick, setYesClick] = useState({});
 
   const [vendorBank, setVendorBank] = useState({})
   const [vendorDetails, setVendorDetails] = useState({})
@@ -34,7 +34,7 @@ const VendorSettlement = () => {
   }, [vendorSettlements]);
 
   const [verifyPayment, setVerifyPayment] = useState(false);
-  
+
   const handleClose = () => {
     setYesClick({})
     setVendorBank({})
@@ -47,7 +47,7 @@ const VendorSettlement = () => {
   const token = localStorage.getItem('token');
 
 
-  const handleShow = (user) => {   
+  const handleShow = (user) => {
     setYesClick(user);
     const vendorBank = async () => {
       try {
@@ -94,13 +94,13 @@ const VendorSettlement = () => {
     setModalData(user);
   };
 
-   const seeDetails = (order) => {
-     navigate("/orders/orderDetails", {
-       state: {
-         order,
-       },
-     });
-   };
+  const seeDetails = (order) => {
+    navigate("/orders/orderDetails", {
+      state: {
+        order,
+      },
+    });
+  };
 
   useEffect(() => {
     const vendorSettlement = async () => {
@@ -142,8 +142,8 @@ const VendorSettlement = () => {
 
 
 
-  const paymentDone = async() => {
-    
+  const paymentDone = async () => {
+
     try {
       const res = await fetch(
         `${process.env.REACT_APP_API_URL}/settleVendorAmount`,
@@ -151,6 +151,7 @@ const VendorSettlement = () => {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
           },
           body: JSON.stringify(yesClick),
         },
@@ -162,12 +163,12 @@ const VendorSettlement = () => {
       }
 
     } catch (error) {
-      
+
     }
 
     setShow(false)
     setVerifyPayment(false)
-    navigate("/settlement/VendorSettlement");
+    navigate("/settlement/SettlementHistory");
   }
 
   return (
@@ -190,7 +191,7 @@ const VendorSettlement = () => {
                 </tr>
               </thead>
               <tbody>
-                {vendorSettlements.length>0 ? (
+                {vendorSettlements.length > 0 ? (
                   vendorSettlements.map((user) => (
                     <tr className="text-center" key={user.vendorId}>
                       <td>{user.orders[0].vendorId}</td>

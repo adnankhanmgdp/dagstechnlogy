@@ -1,86 +1,86 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import $ from "jquery";
-import "datatables.net-bs4"; // Import the Bootstrap 4 DataTables extension
-import "bootstrap/dist/css/bootstrap.min.css"; // Import Bootstrap CSS
-import { Modal } from "bootstrap"; // Import Bootstrap modal components
+import "datatables.net-bs4";
+import "bootstrap/dist/css/bootstrap.min.css";
+import { Modal } from "bootstrap";
 import { useLocation, useNavigate } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 const ApproveVendor = () => {
   const tableRef = useRef();
-  const modalRef = useRef();
-
   const navigate = useNavigate();
-
+  const [showModal, setShowModal] = useState(false);
   const location = useLocation();
-  const vendors = location.state?.vendors
-
+  const vendors = location.state.vendors;
   const token = localStorage.getItem("token");
 
-  console.log("vendors",vendors)
-
   useEffect(() => {
-    $(tableRef.current).DataTable().destroy();
-    $(tableRef.current).DataTable();
+    const table = $(tableRef.current).DataTable();
+    return () => {
+      table.destroy();
+    };
   }, []);
 
-  const handleApprove = () => {
-    // Show the modal when Approve button is clicked
-    const modal = new Modal(modalRef.current);
-    modal.show();
-  };
+  const handleShow = () => setShowModal(true);
+  const handleClose = () => setShowModal(false);
 
   const handleChangeStatus = async () => {
-   try {
-     const res = await fetch(`${process.env.REACT_APP_API_URL}/editVendor`, {
-       method: "POST",
-       headers: {
-         "Content-Type": "application/json",
-         Authorization: `Bearer ${token}`,
-       },
-       body: JSON.stringify({
-         vendorId: vendors.vendorId,
-         verificationStatus: "active"
-       }),
-     });
-     
-     const data = await res.json();
-     if (res.ok) {
-       console.log(data);
-       navigate("/vendors/approveVendors");
-       toast.success("vendor approved")
-     }
-   } catch (error) {
-    console.log(error)
-   }
-  }
+    handleShow();
+  };
 
-    const handleRemoveVendor = async () => {
-      try {
-        const res = await fetch(
-          `${process.env.REACT_APP_API_URL}/deleteUnapprovedVendor`,
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${token}`,
-            },
-            body: JSON.stringify({ vendorId: vendors.vendorId }),
-          },
-        );
+  const handleConfirmApprove = async () => {
+    try {
+      const res = await fetch(`${process.env.REACT_APP_API_URL}/editVendor`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          vendorId: vendors.vendorId,
+          verificationStatus: "active",
+        }),
+      });
 
-        const data = await res.json();
-
-        if (res.ok) {
-          navigate("/vendors/approveVendors");
-          toast.success(data.message);
-        }
+      const data = await res.json();
+      if (res.ok) {
+        navigate("/vendors/approveVendors");
+        toast.success("Vendor approved");
+      } else {
         toast.warning(data.message);
-      } catch (error) {
-        toast.warning(error.message);
       }
-    };
+    } catch (error) {
+      toast.error(error.message);
+    }
+  };
+
+  const handleRemoveVendor = async () => {
+    try {
+      const res = await fetch(
+        `${process.env.REACT_APP_API_URL}/deleteUnapprovedVendor`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ vendorId: vendors.vendorId }),
+        },
+      );
+
+      const data = await res.json();
+      if (res.ok) {
+        navigate("/vendors/approveVendors");
+        handleClose();
+        toast.success(data.message);
+      } else {
+        toast.warning(data.message);
+      }
+    } catch (error) {
+      toast.error(error.message);
+    }
+  };
 
   return (
     <div
@@ -90,7 +90,7 @@ const ApproveVendor = () => {
       <ToastContainer />
       <div className="page-content">
         <div className="container-fluid">
-          <div className="row ">
+          <div className="row">
             <div className="d-flex flex-column m-3 flex-xl-row">
               <div className="card border-0 xl-mb-0 mr-xl-4 col-xl-4">
                 <div className="bg-primary-subtle p-2">
@@ -140,11 +140,10 @@ const ApproveVendor = () => {
                   <h4 className="card-title mb-4 font-size-20">
                     Personal Information
                   </h4>
-
                   <p className="text-muted mb-4 font-size-14">
-                    Hi I'm {vendors.name},has been the industry's standard dummy
-                    text To an English person, it will seem like simplified
-                    English, as a skeptical Cambridge.
+                    Hi I'm {vendors.name}, has been the industry's standard
+                    dummy text To an English person, it will seem like
+                    simplified English, as a skeptical Cambridge.
                   </p>
                   <div className="table-responsive">
                     <table className="table table-nowrap mb-0">
@@ -187,25 +186,40 @@ const ApproveVendor = () => {
                   <h4 className="card-title text-center mt-2 font-size-20 mb-2">
                     Verify Documents
                   </h4>
-                  <div className="mt-4 ml-3">
-                    <div className="text-center">
-                      <img
-                        src={
-                          vendors.document
-                            ? vendors.document
-                            : "https://tse3.mm.bing.net/th?id=OIP.K4jXSK4XQahOLPEliCtvlwHaHa&pid=Api&P=0&h=180"
-                        }
-                        alt="DocumentImage"
-                        width="500px"
-                      />
-                    </div>
+                  <div className="row">
+                  <div className="mt-4  col-6 text-center">
+                    <img
+                      src={
+                        vendors?.profilePic
+                          ? vendors?.profilePic
+                          : "https://tse3.mm.bing.net/th?id=OIP.K4jXSK4XQahOLPEliCtvlwHaHa&pid=Api&P=0&h=180"
+                      }
+                      alt="DocumentImage"
+                      className="w-50"
+                    />
+                    <h4>Vendor Profile</h4>
+                  </div>
+
+                  <div className="mt-4 col-6 text-center">
+                    <img
+                      src={
+                        vendors?.document
+                          ? vendors?.document
+                          : "https://tse3.mm.bing.net/th?id=OIP.K4jXSK4XQahOLPEliCtvlwHaHa&pid=Api&P=0&h=180"
+                      }
+                      alt="DocumentImage"
+                      className="w-50"
+                    />
+                      <h4>Document: {vendors?.docType}</h4>
+                  </div>
+
                   </div>
                 </div>
               </div>
             </div>
             <div className="ml-3 mt-3 text-center mt-5">
               <button
-                onClick={handleApprove}
+                onClick={handleChangeStatus}
                 className="mr-3 w-25 border-0 p-1 bg-success text-white"
               >
                 Approve
@@ -220,49 +234,39 @@ const ApproveVendor = () => {
           </div>
         </div>
       </div>
-      {/* Modal for confirmation */}
-      <div
-        ref={modalRef}
-        className="modal fade"
-        tabindex="-1"
-        aria-labelledby="confirmModalLabel"
-        aria-hidden="true"
-      >
-        <div className="modal-dialog">
-          <div className="modal-content">
-            <div className="modal-header">
-              <h5 className="modal-title" id="confirmModalLabel">
-                Confirmation
-              </h5>
-              <button
-                type="button"
-                className="btn-close"
-                data-bs-dismiss="modal"
-                aria-label="Close"
-              ></button>
-            </div>
-            <div className="modal-body">
-              Are you sure you want to make changes?
-            </div>
-            <div className="modal-footer">
-              <button
-                type="button"
-                className="btn btn-secondary"
-                data-bs-dismiss="modal"
-              >
-                No
-              </button>
-              <button
-                onClick={handleChangeStatus}
-                type="button"
-                className="btn btn-primary"
-              >
-                Yes
-              </button>
+      {showModal && (
+        <div className="modal show" style={{ display: "block" }}>
+          <div className="modal-dialog">
+            <div className="modal-content">
+              <div className="modal-header">
+                <h5 className="modal-title">Approval Confirmation</h5>
+                <button type="button" className="close" onClick={handleClose}>
+                  <span>&times;</span>
+                </button>
+              </div>
+              <div className="modal-body">
+                <p>Are you sure you want to approve this vendor?</p>
+              </div>
+              <div className="modal-footer">
+                <button
+                  type="button"
+                  className="btn btn-secondary"
+                  onClick={handleClose}
+                >
+                  No
+                </button>
+                <button
+                  type="button"
+                  className="btn btn-primary"
+                  onClick={handleConfirmApprove}
+                >
+                  Yes
+                </button>
+              </div>
             </div>
           </div>
         </div>
-      </div>
+      )}
     </div>
   );
 };

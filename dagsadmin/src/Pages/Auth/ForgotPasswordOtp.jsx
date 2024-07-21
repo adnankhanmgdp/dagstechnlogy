@@ -43,13 +43,13 @@ const ForgotPasswordOtp = () => {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          phone: "6386923401",
+          phone: "8299112380",
           OTP: otpData,
-          email: "sahuamit00786@gmail.com",
+          email: "dagstechnology.it@gmail.com",
         }),
       });
       const data = await res.json();
-      // console.log(data);
+      console.log(data);
       if (res.ok) {
         localStorage.setItem("token", data.token);
         navigate("/verify/forgotPassword");
@@ -71,7 +71,7 @@ const ForgotPasswordOtp = () => {
           <h5 className="m-0">Verify your number</h5>
           <span className="text-center py-3">
             Enter the code we just sent to your Mobile Phone <br />{" "}
-            <strong>+91 {phone}</strong>
+            <strong>+91 **********</strong>
           </span>
 
           <div className="d-flex flex-row mt-3">

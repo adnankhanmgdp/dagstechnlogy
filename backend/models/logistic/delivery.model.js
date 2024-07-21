@@ -42,7 +42,7 @@ const DeliveryPartnerSchema = new mongoose.Schema({
     },
     availability: {
         type: Boolean,
-        default: true
+        default: false
     },
     geoCoordinates: {
         latitude: {
