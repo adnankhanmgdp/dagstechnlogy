@@ -2,7 +2,13 @@ const Logistic = require('../../models/logistic/delivery.model');
 const Order = require('../../models/user/order.model');
 const path = require('path');
 const fs = require('fs');
-const { v4: uuidv4 } = require("uuid")
+const { v4: uuidv4 } = require("uuid");
+const approvalConfirmationTemplate = require('../../Tempelates/approved');
+const mailSender = require('../../utils/admin/mailSender');
+const BankDetails = require('../../models/vendor/bankDetails.model');
+const axios = require('axios');
+const rejectionNotificationTemplate = require('../../Tempelates/rejectDocs');
+
 
 exports.fetchLogistic = async (req, res) => {
     try {
@@ -42,24 +48,93 @@ exports.getLogistic = async (req, res) => {
 
 exports.updateLogistic = async (req, res) => {
     const { logisticId } = req.body;
+    const { IFSC, accountHolderName, accountNumber, verificationStatus } = req.body;
+
+    // Initialize variables for bank details
+    let bankName = '';
+    let branch = '';
+    let address = '';
+    let city = '';
+    console.log(req.body)
+
     try {
+        // Fetch bank details using the IFSC code if provided
+        if (IFSC) {
+            try {
+                const response = await axios.get(`https://ifsc.razorpay.com/${IFSC}`);
+                bankName = response.data.BANK || '';
+                branch = response.data.BRANCH || '';
+                address = response.data.ADDRESS || '';
+                city = response.data.CITY || '';
+            } catch (error) {
+                console.error('Error fetching IFSC details:', error.message);
+                // Handle errors from the IFSC API
+                res.json({
+                    message:"Internal Server Error",
+                    error:error.message
+                })
+            }
+        }
+
+        // Update logistic details
         const updateLogistic = await Logistic.findOneAndUpdate(
             { logisticId: logisticId },
             req.body,
             { new: true }
         );
-        console.log(updateLogistic)
+
         if (!updateLogistic) {
             return res.status(404).json({ message: 'Logistic not found' });
         }
+
+        // Update or create bank details
+        let updateBankDetails = await BankDetails.findOneAndUpdate(
+            { bankId: logisticId },
+            {
+                accountHolderName,
+                bankName: bankName || (await BankDetails.findOne({ bankId: logisticId }).bankName),
+                accountNumber,
+                IFSC,
+                city,
+                branch: branch || (await BankDetails.findOne({ bankId: logisticId }).branch),
+                address: address || (await BankDetails.findOne({ bankId: logisticId }).address),
+                bankId: logisticId
+            },
+            { new: true }
+        );
+
+        if (!updateBankDetails) {
+            updateBankDetails = await BankDetails.create({
+                accountHolderName,
+                bankName,
+                accountNumber,
+                IFSC,
+                city,
+                branch,
+                address,
+                bankId: logisticId
+            });
+        }
+
+        if (verificationStatus == 'active') {
+            const emailBody = approvalConfirmationTemplate(updateLogistic.name);
+            await mailSender(updateLogistic.email, 'Logistic Approved', emailBody);
+        }
+        if (verificationStatus == "inactive") {
+            const emailBody = rejectionNotificationTemplate(updateLogistic.name);
+            await mailSender(updateLogistic.email, 'Logistic Rejected', emailBody);
+        }
+
         res.status(200).json({
             message: "Logistic Partner Updated successfully",
-            updateLogistic
+            updateLogistic,
+            updateBankDetails
         });
     } catch (err) {
         res.status(400).json({ message: err.message });
     }
-}
+};
+
 
 exports.deleteUnapprovedLogistic = async (req, res) => {
     try {
@@ -73,9 +148,28 @@ exports.deleteUnapprovedLogistic = async (req, res) => {
     }
 }
 
+exports.Logistic = async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        const logistic = await Logistic.findOne({ logisticId: id })
+        return res.status(200).json({
+            mesage: "Logistic fetched sucessfully",
+            logistic
+        })
+    } catch (error) {
+        return res.status(500).json({
+            success: false,
+            message: "Failed to find logistic",
+            error: error.message,
+        });
+    }
+}
+
+
 exports.createLogistic = async (req, res) => {
     try {
-        const { email, phone, imgData } = req.body;
+        const { email, phone, imgData, profilePic } = req.body;
         if (!phone) {
             return res.status(400).json({ message: "Please enter a mobile number." });
         }
@@ -90,6 +184,9 @@ exports.createLogistic = async (req, res) => {
         }
         if (imgData) {
             data = await Docs(imgData)
+        }
+        if (profilePic) {
+            data = await Profile(profilePic)
         }
         const newLogistic = await Logistic.create({
             email,
@@ -113,7 +210,7 @@ async function Docs(icon) {
         return null;
     }
 
-    const DocsDir = path.join(process.env.FILE_SAVE_PATH, 'LogisticDocs');
+    const DocsDir = path.join(process.env.FILE_SAVE_PATH, 'LogisticDoc');
 
     if (!fs.existsSync(DocsDir)) {
         fs.mkdirSync(DocsDir, { recursive: true });
@@ -121,9 +218,32 @@ async function Docs(icon) {
 
     const picBuffer = Buffer.from(icon, 'base64');
     const picFilename = `${uuidv4()}.jpg`;
-    const picPath = path.join(DocsDir, picFilename);
+    let picPath = path.join(DocsDir, picFilename);
 
     fs.writeFileSync(picPath, picBuffer);
+
+    picPath = `${process.env.UPLOAD_URL}` + picPath.slice(5);
+
+    return picPath;
+}
+
+async function Profile(docs) {
+    if (!docs) {
+        return null;
+    }
+
+    const DocsDir = path.join(process.env.FILE_SAVE_PATH, 'LogisticProfile');
+
+    if (!fs.existsSync(DocsDir)) {
+        fs.mkdirSync(DocsDir, { recursive: true });
+    }
+
+    const picBuffer = Buffer.from(docs, 'base64');
+    const picFilename = `${uuidv4()}.jpg`;
+    let picPath = path.join(DocsDir, picFilename);
+
+    fs.writeFileSync(picPath, picBuffer);
+    picPath = `${process.env.UPLOAD_URL}` + picPath.slice(5);
 
     return picPath;
 }

@@ -7,9 +7,9 @@ exports.settlement = async (req, res) => {
         const settlementHistory = await Settlement.find({ Id: logisticId });
         let settledOrders = [];
 
-        if (!settlementHistory.length) {
-            return res.status(404).json({ error: 'No settlement history found' });
-        }
+        // if (!settlementHistory.length) {
+        //     return res.status(404).json({ error: 'No settlement history found' });
+        // }
 
         // for (const settlement of settlementHistory) {
         //     const orders = await Order.find({ _id: { $in: settlement.orderIds } });
@@ -61,11 +61,20 @@ exports.calculateAmount = async (req, res) => {
                 $match: {
                     'logisticId.0': logisticId,
                     'orderStatus.status': { $ne: 'cancelled' },
-                    settlementForLogisticsOnPickup: { $gt: 0 },
-                    'orderStatus.1.status': 'initiated', // Assuming 'initiated' is at 1th position
+                    // settlementForLogisticsOnPickup: { $gt: 0 },
+                    orderStatus: { // Ensure order has 'initiated' status and exclude 'cancelled' status
+                        $elemMatch: {
+                            status: 'pickedUp'
+                        },
+                        $not: {
+                            $elemMatch: {
+                                status: 'cancelled'
+                            }
+                        }
+                    }
+                    // 'orderStatus.1.status': 'initiated', // Assuming 'initiated' is at 1th position
                 }
             },
-            { $unwind: '$logisticId' },
             {
                 $group: {
                     _id: null,
@@ -74,13 +83,14 @@ exports.calculateAmount = async (req, res) => {
             }
         ]);
 
+
         const ordersTotalOnPickup = await Order.aggregate([
             {
                 $match: {
                     'logisticId.0': logisticId, // Filter orders by vendorId
                     orderStatus: { // Ensure order has 'initiated' status and exclude 'cancelled' status
                         $elemMatch: {
-                            status: 'initiated'
+                            status: 'pickedUp'
                         },
                         $not: {
                             $elemMatch: {
@@ -93,39 +103,40 @@ exports.calculateAmount = async (req, res) => {
             {
                 $group: {
                     _id: null,
-                    totalAmount: { $sum: '$deliveryFee' } // Summing up the 'vendorFee' field of matching orders
+                    totalAmount: { $sum: '$deliveryFee' }
                 }
             }
         ]);
 
-        const dueSettlementOnPickup = ordersDueOnPickup.length ? ordersDueOnPickup[0].totalSettlement : 0;
+
+        const dueSettlementOnPickup = ordersDueOnPickup.length ? ordersDueOnPickup[0].totalSettlement : 0;      
         const totalSettlementOnPickup = ordersTotalOnPickup.length ? ordersTotalOnPickup[0].totalAmount / 2 : 0;
-        const amountEarnedOnPickup = totalSettlementOnPickup - dueSettlementOnPickup;
+        const amountEarnedOnPickup = totalSettlementOnPickup - dueSettlementOnPickup;                            
+        
+
 
         //delivery
         const ordersDueOnDelivery = await Order.aggregate([
             {
                 $match: {
                     'logisticId.1': logisticId,
-                    // 'orderStatus.status': { $ne: 'cancelled' },
-                    // 'orderStatus.6.status': 'outForDelivery',
                     orderStatus: { // Ensure order has 'outForDelivery' status and exclude 'cancelled' status
                         $elemMatch: {
-                            status: 'outForDelivery'
+                            status: 'delivered'
                         },
                         $not: {
                             $elemMatch: {
                                 status: 'cancelled'
                             }
-                        }
-                    }
+                        },
+                    },
+                    settlementForLogisticsOnDelivery: { $gt: 0 },
                 }
             },
-            { $unwind: '$logisticId' },
             {
                 $group: {
                     _id: null,
-                    totalSettlement: { $sum: '$settlementForLogisticsOnPickup' }
+                    totalSettlement: { $sum: '$settlementForLogisticsOnDelivery' }
                 }
             }
         ]);
@@ -136,7 +147,7 @@ exports.calculateAmount = async (req, res) => {
                     'logisticId.1': logisticId, // Filter orders by vendorId
                     orderStatus: { // Ensure order has 'initiated' status and exclude 'cancelled' status
                         $elemMatch: {
-                            status: 'outForDelivery'
+                            status: 'delivered'
                         },
                         $not: {
                             $elemMatch: {
@@ -158,6 +169,8 @@ exports.calculateAmount = async (req, res) => {
         const dueSettlementOnDelivery = ordersDueOnDelivery.length ? ordersDueOnDelivery[0].totalSettlement : 0;
         const totalSettlementOnDelivery = ordersTotalOnDelivery.length ? ordersTotalOnDelivery[0].totalAmount / 2 : 0;
         const amountEarnedOnDelivery = totalSettlementOnDelivery - dueSettlementOnDelivery;
+        console.log(dueSettlementOnPickup,dueSettlementOnDelivery)
+
         // const orders = await Order.aggregate([
         //     {
         //         $match: {
@@ -196,6 +209,7 @@ exports.calculateAmount = async (req, res) => {
             amountEarnedOnDelivery,
         })
     } catch (error) {
+        console.log(error.message)
         res.status(500).json({
             message: "Internal server error",
             error: error.message

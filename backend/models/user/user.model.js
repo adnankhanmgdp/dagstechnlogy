@@ -17,7 +17,7 @@ const UserSchema = new mongoose.Schema({
         longitude: {
             type: String
         }
-    }, 
+    },
     phone: {
         type: String,
     },
@@ -27,14 +27,15 @@ const UserSchema = new mongoose.Schema({
     OTP: {
         type: String
     },
-    address:[ {
+    address: [{
         type: String
     }],
     pincode: {
         type: String
     },
     status: {
-        type: String  //active and inactive 
+        type: Boolean,
+        default: false //active and inactive 
     },
     orders: [{
         type: String

@@ -7,7 +7,7 @@ const CategoryServiceTable = () => {
   const decodedUser = JSON.parse(decodeURIComponent(item));
   // console.log("decoded",decodedUser);
   // console.log("item", item);
-  
+
   const data = decodedUser.items;
 
 

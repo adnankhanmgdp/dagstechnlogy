@@ -1,10 +1,12 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 const NewLogPartner = () => {
   const [formData, setFormData] = useState({});
   // console.log("formData", formData);
+  const navigate = useNavigate();
 
   const token = localStorage.getItem("token");
 
@@ -32,24 +34,23 @@ const NewLogPartner = () => {
     e.preventDefault();
     try {
       const res = await fetch(
-        `${process.env.REACT_APP_API_URL}/createLogistic`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({
-            name: formData.name,
-            email: formData.email,
-            phone: formData.phone,
-            capacity: formData.capacity,
-            docType: "PAN",
-            imgData: formData.imgData,
-            pincode: formData.pincode,
-            address: formData.address,
-          }),
+        `${process.env.REACT_APP_API_URL}/createLogistic`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
         },
+        body: JSON.stringify({
+          name: formData.name,
+          email: formData.email,
+          phone: formData.phone,
+          capacity: formData.capacity,
+          docType: formData.docType,
+          imgData: formData.imgData,
+          pincode: formData.pincode,
+          address: formData.address,
+        }),
+      },
       );
 
       const data = await res.json();
@@ -57,45 +58,44 @@ const NewLogPartner = () => {
       if (res.ok) {
         setLogisticData(data.data);
         toast.success(data.message);
+        navigate('/logistic/approvePartner')
+        // try {
+        //   const res2 = await fetch(
+        //     `${process.env.REACT_APP_API_URL}/createBankDetails`,
+        //     {
+        //       method: "POST",
+        //       headers: {
+        //         "Content-Type": "application/json",
+        //         Authorization: `Bearer ${token}`,
+        //       },
+        //       body: JSON.stringify({
+        //         accountHolderName: formData.accountHolderName,
+        //         bankName: formData.bankName,
+        //         accountNumber: formData.accountNumber,
+        //         IFSC: formData.IFSC,
+        //         branch: formData.branch,
+        //         address: formData.bankAddress,
+        //         bankId: data.data.logisticId,
+        //       }),
+        //     },
+        //   );
 
-        try {
-          const res2 = await fetch(
-            `${process.env.REACT_APP_API_URL}/createBankDetails`,
-            {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-                Authorization: `Bearer ${token}`,
-              },
-              body: JSON.stringify({
-                accountHolderName: formData.accountHolderName,
-                bankName: formData.bankName,
-                accountNumber: formData.accountNumber,
-                IFSC: formData.IFSC,
-                branch: formData.branch,
-                address: formData.bankAddress,
-                bankId: data.data.logisticId,
-              }),
-            },
-          );
+        //   const data2 = await res2.json();
 
-          const data2 = await res2.json();
-
-          if (res2.ok) {
-            // toast.success("Logistic and bank details created successfully");
-          } else {
-            toast.warning(data2.message);
-          }
-        } catch (error) {
-          toast.error("Failed to create bank details");
-          console.error("Error creating bank details:", error);
-        }
+        //   if (res2.ok) {
+        //     // toast.success("Logistic and bank details created successfully");
+        //   } else {
+        //     toast.warning(data2.message);
+        //   }
+        // } catch (error) {
+        //   toast.error("Failed to create bank details");
+        //   console.error("Error creating bank details:", error);
+        // }
       } else {
         toast.warning(data.message);
       }
     } catch (error) {
       toast.error("Failed to create logistic");
-      console.error("Error creating logistic:", error);
     }
   };
 
@@ -104,7 +104,6 @@ const NewLogPartner = () => {
       style={{ background: "#F8F8FB", minHeight: "100vh" }}
       className="main-content"
     >
-      <ToastContainer />
       <div className="page-content">
         {/* main form */}
 
@@ -169,14 +168,14 @@ const NewLogPartner = () => {
                           <div class="col-lg-6">
                             <div class="mb-3">
                               <label for="basicpill-email-input">
-                                PAN card
+                                Document Type
                               </label>
                               <input
                                 onChange={handleChange}
-                                type="number"
+                                type="text"
                                 class="form-control"
-                                id="document"
-                                placeholder="Enter PAN number"
+                                id="docType"
+                                placeholder="Enter the type of Document"
                                 required
                               />
                             </div>
@@ -257,7 +256,7 @@ const NewLogPartner = () => {
 
                     {/* bank details form */}
 
-                    <div className="card p-3">
+                    {/* <div className="card p-3">
                       <h3 className="mt-1 mb-3">Bank Details</h3>
 
                       <section>
@@ -357,7 +356,7 @@ const NewLogPartner = () => {
                           </div>
                         </div>
                       </section>
-                    </div>
+                    </div> */}
                     <button
                       onClick={handleCreateVendor}
                       className="createUserBtn mt-3"

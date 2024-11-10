@@ -20,7 +20,7 @@ const Faq = () => {
       });
       const data = await res.json();
       if (res.ok) {
-        console.log("all faqs are", data.charges.faq)
+        // console.log("all faqs are", data.charges.faq)
         setFaqs(data.charges.faq);
       }
     }
@@ -63,7 +63,7 @@ const Faq = () => {
         "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
       },
-      body: JSON.stringify({ faqId: faqs[editingIndex]._id ,...updatedFAQ}),
+      body: JSON.stringify({ faqId: faqs[editingIndex]._id, ...updatedFAQ }),
     })
       .then((response) => response.json())
       .then((data) => {
@@ -82,14 +82,14 @@ const Faq = () => {
     setEditingAnswer("");
   };
 
-  const handleDeleteFAQ = async(_id) => {
+  const handleDeleteFAQ = async (_id) => {
     const res = await fetch(`${process.env.REACT_APP_API_URL}/deleteFAQ`, {
       method: "DELETE",
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
       },
-      body: JSON.stringify({faqId: _id}),
+      body: JSON.stringify({ faqId: _id }),
     });
     const data = await res.json();
     if (res.ok) {
@@ -100,10 +100,9 @@ const Faq = () => {
 
   return (
     <div
-      style={{ background: "#F8F8FB", minHeight: "200vh" }}
+     style={{ background: "#F8F8FB", minHeight: "100vh", overflowY: "auto" }}
       className="main-content"
     >
-      <ToastContainer />
       <div className="page-content">
         <div className="container-fluid">
           <div className="container mt-5">
@@ -139,7 +138,7 @@ const Faq = () => {
 
             <div className="card">
               <div className="card-header text-dark">Existing FAQs</div>
-              <div className="card-body">
+              <div className="card-body" >
                 {faqs.map((faq, index) => (
                   <div key={faq._id} className="mb-3">
                     {editingIndex === index ? (
@@ -206,8 +205,6 @@ const Faq = () => {
                   </div>
                 ))}
               </div>
-              
-
             </div>
           </div>
         </div>

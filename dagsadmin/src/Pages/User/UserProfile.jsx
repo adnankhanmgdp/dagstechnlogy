@@ -1,27 +1,61 @@
 import React, { useEffect, useRef, useState } from "react";
 import $ from "jquery";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate, useLocation, useParams } from "react-router-dom";
 import "datatables.net-bs4"; // Import the Bootstrap 4 DataTables extension
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import moment from "moment";
 
 const UserProfile = () => {
   const location = useLocation();
+  const { phone } = useParams()
   const [decodedUser, setDecodedUser] = useState(null);
   const [userOrders, setUserOrders] = useState([]);
-  console.log("decodeUSer",decodedUser)
+  const token = localStorage.getItem("token");
+
+  // console.log("decodeUSer",decodedUser)
   const [showEditProfileModal, setShowEditProfileModal] = useState(false);
 
+  // useEffect(() => {
+  //   if (location.state && location.state.user) {
+  //     setDecodedUser(location.state.user);
+  //   }
+  // }, [location.state]);
+
+
   useEffect(() => {
-    if (location.state && location.state.user) {
-      setDecodedUser(location.state.user);
-    }
-  }, [location.state]);
+    const fetchUserData = async () => {
+      console.log(phone)
+      try {
+        const res = await fetch(
+          `${process.env.REACT_APP_API_URL}/getUser`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({ phone: phone }),
+          }
+        );
+        const data = await res.json();
+        console.log(data.user[0])
+        if (res.ok) {
+          setDecodedUser(data.user[0]);
+        } else {
+          toast.error("User not found");
+        }
+      } catch (error) {
+        toast.error(error.message);
+      }
+    };
+
+    fetchUserData();
+  }, [phone, token]);
 
   const navigate = useNavigate();
   const tableRef = useRef();
 
-  const token = localStorage.getItem("token");
 
   useEffect(() => {
     const fetchUserOrders = async () => {
@@ -35,7 +69,7 @@ const UserProfile = () => {
                 "Content-Type": "application/json",
                 Authorization: `Bearer ${token}`,
               },
-              body: JSON.stringify({ phone: decodedUser.phone }),
+              body: JSON.stringify({ phone: phone }),
             },
           );
           const data = await res.json();
@@ -67,7 +101,7 @@ const UserProfile = () => {
   };
 
   const [editableProfile, setEditableProfile] = useState({});
-  
+
   const handleChangetheprofile = (e) => {
     setEditableProfile({ ...editableProfile, [e.target.id]: e.target.value });
   };
@@ -91,27 +125,6 @@ const UserProfile = () => {
     }
   };
 
-  const handleDeactivateUser = async () => {
-    try {
-      const res = await fetch(`${process.env.REACT_APP_API_URL}/editUser`, {
-        method: "POST",
-        headers: {
-          "content-type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          userId: decodedUser.userId,
-          status: "inactive",
-        }),
-      });
-      if (res.ok) {
-        toast.success("User deactivated successfully");
-        navigate("/users/allUsers");
-      }
-    } catch (error) {
-      console.log(error);
-    }
-  };
 
   const handleActivateUser = async () => {
     try {
@@ -136,7 +149,7 @@ const UserProfile = () => {
   };
 
   const userOrderInvoice = (order) => {
-    navigate("/orders/orderDetails", {
+    navigate(`/orders/orderDetails/${order.orderId}`, {
       state: {
         order,
       },
@@ -157,7 +170,6 @@ const UserProfile = () => {
 
   return (
     <div className="main-content" style={{ backgroundColor: "#F6F6F9" }}>
-      <ToastContainer />
       <div className="page-content">
         <div className="container-fluid">
           <div className="row">
@@ -167,8 +179,11 @@ const UserProfile = () => {
                   <div className="row">
                     <div className="mx-auto mt-3">
                       <img
-                        src="https://tse2.mm.bing.net/th?id=OIP.6UhgwprABi3-dz8Qs85FvwHaHa&pid=Api&P=0&h=180"
-                        className="avatarCustom"
+                        src={
+                          decodedUser?.profilePic
+                            ? decodedUser?.profilePic
+                            : "https://tse3.mm.bing.net/th?id=OIP.K4jXSK4XQahOLPEliCtvlwHaHa&pid=Api&P=0&h=180"
+                        } className="avatarCustom"
                         alt="user's img"
                       />
                     </div>
@@ -183,44 +198,15 @@ const UserProfile = () => {
                       </div>
                     </div>
 
-                    {decodedUser.status === "active" ? (
-                      <>
-                        <div className="d-flex flex-column mx-auto">
-                          <span
-                            className="mx-auto text-primary editProfileButton"
-                            onClick={toggleEditProfileModal}
-                          >
-                            + edit profile
-                          </span>
-                          <div className="mx-auto d-flex flex-row mt-3 mb-1">
-                            <button
-                              onClick={userCreateOrder}
-                              style={{ fontSize: "14px" }}
-                              className="border-0 mr-2 p-1 bg-success text-white pl-3 rounded-md pr-3"
-                            >
-                              + Create Order
-                            </button>
-                            <button
-                              style={{ fontSize: "14px" }}
-                              onClick={handleDeactivateUser}
-                              className="border-0 p-1 bg-danger text-white pl-3 rounded-md pr-3"
-                            >
-                              Deactivate User
-                            </button>
-                          </div>
-                        </div>
-                      </>
-                    ) : (
-                      <div className="mx-auto d-flex flex-row mt-3 mb-1">
-                        <button
-                          onClick={handleActivateUser}
-                          style={{ fontSize: "14px" }}
-                          className="border-0 mr-2 p-1 bg-success text-white pl-3 rounded-md pr-3"
-                        >
-                          Activate User
-                        </button>
-                      </div>
-                    )}
+                    {/* <div className="d-flex flex-column mx-auto">
+                      <span
+                        className="mx-auto text-primary editProfileButton"
+                        onClick={toggleEditProfileModal}
+                      >
+                        + edit profile
+                      </span>
+                    </div> */}
+
                   </div>
                 </div>
               </div>
@@ -232,11 +218,6 @@ const UserProfile = () => {
                     <h4 className="card-title mb-4 font-size-20">
                       Personal Information
                     </h4>
-                    {decodedUser.status === "active" ? (
-                      <span className="mr-3 activeBorder">active</span>
-                    ) : (
-                      <span className="mr-3 inactiveBorder">inactive</span>
-                    )}
                   </div>
 
                   <p className="text-muted mb-4 font-size-14">
@@ -267,9 +248,17 @@ const UserProfile = () => {
                         </tr>
                         <tr>
                           <th className="headingCustom" scope="row">
-                            Location :
+                            Address :
                           </th>
-                          <td>{decodedUser.address}</td>
+                          <td>
+                            <ul className="address-list">
+                              {decodedUser.address.map((address, index) => (
+                                <li key={index} className="address-item">
+                                  {index + 1} - {address}
+                                </li>
+                              ))}
+                            </ul>
+                          </td>
                         </tr>
                       </tbody>
                     </table>
@@ -307,7 +296,7 @@ const UserProfile = () => {
                             <tr className="text-center" key={order.orderId}>
                               <td>{order.orderId}</td>
                               <td>({order.vendorId})</td>
-                              <td>{order.orderDate}</td>
+                              <td>{moment(order.orderDate).format('DD MMMM YYYY')}</td>
                               <td>
                                 <div>
                                   <span
@@ -319,16 +308,16 @@ const UserProfile = () => {
                                         ].status === "Delivered"
                                           ? "#a7ebc0"
                                           : order.orderStatus[
-                                                order.orderStatus.length - 1
-                                              ].status === "Pending"
+                                            order.orderStatus.length - 1
+                                          ].status === "Pending"
                                             ? "#ffa8a8"
                                             : order.orderStatus[
-                                                  order.orderStatus.length - 1
-                                                ].status === "Processing"
+                                              order.orderStatus.length - 1
+                                            ].status === "Processing"
                                               ? "#ffe38b"
                                               : order.orderStatus[
-                                                    order.orderStatus.length - 1
-                                                  ].status === "Shipped"
+                                                order.orderStatus.length - 1
+                                              ].status === "Shipped"
                                                 ? "#c9ecc3"
                                                 : "",
                                       width: "100px",
@@ -425,7 +414,7 @@ const UserProfile = () => {
                         />
                       </div>
                       <div className="form-group">
-                        <label>Location</label>
+                        <label>Address</label>
                         <input
                           id="address"
                           type="text"

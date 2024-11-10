@@ -49,7 +49,7 @@ const ForgotPasswordOtp = () => {
         }),
       });
       const data = await res.json();
-      console.log(data);
+      // console.log(data);
       if (res.ok) {
         localStorage.setItem("token", data.token);
         navigate("/verify/forgotPassword");

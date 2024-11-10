@@ -11,14 +11,14 @@ const TermsAndConditions = () => {
 
   const token = localStorage.getItem("token");
 
-const handleEditorChange = (content) => {
-  const cleanedContent = content.trim().replace(/\s+/g, " ");
-  setAnswer(cleanedContent);
-};
+  const handleEditorChange = (content) => {
+    const cleanedContent = content.trim().replace(/\s+/g, " ");
+    setAnswer(cleanedContent);
+  };
 
   const handleSubmit = async (e) => {
     setShowEditor(!showEditor);
-    console.log(answer)
+    // console.log(answer)
     e.preventDefault();
     try {
       const res = await fetch(
@@ -67,7 +67,6 @@ const handleEditorChange = (content) => {
 
   return (
     <div className="main-content" style={styles.mainContent}>
-      <ToastContainer />
       <div className="page-content" style={styles.pageContent}>
         {showEditor ? (
           <div className="container-fluid" style={styles.formContainer}>

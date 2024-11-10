@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useParams } from "react-router-dom";
 
 const InvoiceDetails = () => {
   const location = useLocation();
+  const [order, setOrder] = useState()
   const userOrder = location.state?.order;
-  const orderLocation = location.state.location
+  // const orderLocation = location.state.location
+  const { id } = useParams();
 
   // console.log("userOrderrrr", userOrder);
 
@@ -15,47 +17,70 @@ const InvoiceDetails = () => {
   // console.log("dataOfUser", dataOfUser)
 
   useEffect(() => {
-    if (userOrder?.userId) {
-      const fetchData = async () => {
-        try {
-          const res = await fetch(`${process.env.REACT_APP_API_URL}/getUser`, {
+    const fetchOrderAndUserDetails = async () => {
+      try {
+        // Fetch order details
+        const orderRes = await fetch(
+          `${process.env.REACT_APP_API_URL}/getOrder`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({ orderId: id }),
+          }
+        );
+
+        const orderData = await orderRes.json();
+        if (orderRes.ok) {
+          setOrder(orderData.order);
+
+          // Fetch user details using userId from order
+          const userRes = await fetch(`${process.env.REACT_APP_API_URL}/getUser`, {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
               Authorization: `Bearer ${token}`,
             },
             body: JSON.stringify({
-              phone: userOrder.userId ? userOrder.userId : userOrder.orderId,
+              phone: orderData.order.userId,
             }),
           });
-          const data = await res.json();
-          if (res.ok) {
-            // console.log("userOrderData", data.user[0]);
-            setDataOfUser(data.user[0]);
+
+          const userData = await userRes.json();
+          if (userRes.ok) {
+            console.log("userOrderData", userData.user[0]);
+            setDataOfUser(userData.user[0]);
           }
-        } catch (error) {
-          // console.log(error.message);
+        } else {
+          toast.error(orderData.message);
         }
-      };
-      fetchData();
-    }
-  }, []);
+      } catch (error) {
+        console.log(error);
+        toast.error("An unexpected error occurred. Please try again.");
+      }
+    };
+
+    fetchOrderAndUserDetails();
+  }, [id, token]);
+
 
   useEffect(() => {
-    if (userOrder?.items) {
-      const newTotal = userOrder.items.reduce(
+    if (order?.items) {
+      const newTotal = order.items.reduce(
         (acc, item) => acc + item.unitPrice * item.qty,
         0,
       );
       setAllTotal(newTotal);
     }
-  }, [userOrder]);
+  }, [order]);
 
   const handlePrint = () => {
     window.print();
   };
 
-  if (!userOrder) {
+  if (!order) {
     return (
       <div>
         <h2>No order details available</h2>
@@ -103,7 +128,7 @@ const InvoiceDetails = () => {
                       />
                     </div>
                     <h4 className="float-end font-size-16">
-                      Order # {userOrder && userOrder.orderId}
+                      Order # {order && order.orderId}
                     </h4>
                   </div>
                   <hr />
@@ -114,7 +139,7 @@ const InvoiceDetails = () => {
                         <br />
                         {dataOfUser && dataOfUser.name}
                         <br />
-                        {orderLocation}
+                        {order.orderLocation}
                       </address>
                     </div>
                     <div className="col-sm-6 text-sm-end">
@@ -123,7 +148,7 @@ const InvoiceDetails = () => {
                         <br />
                         {dataOfUser && dataOfUser.name}
                         <br />
-                        {orderLocation}
+                        {order.orderLocation}
                       </address>
                     </div>
                   </div>
@@ -137,14 +162,14 @@ const InvoiceDetails = () => {
                       <address>
                         <strong>Transaction Id:</strong>
                         <br />
-                        {userOrder.transactionId?userOrder.transactionId:"N/A"}
+                        {order.transactionId ? order.transactionId : "N/A"}
                       </address>
                     </div>
                     <div className="col-sm-6 mt-3 text-sm-end">
                       <address>
                         <strong>Order Date:</strong>
                         <br />
-                        {userOrder && userOrder.orderDate}
+                        {order && Date(order.orderDate).toLocaleString('hi')}
                         <br />
                         <br />
                       </address>
@@ -167,11 +192,12 @@ const InvoiceDetails = () => {
                         </tr>
                       </thead>
                       <tbody>
-                        {userOrder &&
-                          userOrder.items.map((item, index) => (
+                        {order &&
+                          order.items.map((item, index) => (
                             <tr key={index}>
                               <td colSpan="3">{item.itemId}</td>
-                              <td>Shirt</td>
+                              {/* <td>Shirt</td> */}
+                              <td className="text-center">{item.itemNAME}</td>
                               <td className="text-center">{item.qty}</td>
                               <td className="text-center">₹{item.unitPrice}</td>
                               <td className="text-center">
@@ -186,31 +212,33 @@ const InvoiceDetails = () => {
                       </tbody>
                     </table>
                   </div>
+
                   <div className="w-100 my-5 d-flex justify-content-end">
-                    <div className="d-flex flex-column w-25  mr-5">
+                    <div className="d-flex flex-column w-25 mr-5">
                       <div className="mb-2 d-flex flex-row justify-content-between">
-                        <strong>Sub Total</strong>
-                        <span>₹{allTotal.toFixed(2)}</span>
+                        <strong>Items Total</strong>
+                        <span>₹{order.amount.toFixed(2)}</span>
                       </div>
                       <div className="mb-2 d-flex flex-row justify-content-between">
                         <strong>Shipping</strong>
-                        <span>+₹{userOrder && userOrder.deliveryFee}</span>
+                        <span>+₹{order && order.deliveryFee ? order.deliveryFee.toFixed(2) : "N/A"}</span>
                       </div>
                       <div className="mb-2 d-flex flex-row justify-content-between">
-                        <strong>18% GST(tax)</strong>
-                        <span>+₹{(18 / 100) * allTotal.toFixed(2)}</span>
+                        <strong>Discount</strong>
+                        <span>-₹{order && order.discount ? order.discount.toFixed(2) : 0 }</span>
+                      </div>
+                      <div className="mb-2 d-flex flex-row justify-content-between">
+                        <strong>Tax</strong>
+                        <span>+₹{order && order.taxes? order.taxes.toFixed(2) : 0}</span>
                       </div>
                       <div className="mb-2 d-flex flex-row justify-content-between">
                         <strong>Total</strong>
-                        <span>
-                          ₹
-                          {allTotal +
-                            userOrder.deliveryFee +
-                            (18 / 100) * allTotal.toFixed(2)}
-                        </span>
+                        <span>₹{order && order.finalAmount ? order.finalAmount.toFixed(2) : "N/A"}</span>
                       </div>
                     </div>
                   </div>
+
+
                   <div className="d-print-none">
                     <div className="float-right">
                       <Link

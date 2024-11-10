@@ -9,7 +9,7 @@ const ApprovePartner = () => {
   // console.log("logistics",logistics)
 
   const token = localStorage.getItem("token");
-  
+
   useEffect(() => {
     const approve = async () => {
       const res = await fetch(
@@ -33,7 +33,7 @@ const ApprovePartner = () => {
     };
     approve();
   }, [])
-  
+
   const handleSeeprofile = (logistic) => {
     navigate("/logistic/approvePartnerProfile", {
       state: {
@@ -66,39 +66,40 @@ const ApprovePartner = () => {
           {/* <!-- end page title --> */}
           {/* <!--end row--> */}
 
-          <div class="row" id="partner-list">
-            {logistics.map((logistic) => (
-              <div class="col-xl-4 mt-4 col-md-6">
-                <div class="card">
-                  <div class="card-body">
-                    <div class="d-flex align-start mb-3"></div>
-                    <div class="text-center mb-3">
+          <div className="row" id="partner-list">
+          {logistics && logistics.length > 0 ? (
+            logistics.map((logistic) => (
+              <div className="col-xl-4 mt-4 col-md-6" key={logistic.logisticId}>
+                <div className="card">
+                  <div className="card-body">
+                    <div className="d-flex align-start mb-3"></div>
+                    <div className="text-center mb-3">
                       <img
                         src="https://tse2.mm.bing.net/th?id=OIP.6UhgwprABi3-dz8Qs85FvwHaHa&pid=Api&P=0&h=180"
                         className="avatarCustom"
                         alt="user's img"
                       />
-                      <h6 class="font-size-15 mt-3 mb-1">{logistic.name}</h6>
-                      <p class="mb-0 text-muted font-size-13 badge">
-                        Location: {logistic.address}
+                      <h6 className="font-size-15 mt-3 mb-1">{logistic.name || "No Name"}</h6>
+                      <p className="mb-0 text-muted font-size-13 badge">
+                        Location: {logistic.address || "No Address"}
                       </p>
                     </div>
                     <div className="mb-2">
                       <div className="d-flex justify-content-center align-items-center">
-                        <i class="bx bx-envelope"></i>
-                        <Link className="pl-2">{logistic.email}</Link>
+                        <i className="bx bx-envelope"></i>
+                        <Link className="pl-2">{logistic.email || "No Email"}</Link>
                       </div>
                       <div className="d-flex justify-content-center align-items-center">
-                        <i class="bx bx-phone"></i>
-                        <Link className="pl-2">{logistic.phone}</Link>
+                        <i className="bx bx-phone"></i>
+                        <Link className="pl-2">{logistic.phone || "No Phone"}</Link>
                       </div>
                     </div>
 
-                    <div class="mt-4 btnBack pt-1 pb-1">
+                    <div className="mt-4 btnBack pt-1 pb-1">
                       <div
                         onClick={() => handleSeeprofile(logistic)}
                         to="/logistic/approvePartnerProfile"
-                        class="d-block customBtn"
+                        className="d-block customBtn"
                       >
                         <span className=""> See details</span>
                       </div>
@@ -106,8 +107,13 @@ const ApprovePartner = () => {
                   </div>
                 </div>
               </div>
-            ))}
-          </div>
+            ))
+          ) : (
+            <div className="col-12 text-center">
+              <p>No partners found</p>
+            </div>
+          )}
+        </div>
 
           {/* <!-- end row --> */}
         </div>

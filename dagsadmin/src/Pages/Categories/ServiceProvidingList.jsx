@@ -9,8 +9,8 @@ const ServiceProvidingList = () => {
   const { serviceId } = useParams();
 
   useEffect(() => {
-      console.log(serviceId);
-  },[])
+    console.log(serviceId);
+  }, [])
 
   const navigate = useNavigate();
 
@@ -26,14 +26,22 @@ const ServiceProvidingList = () => {
   // console.log("decoded",decodedUser)
   const lastInputRef = useRef(null);
   const [showModal, setShowModal] = useState(false);
-   const [showOtherModal, setOtherModal] = useState(false);
+  const [showOtherModal, setOtherModal] = useState(false);
   const [itemIdToDelete, setItemIdToDelete] = useState(null);
   const [showEditModal, setShowEditModal] = useState(false);
+  const [itemToEdit, setItemToEdit] = useState(false);
+  const [showEditItemModal, setShowEditItemModal] = useState(false);
   const [editFormData, setEditFormData] = useState({
     serviceName: "",
     vendorCommission: "",
     imgData: "",
   });
+  const [editForm, setEditForm] = useState({
+    itemName: "",
+    unitPrice: "",
+    icon: "",
+  });
+
 
   // console.log("editFormData",editFormData)
 
@@ -66,47 +74,46 @@ const ServiceProvidingList = () => {
   }, [serviceId, token]);
 
   const handleAddItemToService = async () => {
-  //  console.log("newItem",newItem);
-   // Update formData synchronously
-   const updatedFormData = {
-     ...formData,
-     itemName: newItem.itemName,
-     unitPrice: newItem.unitPrice,
-     imgData: newItem.imgData,
-   };
+    //  console.log("newItem",newItem);
+    // Update formData synchronously
+    const updatedFormData = {
+      ...formData,
+      itemName: newItem.itemName,
+      unitPrice: newItem.unitPrice,
+      imgData: newItem.imgData,
+    };
 
-   // Make the API call
-   try {
-     const res = await fetch(`${process.env.REACT_APP_API_URL}/addItem`, {
-       method: "POST",
-       headers: {
-         "Content-Type": "application/json",
-         Authorization: `Bearer ${token}`,
-       },
-       body: JSON.stringify(updatedFormData),
-     });
+    // Make the API call
+    try {
+      const res = await fetch(`${process.env.REACT_APP_API_URL}/addItem`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(updatedFormData),
+      });
 
-     const data = await res.json();
+      const data = await res.json();
 
-    //  console.log("data",data)
-     // Update decodedUser and reset newItem if the API call is successful
-     if (res.ok) {
-       setDecodedUser(data.items);
-       setNewItem({ itemName: "", unitPrice: "", imgData: "" });
-       toast.success(`Item successfully added`);
-     } else {
-       toast.error(`Failed to add item: ${data.message}`);
-     }
-   } catch (error) {
-    //  console.error(error);
-     toast.error(`An error occurred: ${error.message}`);
-   }
- };
-
+      //  console.log("data",data)
+      // Update decodedUser and reset newItem if the API call is successful
+      if (res.ok) {
+        setDecodedUser(data.items);
+        setNewItem({ itemName: "", unitPrice: "", imgData: "" });
+        toast.success(`Item successfully added`);
+      } else {
+        toast.error(`Failed to add item: ${data.message}`);
+      }
+    } catch (error) {
+      //  console.error(error);
+      toast.error(`An error occurred: ${error.message}`);
+    }
+  };
 
   const handleDeleteService = async (e) => {
     e.preventDefault();
-    console.log("delete service",servicee.serviceId)
+    // console.log("delete service",servicee.serviceId)
     try {
       const res = await fetch(
         `${process.env.REACT_APP_API_URL}/deleteService`,
@@ -122,7 +129,7 @@ const ServiceProvidingList = () => {
 
       const data = await res.json();
       if (res.ok) {
-        // console.log(data);
+        toast.warning("Service deleted! 😥")
         navigate("/categories/ManageSubServices");
       }
     } catch (error) {
@@ -161,13 +168,122 @@ const ServiceProvidingList = () => {
     setShowModal(false);
   };
 
-    const openOtherModal = () => {
-      setOtherModal(true);
+  //edit items started here  --------------------------------------------------------------------------------------
+  const openEditItemModal = async (itemId) => {
+    setItemToEdit(itemId);
+
+    try {
+      const res = await fetch(`${process.env.REACT_APP_API_URL}/item`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          serviceId: serviceId,
+          itemId: itemId,
+          ...editForm,
+        }),
+      });
+
+      if (!res.ok) {
+        const errorData = await res.json();
+        const errorMessage = errorData.message || 'An error occurred';
+        toast.error(`Error: ${errorMessage}`);
+        return;
+      }
+
+      const data = await res.json();
+
+      if (!data || !data.item) {
+        // Handle unexpected response structure
+        toast.error("Unexpected response structure");
+        return;
+      }
+
+      // Update form with the received data
+      setEditForm({
+        itemName: data.item.name,
+        unitPrice: data.item.unitPrice,
+        icon: data.item.itemIcon,
+      });
+
+      setShowEditItemModal(true);
+    } catch (error) {
+      toast.error(`Error: ${error.message || 'An unknown error occurred'}`);
+    }
+  };
+
+  //edit items
+  const closeEditItemModal = () => {
+    setShowEditItemModal(false);
+  };
+
+  const handleEditItemChange = (e) => {
+    const { name, value } = e.target;
+    setEditForm((prevForm) => ({
+      ...prevForm,
+      [name]: value,
+    }));
+  };
+
+  const handleSaveEditItem = async () => {
+
+    const res = await fetch(`${process.env.REACT_APP_API_URL}/item`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        serviceId: serviceId,
+        itemId: itemToEdit,
+        ...editForm,
+      }),
+    });
+
+    const data = await res.json();
+    if (res.ok) {
+
+      setDecodedUser((prevItems) =>
+        prevItems.map((item) =>
+          item.itemId === itemToEdit
+            ? { ...item, ...data.service.items.find(i => i.itemId === itemToEdit) } // Update with latest data from server
+            : item
+        )
+      );
+
+
+      closeEditItemModal();
+      toast.success("Item updated successfully");
+    } else {
+      toast.error("Failed to update Item");
+    }
+  };
+
+  const handleUpdateItemIcon = (e) => {
+    const file = e.target.files[0];
+    const reader = new FileReader();
+
+    reader.onloadend = () => {
+      const base64String = reader.result.split(",")[1];
+      setEditForm({
+        ...editForm,
+        icon: base64String,
+      });
     };
 
-    const closeOtherModal = () => {
-      setOtherModal(false);
-    };
+    reader.readAsDataURL(file);
+  };
+  // items edited end here ------------------------------------------------------------------------------------------
+
+  const openOtherModal = () => {
+    setOtherModal(true);
+  };
+
+  const closeOtherModal = () => {
+    setOtherModal(false);
+  };
 
   const handleUploadItemIcon = (e) => {
     const file = e.target.files[0];
@@ -183,7 +299,7 @@ const ServiceProvidingList = () => {
           imgData: base64String,
         });
       };
-      
+
 
       reader.readAsDataURL(file);
     }
@@ -252,7 +368,6 @@ const ServiceProvidingList = () => {
       className="main-content"
       style={{ background: "#F8F8FB", minHeight: "100vh" }}
     >
-      <ToastContainer />
       <div className="page-content">
         <div className="container-fluid">
           <div className="row">
@@ -314,47 +429,60 @@ const ServiceProvidingList = () => {
                           <th>ID</th>
                           <th>Name</th>
                           <th>Price</th>
+                          <th className="text-center">Edit</th>
                           <th className="text-center">Action</th>
                         </tr>
                       </thead>
                       <tbody>
                         {decodedUser?.length > 0
                           ? decodedUser.map((item) => (
-                              <tr
-                                className="text-center"
-                                key={item.itemId}
-                                data-id={item.itemId}
-                              >
-                                <td data-field="image text-center">
-                                  <div
-                                    className="border mx-auto newImageBorder overflow-hidden"
-                                    style={{ width: "50px", height: "50px" }}
-                                  >
-                                    <img
-                                      src={item.itemIcon}
-                                      width="60"
-                                      height="60"
-                                      className=" p-2"
-                                      alt="icon"
-                                    />
-                                  </div>
-                                </td>
+                            <tr
+                              className="text-center"
+                              key={item.itemId}
+                              data-id={item.itemId}
+                            >
+                              <td data-field="image text-center">
+                                <div
+                                  className="border mx-auto newImageBorder overflow-hidden"
+                                  style={{ width: "50px", height: "50px" }}
+                                >
+                                  <img
+                                    src={item.itemIcon}
+                                    width="60"
+                                    height="60"
+                                    className=" p-2"
+                                    alt="icon"
+                                  />
+                                </div>
+                              </td>
 
-                                <td data-field="id">{item.itemId}</td>
-                                <td data-field="name">{item.name}</td>
-                                <td data-field="price">₹ {item.unitPrice}</td>
-                                <td className="text-center">
-                                  <Link
-                                    to="#"
-                                    className="btn btn-outline-secondary btn-sm delete"
-                                    title="delete"
-                                    onClick={() => openModal(item.itemId)}
-                                  >
-                                    <i className="fa fa-trash"></i>
-                                  </Link>
-                                </td>
-                              </tr>
-                            ))
+                              <td data-field="id">{item.itemId}</td>
+                              <td data-field="name">{item.name}</td>
+                              <td data-field="price">₹ {item.unitPrice}</td>
+
+                              <td className="text-center">
+                                <Link
+                                  to="#"
+                                  className="btn btn-outline-secondary btn-sm edit"
+                                  title="edit"
+                                  onClick={() => openEditItemModal(item.itemId)}
+                                >
+                                  <i className="fa fa-edit"></i>
+                                </Link>
+                              </td>
+
+                              <td className="text-center">
+                                <Link
+                                  to="#"
+                                  className="btn btn-outline-secondary btn-sm delete"
+                                  title="delete"
+                                  onClick={() => openModal(item.itemId)}
+                                >
+                                  <i className="fa fa-trash"></i>
+                                </Link>
+                              </td>
+                            </tr>
+                          ))
                           : "No item in the service"}
                       </tbody>
                     </table>
@@ -368,7 +496,7 @@ const ServiceProvidingList = () => {
                       <th>Enter Name</th>
                       <th>Enter Price</th>
                       <th>Enter Icon</th>
-                      <th className="text-white">Actiion</th>
+                      <th className="text-white">Action</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -459,7 +587,7 @@ const ServiceProvidingList = () => {
         </Modal.Footer>
       </Modal>
 
-      <Modal show={showEditModal} onHide={() => setShowEditModal(false)}>
+      <Modal show={showEditModal} onHide={closeEditItemModal}>
         <Modal.Header>
           <Modal.Title>Edit Service</Modal.Title>
         </Modal.Header>
@@ -494,7 +622,7 @@ const ServiceProvidingList = () => {
             {editFormData.imgData && (
               <div className="mt-2">
                 <img
-                  src={`data:image/png;base64,${editFormData.imgData}`}
+                  src={`${editFormData.imgData}`}
                   alt="Service Icon"
                   style={{ width: "50px", height: "50px" }}
                 />
@@ -511,6 +639,60 @@ const ServiceProvidingList = () => {
           </Button>
         </Modal.Footer>
       </Modal>
+
+      <Modal show={showEditItemModal} onHide={() => setShowEditItemModal(false)}>
+        <Modal.Header>
+          <Modal.Title>Edit Item</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <div className="form-group">
+            <label>Item Name</label>
+            <input
+              type="text"
+              className="form-control"
+              name="itemName"
+              value={editForm.itemName}
+              onChange={handleEditItemChange}
+            />
+          </div>
+          <div className="form-group">
+            <label>Item Price </label>
+            <input
+              type="text"
+              className="form-control"
+              name="unitPrice"
+              value={editForm.unitPrice}
+              onChange={handleEditItemChange}
+            />
+          </div>
+          <div className="form-group">
+            <label>Item Icon</label>
+            <input
+              type="file"
+              className="form-control"
+              onChange={handleUpdateItemIcon}
+            />
+            {editForm.icon && (
+              <div className="mt-2">
+                <img
+                  src={`${editForm.icon}`}
+                  alt="Item Icon"
+                  style={{ width: "50px", height: "50px" }}
+                />
+              </div>
+            )}
+          </div>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => closeEditItemModal(false)}>
+            Cancel
+          </Button>
+          <Button variant="primary" onClick={handleSaveEditItem}>
+            Save Changes
+          </Button>
+        </Modal.Footer>
+      </Modal>
+
     </div>
   );
 };

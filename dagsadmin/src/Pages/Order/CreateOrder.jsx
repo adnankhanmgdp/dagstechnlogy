@@ -109,7 +109,6 @@ const CreateOrder = () => {
     >
       <div className="page-content">
         <div className="container-fluid">
-          <ToastContainer />
           <div className="row">
             <div className="col-12">
               <div className="page-title-box d-sm-flex align-items-center justify-content-between">

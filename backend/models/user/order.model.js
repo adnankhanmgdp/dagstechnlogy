@@ -99,7 +99,7 @@ const OrderSchema = new mongoose.Schema({
         type: String
     },
     logisticId: [{
-        type: String
+        type: String //0th index for pickup and 1st for delivery
     }],
     secretKey: {
         type: String,

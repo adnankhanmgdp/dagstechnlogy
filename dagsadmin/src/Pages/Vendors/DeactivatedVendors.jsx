@@ -7,7 +7,7 @@ const DeactivatedVendors = () => {
   const tableRef = useRef();
 
   const [vendors, setVendors] = useState([]);
-  console.log(vendors);
+  // console.log(vendors);
 
   const navigate = useNavigate();
   const token = localStorage.getItem("token");
@@ -39,7 +39,7 @@ const DeactivatedVendors = () => {
         );
         const data = await res.json();
         const inactiveVendors = data.vendors.filter(
-          (vendor) => vendor.status === "inactive",
+          (vendor) => vendor.verificationStatus === "inactive",
         );
 
         setVendors(inactiveVendors);
@@ -51,7 +51,7 @@ const DeactivatedVendors = () => {
   }, []);
 
   const handleViewProfile = (vendor) => {
-    navigate("/vendors/vendorProfile", {
+    navigate(`/vendors/vendorProfile/${vendor.vendorId}`, {
       state: vendor,
     });
   };
@@ -92,21 +92,29 @@ const DeactivatedVendors = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {vendors.map((vendor) => (
-                    <tr key={vendor.vendorId}>
-                      <td className="text-center">
-                        {vendor.vendorId ? vendor.vendorId : "---"}
+                  {vendors.length === 0 ? (
+                    <tr className="text-center">
+                      <td colSpan="5">
+                        <h5>No vendors found</h5>
                       </td>
-                      <td className="text-center">
-                        {vendor.name ? vendor.name : "---"}
-                      </td>
-                      <td className="text-center">
-                        {vendor.address ? vendor.address : "---"}
-                      </td>
-                      <td className="text-center">
-                        {vendor.orders.length ? vendor.orders.length : "----"}{" "}
-                      </td>
-                      {/* <td className="mt-4 text-center">
+                    </tr>
+                  ) : (
+
+                    vendors.map((vendor) => (
+                      <tr key={vendor.vendorId}>
+                        <td className="text-center">
+                          {vendor.vendorId ? vendor.vendorId : "---"}
+                        </td>
+                        <td className="text-center">
+                          {vendor.name ? vendor.name : "---"}
+                        </td>
+                        <td className="text-center">
+                          {vendor.address ? vendor.address : "---"}
+                        </td>
+                        <td className="text-center">
+                          {vendor.orders.length ? vendor.orders.length : "----"}{" "}
+                        </td>
+                        {/* <td className="mt-4 text-center">
                         <div>
                           <span
                             className="pl-3 pr-3 pb-2 pt-2 rounded-pill"
@@ -124,16 +132,18 @@ const DeactivatedVendors = () => {
                         </div>
                       </td> */}
 
-                      <td style={{ textAlign: "center", marginTop: "12px" }}>
-                        <button
-                          onClick={() => handleViewProfile(vendor)}
-                          className="btn btn-outline-secondary"
-                        >
-                          View profile
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
+                        <td style={{ textAlign: "center", marginTop: "12px" }}>
+                          <button
+                            onClick={() => handleViewProfile(vendor)}
+                            className="btn btn-outline-secondary"
+                          >
+                            View profile
+                          </button>
+                        </td>
+                      </tr>
+                    ))
+
+                  )}
                 </tbody>
               </table>
             </div>

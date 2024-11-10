@@ -6,7 +6,8 @@ const Logistic = require('../../models/logistic/delivery.model');
 const User = require('../../models/user/user.model');
 const Notification = require('../../models/user/notifications.model')
 const { sendOTP, generateOTP } = require('../../utils/admin/generateOTP');
-const bcrypt = require('bcryptjs')
+const bcrypt = require('bcryptjs');
+const mailSender = require('../../utils/admin/mailSender');
 
 exports.getLogisticDashboard = async (req, res) => {
     const logisticId = req.body.logisticId;
@@ -128,6 +129,7 @@ exports.fetchActiveOrders = async (req, res) => {
             orderId: { $in: orderIds },
             'orderStatus.status': { $ne: 'cancelled' }
         }).sort({ pickupDate: -1 });
+        console.log(orders)
         //will get all orders even repeated orders 
 
         // const activeOrders = orders.filter(order => {
@@ -154,18 +156,40 @@ exports.fetchActiveOrders = async (req, res) => {
         // });
 
         const activeOrdersOnPickup = orders.filter(order => {
-            const statusesToExclude = ["cleaning", "cancelled", "refunded"];
-            return !order.orderStatus.some(status => statusesToExclude.includes(status.status));
+            // Find the most recent status
+            const latestStatus = order.orderStatus[order.orderStatus.length - 1]?.status;
+            console.log("hi",latestStatus)
+            console.log(order.orderId)
+
+            // Check if the latest status is one of the desired statuses
+            return latestStatus === 'readyToPickup' || latestStatus === 'pickedUp';
         });
+
         const activeOrdersOnDelivery = orders.filter(order => {
-            const statusesToExclude = ["delivered", "cancelled", "refunded"];
-            return !order.orderStatus.some(status => statusesToExclude.includes(status.status));
+            // Find the most recent status
+            const latestStatus = order.orderStatus[order.orderStatus.length - 1]?.status;
+
+            // Check if the latest status is one of the desired statuses
+            return latestStatus === 'readyToDelivery' || latestStatus === 'outOfDelivery';
         });
+
+
+
+        // const activeOrdersOnPickup = orders.filter(order => {
+        //     const statusesToExclude = ["cleaning", "cancelled", "refunded"];
+        //     return !order.orderStatus.some(status => statusesToExclude.includes(status.status));
+        // });
+        // const activeOrdersOnDelivery = orders.filter(order => {
+        //     const statusesToExclude = ["delivered", "cancelled", "refunded"];
+        //     return !order.orderStatus.some(status => statusesToExclude.includes(status.status));
+        // });
 
         let activeOrders = [...activeOrdersOnPickup, ...activeOrdersOnDelivery];
 
         activeOrders = Array.from(new Set(activeOrders.map(order => order.id)))
             .map(id => activeOrders.find(order => order.id === id));
+
+        activeOrders.sort((a, b) => new Date(b.orderDate) - new Date(a.orderDate));
 
         return res.status(200).json({ activeOrders });
     } catch (error) {
@@ -190,19 +214,21 @@ exports.fetchPastOrders = async (req, res) => {
             orderDate: -1
         });
 
-        const pastOrdersOnPickup = orders.filter(order => {
-            const statusesToInclude = ["cleaning", "cancelled", "refunded"];
+        let pastOrders = orders.filter(order => {
+            const statusesToInclude = ["cleaning", "cancelled", "refunded", "delivered"];
             return order.orderStatus.some(status => statusesToInclude.includes(status.status));
         });
-        const pastOrdersOnDelivery = orders.filter(order => {
-            const statusesToInclude = ["delivered", "cancelled", "refunded"];
-            return order.orderStatus.some(status => statusesToInclude.includes(status.status));
-        });
+        // const pastOrdersOnDelivery = orders.filter(order => {
+        //     const statusesToInclude = [, "cancelled", "refunded"];
+        //     return order.orderStatus.some(status => statusesToInclude.includes(status.status));
+        // });
 
-        let pastOrders = [...pastOrdersOnPickup, ...pastOrdersOnDelivery];
+        // let pastOrders = [...pastOrdersOnPickup, ...pastOrdersOnDelivery];
 
         pastOrders = Array.from(new Set(pastOrders.map(order => order.id)))
-        .map(id => pastOrders.find(order => order.id === id));
+            .map(id => pastOrders.find(order => order.id === id));
+
+        pastOrders.sort((a, b) => new Date(b.orderDate) - new Date(a.orderDate));
 
         return res.status(200).json({ pastOrders });
     } catch (error) {
@@ -377,6 +403,22 @@ exports.confirmDelivery = async (req, res) => {
             notificationFor: "user"
         })
 
+        // if (user.email) {
+        //     const invoicePath = path.join(__dirname, `invoice_${order.orderId}.pdf`);
+        //     const invoiceData = await createInvoice(order); 
+        //     fs.writeFileSync(invoicePath, invoiceData, 'base64'); // Save the invoice locally
+
+
+        //     const invoiceUrl = `https://dagstechnology.in/invoices/invoice_${order.orderId}.pdf`;
+        //     const emailBody = invoiceEmailTemplate(user.name, invoiceUrl);
+
+        //     // Send the email with the invoice attachment
+        //     await mailSender(user.email, 'Order Delivered Successfully', emailBody, invoicePath);
+
+        //     // Remove the file after sending the email
+        //     fs.unlinkSync(invoicePath);
+        // }
+        
         return res.json({
             message: "Order is Delivered Successfully",
             order
@@ -410,6 +452,19 @@ exports.dashboard = async (req, res) => {
     const today = new Date(Date.now() + (5.5 * 60 * 60 * 1000)).toISOString();
     const yesterday = subDays(new Date(), 1); // Calculate yesterday's date
 
+    const start = new Date(Date.now() + (5.5 * 60 * 60 * 1000))
+    const end = new Date(Date.now() + (5.5 * 60 * 60 * 1000))
+    start.setUTCHours(0, 0, 0, 0);
+    // Set time to 23:59:59 UTC for the end date
+    end.setUTCHours(23, 59, 59, 999);
+
+    // Add 5 hours and 30 minutes to match your storage format
+    start.setHours(start.getHours() + 5);
+    start.setMinutes(start.getMinutes() + 30);
+
+    end.setHours(end.getHours() + 5);
+    end.setMinutes(end.getMinutes() + 30);
+
     try {
 
         //all total orders until now
@@ -435,7 +490,7 @@ exports.dashboard = async (req, res) => {
                     $and: [
                         { status: 'cleaning' },
                         { status: { $ne: 'cancelled' } },
-                        { time: { $gte: startOfDay(today), $lte: endOfDay(today) } }
+                        { time: { $gte: start, $lte: end } }
                     ]
                 }
             }
@@ -448,7 +503,7 @@ exports.dashboard = async (req, res) => {
                     $and: [
                         { status: 'delivered' },
                         { status: { $ne: 'cancelled' } },
-                        { time: { $gte: startOfDay(today), $lte: endOfDay(today) } }
+                        { time: { $gte: start, $lte: end } }
                     ]
                 }
             }
@@ -477,26 +532,25 @@ exports.dashboard = async (req, res) => {
             'logisticId.0': logisticId,
             'orderStatus': {
                 $elemMatch: {
-                    $and: [
-                        { status: 'readyToPickup' },
-                        { status: { $ne: 'cancelled' } },
-                        { status: { $ne: 'cleaning' } },
-                    ]
+                    status: 'readyToPickup'
                 }
-            }
+            },
+            'orderStatus.status': { $ne: 'cancelled' },
+            'orderStatus.status': { $ne: 'cleaning' }
         });
+
+
         const orderOnDelivery = await Order.find({
             'logisticId.1': logisticId,
             'orderStatus': {
                 $elemMatch: {
-                    $and: [
-                        { status: 'readyToDelivery' },
-                        { status: { $ne: 'cancelled' } },
-                        { status: { $ne: 'delivered' } },
-                    ]
+                    status: 'readyToDelivery'
                 }
-            }
+            },
+            'orderStatus.status': { $ne: 'cancelled' },
+            'orderStatus.status': { $ne: 'delivered' }
         });
+
 
         allOrdersOnPickup.forEach(order => {
             if (order.distance != null)
@@ -516,7 +570,7 @@ exports.dashboard = async (req, res) => {
             ordersToDelivered: orderOnDelivery.length,
             totalTodayOrdersDelivered: todayOrdersOnDeliveryCompleted.length,
             todaysEarning: totalAmount,
-            distance:Math.round(distance)
+            distance: Math.round(distance)
         });
     } catch (error) {
         console.log(error)

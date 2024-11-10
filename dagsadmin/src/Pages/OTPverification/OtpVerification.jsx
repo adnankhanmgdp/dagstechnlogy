@@ -1,5 +1,5 @@
 import React, { useRef, useState } from "react";
-import { useNavigate} from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { useDispatch, useSelector } from "react-redux";
 import { clearError } from "../../redux/UserSlice";
 
@@ -7,9 +7,9 @@ const OTPVerification = () => {
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
 
   const { phone } = useSelector((state) => state.phone)
-    const { email } = useSelector((state) => state.phone);
-  console.log("phone", phone, email)
-  
+  const { email } = useSelector((state) => state.phone);
+  // console.log("phone", phone, email)
+
   const token = localStorage.getItem("token");
 
   const navigate = useNavigate();
@@ -57,7 +57,7 @@ const OTPVerification = () => {
         }),
       });
       const data = await res.json();
-      console.log("data",data)
+      // console.log("data",data)
       if (res.ok) {
         localStorage.setItem("token", data.token)
         dispatch(clearError())
@@ -68,7 +68,7 @@ const OTPVerification = () => {
     }
   };
 
-  const resendCode = async() => {
+  const resendCode = async () => {
     try {
       const res = await fetch(`${process.env.REACT_APP_API_URL}/resendOTP`, {
         method: "POST",
@@ -81,7 +81,7 @@ const OTPVerification = () => {
         }),
       });
       const data = await res.json();
-      console.log("data",data);
+      // console.log("data",data);
     } catch (error) {
       console.log(error);
     }

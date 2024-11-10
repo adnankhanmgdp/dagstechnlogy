@@ -1,5 +1,5 @@
 import React, { useRef, useState } from "react";
-import { useDispatch,useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
 import { signInSuccess, passcodeFailure } from "../../redux/UserSlice";
 
@@ -7,12 +7,12 @@ const PasscodeVerification = () => {
 
   const dispatch = useDispatch();
   const { error } = useSelector((state) => state.user)
-  
-  const { phone, email } = useSelector((state) => state.phone);
-  console.log("email", email)
-  console.log("phone", phone)
 
-  const [otp, setOtp] = useState(["", "", "", "","",""]); // Initialize OTP state with empty array
+  const { phone, email } = useSelector((state) => state.phone);
+  // console.log("email", email)
+  // console.log("phone", phone)
+
+  const [otp, setOtp] = useState(["", "", "", "", "", ""]); // Initialize OTP state with empty array
   const inputRefs = [
     useRef(null),
     useRef(null),
@@ -58,7 +58,7 @@ const PasscodeVerification = () => {
         }),
       });
       const data = await res.json();
-      console.log("data", data);
+      // console.log("data", data);
       if (res.ok) {
         dispatch(signInSuccess(data))
         navigate("/");

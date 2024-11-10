@@ -71,7 +71,9 @@ exports.settleVendorAmount = async (req, res) => {
 
 exports.viewHistory = async (req, res) => {
     try {
-        const settlementHistory = await Settlement.find({});
+        const settlementHistory = await Settlement.find({}).sort({
+            date:-1
+        })
         let settledOrders = [];
 
         if (!settlementHistory.length) {
@@ -99,26 +101,33 @@ exports.viewHistory = async (req, res) => {
 
 exports.logisticPickupSettlement = async (req, res) => {
     try {
-        const pickupSettlements = await Order.aggregate([
-            { $unwind: '$logisticId' },
-            {
-                $match: {
-                    $and: [
-                        { settlementForLogisticsOnPickup: { $ne: 0 } },
-                        { settlementForLogisticsOnPickup: { $ne: null } }
-                    ]
-                }
-            },
-            {
-                $group: {
-                    _id: "$logisticId",
-                    totalSettlement: { $sum: "$settlementForLogisticsOnPickup" },
-                    orders: { $push: "$$ROOT" }
-                }
-            }
-        ]);
+        const orders = await Order.find({
+            logisticId: { $exists: true, $ne: [] }
+        });
 
-        res.status(200).json(pickupSettlements);
+        const filteredOrders = orders.filter(order => {
+            return order.logisticId[0] !== undefined && 
+                   order.settlementForLogisticsOnPickup !== 0 && 
+                   order.settlementForLogisticsOnPickup !== null;
+        });
+
+        const settlements = filteredOrders.reduce((acc, order) => {
+            const logisticId = order.logisticId[0];
+            if (!acc[logisticId]) {
+                acc[logisticId] = { totalSettlement: 0, orders: [] };
+            }
+            acc[logisticId].totalSettlement += order.settlementForLogisticsOnPickup;
+            acc[logisticId].orders.push(order);
+            return acc;
+        }, {});
+
+        const result = Object.keys(settlements).map(logisticId => ({
+            _id: logisticId,
+            totalSettlement: settlements[logisticId].totalSettlement,
+            orders: settlements[logisticId].orders
+        }));
+
+        res.status(200).json(result);
     } catch (error) {
         res.status(500).json({
             error: 'An error occurred while fetching the pickup logistic settlements',
@@ -129,35 +138,44 @@ exports.logisticPickupSettlement = async (req, res) => {
 
 exports.logisticDeliverySettlement = async (req, res) => {
     try {
-        const pickupSettlements = await Order.aggregate([
-            { $unwind: '$logisticId' },
-            {
-                $match: {
-                    $and: [
-                        { settlementForLogisticsOnDelivery: { $ne: 0 } },
-                        { settlementForLogisticsOnDelivery: { $ne: null } }
-                    ]
-                }
-            },
-            {
-                $group: {
-                    _id: "$logisticId",
-                    totalSettlement: { $sum: "$settlementForLogisticsOnDelivery" },
-                    orders: { $push: "$$ROOT" }
-                }
-            }
-        ]);
+        const orders = await Order.find({
+            logisticId: { $exists: true, $ne: [] }
+        });
 
-        res.status(200).json(pickupSettlements);
+        const filteredOrders = orders.filter(order => {
+            return order.logisticId[1] !== undefined && 
+                   order.settlementForLogisticsOnDelivery !== 0 && 
+                   order.settlementForLogisticsOnDelivery !== null;
+        });
+
+        const settlements = filteredOrders.reduce((acc, order) => {
+            const logisticId = order.logisticId[1];
+            if (!acc[logisticId]) {
+                acc[logisticId] = { totalSettlement: 0, orders: [] };
+            }
+            acc[logisticId].totalSettlement += order.settlementForLogisticsOnDelivery;
+            acc[logisticId].orders.push(order);
+            return acc;
+        }, {});
+
+        const result = Object.keys(settlements).map(logisticId => ({
+            _id: logisticId,
+            totalSettlement: settlements[logisticId].totalSettlement,
+            orders: settlements[logisticId].orders
+        }));
+
+        res.status(200).json(result);
     } catch (error) {
         res.status(500).json({
-            error: 'An error occurred while fetching the pickup logistic settlements',
+            error: 'An error occurred while fetching the delivery logistic settlements',
             message: error.message
         });
     }
 };
 
+
 exports.settlePickedAmount = async (req, res) => {
+    console.log(req.body)
     try {
         const { _id, orders, totalSettlement } = req.body;
         const orderIds = orders.map(order => order._id);

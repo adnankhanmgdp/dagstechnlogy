@@ -7,16 +7,16 @@ const ShippingPolicy = () => {
   const [answer, setAnswer] = useState("");
   const [privacyPolicy, setPrivacyPolicy] = useState("");
 
-  console.log("cleaned",answer)
+  // console.log("cleaned",answer)
 
   const [showEditor, setShowEditor] = useState(false);
 
   const token = localStorage.getItem("token");
 
-const handleEditorChange = (content) => {
- const cleanedContent = content.trim().replace(/\s+/g, " ");
-  setAnswer(cleanedContent);
-};
+  const handleEditorChange = (content) => {
+    const cleanedContent = content.trim().replace(/\s+/g, " ");
+    setAnswer(cleanedContent);
+  };
 
   const handleSubmit = async (e) => {
     setShowEditor(!showEditor);
@@ -64,7 +64,6 @@ const handleEditorChange = (content) => {
 
   return (
     <div className="main-content" style={styles.mainContent}>
-      <ToastContainer />
       <div className="page-content" style={styles.pageContent}>
         {showEditor ? (
           <div className="container-fluid" style={styles.formContainer}>

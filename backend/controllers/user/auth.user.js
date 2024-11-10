@@ -9,48 +9,85 @@ const Notification = require('../../models/user/notifications.model')
 exports.register = async (req, res) => {
     const { phone, name } = req.body;
     const ip = req.ip;
-    const address = []
-    const email = ""
-    const profilePic = ""
+    const address = [];
+    const email = "";
+    const profilePic = "";
+
     if (!phone) {
         return res.status(400).json({
             message: "No phone number provided"
-        })
+        });
     }
+
+    // Check if user with the same phone exists
     const checkUserPresent = await User.findOne({ phone });
 
     if (checkUserPresent) {
-        return res.status(401).json({
-            success: false,
-            message: "User already exists"
-        })
-    }
-    const phoneOTP = generateOTP();
-    const hashedOTP = await bcrypt.hashSync(phoneOTP, 10);  
+        if (checkUserPresent.status === false) {
+            // User exists with status false, delete and create a new one
+            await User.deleteOne({ phone });
 
-    try {
-        const user = await User.create({ phone, name, OTP: hashedOTP, userId: phone, address, email, profilePic });
-        console.log("user otp", phoneOTP)
-        sendOTP(phoneOTP, phone);
-        const currentTime = new Date(Date.now() + (330 * 60000)).toISOString();
-        user.lastLogin = currentTime
-        if (!user.ip.includes(ip)) {
-            user.ip.push(ip);
-            await user.save();
+            const phoneOTP = generateOTP();
+            const hashedOTP = await bcrypt.hashSync(phoneOTP, 10);
+
+            try {
+                const user = await User.create({ phone, name, OTP: hashedOTP, userId: phone, address, email, profilePic });
+                console.log("user otp", phoneOTP);
+                sendOTP(phoneOTP, phone);
+                const currentTime = new Date(Date.now() + (330 * 60000)).toISOString();
+                user.lastLogin = currentTime;
+                if (!user.ip.includes(ip)) {
+                    user.ip.push(ip);
+                    await user.save();
+                }
+                return res.status(200).json({
+                    success: true,
+                    message: "OTP sent successfully",
+                    user
+                });
+            } catch (error) {
+                return res.status(500).json({
+                    success: false,
+                    message: "Failed to create user",
+                    error: error.message
+                });
+            }
+        } else {
+            // User exists and is active
+            return res.status(401).json({
+                success: false,
+                message: "User already exists"
+            });
         }
-        return res.status(200).json({
-            success: true,
-            message: "OTP sent successfully",
-            user
-        });
-    } catch (error) {
-        return res.status(500).json({
-            success: false,
-            message: "Failed to create user",
-            error: error.message
-        });
+    } else {
+        // No user exists with the given phone
+        const phoneOTP = generateOTP();
+        const hashedOTP = await bcrypt.hashSync(phoneOTP, 10);
+
+        try {
+            const user = await User.create({ phone, name, OTP: hashedOTP, userId: phone, address, email, profilePic });
+            console.log("user otp", phoneOTP);
+            sendOTP(phoneOTP, phone);
+            const currentTime = new Date(Date.now() + (330 * 60000)).toISOString();
+            user.lastLogin = currentTime;
+            if (!user.ip.includes(ip)) {
+                user.ip.push(ip);
+                await user.save();
+            }
+            return res.status(200).json({
+                success: true,
+                message: "OTP sent successfully",
+                user
+            });
+        } catch (error) {
+            return res.status(500).json({
+                success: false,
+                message: "Failed to create user",
+                error: error.message
+            });
+        }
     }
-}
+};
 
 exports.verifyOTP = async (req, res) => {
     const { phone, otp } = req.body;
@@ -77,7 +114,7 @@ exports.verifyOTP = async (req, res) => {
         const currentTime = new Date(Date.now() + (330 * 60000));
         const timeDiff = Math.abs(currentTime - lastLoginTime);
         const minutesDiff = Math.ceil(timeDiff / (1000 * 60));
-        console.log(minutesDiff)
+        // console.log(minutesDiff)
         if (minutesDiff > 5) {
             return res
                 .status(401)
@@ -87,9 +124,19 @@ exports.verifyOTP = async (req, res) => {
             { phone: user.phone, id: user._id, name: user.name },
             process.env.JWT_SECRET,
             {
-                expiresIn: "30m",
+                expiresIn: "1d",
             }
         );
+        if (user.status === false) {
+            await Notification.create({
+                id: user.phone,
+                title: "Welcome to DAGS! Now you can clean your laundry effortlessly.",
+                subtitle: "Enjoy our quick and convenient laundry services.",
+                notificationFor: "user"
+            });
+        }
+        user.status = true;
+        await user.save();
         return res.status(200).json({
             success: true,
             message: "OTP verified successfully",
@@ -142,6 +189,50 @@ exports.login = async (req, res) => {
     }
 }
 
+exports.resendOTP = async (req, res) => {
+    const { phone } = req.body;
+
+    if (!phone) {
+        return res.status(400).json({
+            message: "No phone number provided"
+        });
+    }
+
+    try {
+        // Check if the user exists and is inactive
+        const user = await User.findOne({ phone });
+
+        if (!user) {
+            return res.status(404).json({
+                success: false,
+                message: "User not found"
+            });
+        }
+
+        // Generate a new OTP and hash it
+        const newOTP = generateOTP();
+        const hashedOTP = await bcrypt.hashSync(newOTP, 10);
+
+        // Update the user's OTP in the database
+        user.OTP = hashedOTP;
+        await user.save();
+
+        // Send the new OTP to the user
+        sendOTP(newOTP, phone);
+
+        return res.status(200).json({
+            success: true,
+            message: "New OTP sent successfully"
+        });
+    } catch (error) {
+        return res.status(500).json({
+            success: false,
+            message: "Failed to resend OTP",
+            error: error.message
+        });
+    }
+};
+
 exports.addAddress = async (req, res) => {
     const { phone, latitude, longitude, address, pincode } = req.body;
     // console.log(latitude, longitude)
@@ -156,7 +247,7 @@ exports.addAddress = async (req, res) => {
             user.geoCoordinates.longitude = longitude;
         }
         if (pincode) {
-            user.pincode = pincode;  
+            user.pincode = pincode;
         }
         if (address) {
             user.address.push(address);
@@ -215,11 +306,29 @@ exports.fetchAddress = async (req, res) => {
 exports.updateUser = async (req, res) => {
     const { phone, profilePic, ...updates } = req.body;
     try {
+
+        const existingUser = await User.findOne({ phone: phone });
+        if (!existingUser) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        const email = req.body.email;
+
+        // Check if email is provided and exists in the database
+        if (email) {
+            const emailExists = await User.findOne({ email: email });
+            if (emailExists && emailExists.phone != phone) {
+                return res.status(400).json({ message: 'Email already exists' });
+            }
+        }
+        
         const imagePath = path.join(process.env.FILE_SAVE_PATH, `${phone}.jpg`);
         if (profilePic) {
             fs.writeFileSync(imagePath, profilePic, 'base64');
-            updates.profile_pic_url = imagePath;
+            const document = `${process.env.UPLOAD_URL}` + imagePath.slice(5);
+            updates.profilePic = document;
         }
+        
         const updatedUser = await User.findOneAndUpdate(
             { phone: phone },
             updates,
@@ -233,6 +342,7 @@ exports.updateUser = async (req, res) => {
             updatedUser
         });
     } catch (err) {
+        console.log(err)
         res.status(400).json({
             message: "Internal Server Error",
             error: err.message

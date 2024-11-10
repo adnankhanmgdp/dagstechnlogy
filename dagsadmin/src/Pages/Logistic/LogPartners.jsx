@@ -30,15 +30,14 @@ const LogPartners = () => {
       }
     }
     fetchData()
-  },[])
+  }, [])
 
   const navigate = useNavigate();
 
   const handleSubmitData = (logistic) => {
-    navigate("/logistic/partnerProfile", {
-      state: 
+    navigate(`/logistic/partnerProfile/${logistic.logisticId}`, {
+      state:
         logistic
-      
     })
   }
 
@@ -65,48 +64,51 @@ const LogPartners = () => {
           </div>
           {/* <!-- end page title --> */}
           {/* <!--end row--> */}
-
-          <div class="row" id="partner-list">
-            
-            {logistics.map((logistic) => (
-              <div class="col-xl-4 mt-4 col-md-6">
-                <div class="card">
-                  <div class="card-body">
-                    <div class="d-flex align-start mb-3"></div>
-                    <div class="text-center mb-3">
-                      <img
-                        src="https://tse2.mm.bing.net/th?id=OIP.6UhgwprABi3-dz8Qs85FvwHaHa&pid=Api&P=0&h=180"a
-                        alt=""
-                        class="avatar-sm rounded-circle"
-                      />
-                      <h6 class="font-size-15 mt-3 mb-1">{logistic.name}</h6>
-                      <p class="mb-0 text-muted font-size-13 badge">
-                        Location: {logistic.address}
-                      </p>
-                    </div>
-                    <div className="mb-2">
-                      <div className="d-flex justify-content-center align-items-center">
-                        <i class="bx bx-envelope"></i>
-                        <Link className="pl-2">{logistic.email}</Link>
+          <div className="row" id="partner-list">
+            {logistics.length > 0 ? (
+              logistics.map((logistic) => (
+                <div className="col-xl-4 mt-4 col-md-6" key={logistic.logisticId}>
+                  <div className="card">
+                    <div className="card-body">
+                      <div className="d-flex align-start mb-3"></div>
+                      <div className="text-center mb-3">
+                        <img
+                          src="https://tse2.mm.bing.net/th?id=OIP.6UhgwprABi3-dz8Qs85FvwHaHa&pid=Api&P=0&h=180"
+                          alt=""
+                          className="avatar-sm rounded-circle"
+                        />
+                        <h6 className="font-size-15 mt-3 mb-1">{logistic.name}</h6>
+                        <p className="mb-0 text-muted font-size-13 badge">
+                          Location: {logistic.address ? logistic.address : "N/A"}
+                        </p>
                       </div>
-                      <div className="d-flex justify-content-center align-items-center">
-                        <i class="bx bx-phone"></i>
-                        <Link className="pl-2">{logistic.phone}</Link>
+                      <div className="mb-2">
+                        <div className="d-flex justify-content-center align-items-center">
+                          <i className="bx bx-envelope"></i>
+                          <Link className="pl-2">{logistic.email}</Link>
+                        </div>
+                        <div className="d-flex justify-content-center align-items-center">
+                          <i className="bx bx-phone"></i>
+                          <Link className="pl-2">{logistic.phone}</Link>
+                        </div>
                       </div>
-                    </div>
-
-                    <div class="mt-4 btnBack pt-1 pb-1">
-                      <button
-                        className="btnBack border-0"
-                        onClick={() => handleSubmitData(logistic)}
-                      >
-                        View Profile
-                      </button>
+                      <div className="mt-4 btnBack pt-1 pb-1">
+                        <button
+                          className="btnBack border-0"
+                          onClick={() => handleSubmitData(logistic)}
+                        >
+                          View Profile
+                        </button>
+                      </div>
                     </div>
                   </div>
                 </div>
+              ))
+            ) : (
+              <div className="col-12 text-center">
+                <p>No data found</p>
               </div>
-            ))}
+            )}
           </div>
 
           {/* <!-- end row --> */}

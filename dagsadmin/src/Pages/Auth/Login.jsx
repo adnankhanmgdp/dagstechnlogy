@@ -96,7 +96,6 @@ const Login = () => {
       className="d-flex align-items-center justify-content-center vh-100"
       style={{ backgroundColor: "#F8F8FB" }}
     >
-      <ToastContainer />
       <div class="account-pages">
         <div style={{ paddingTop: "15vh" }} class="container">
           <div class="d-flex row justify-content-center">
@@ -125,15 +124,15 @@ const Login = () => {
                   </div>
                 </div>
                 <div class="card-body pt-0">
+
                   <div class="auth-logo">
-                    <a href="index.html" class="auth-logo-light">
-                      <div class="avatar-md profile-user-wid mb-4">
-                        <span class="avatar-title rounded-circle bg-light">
-                          <img src="/assets/Dags.jpg" alt="" height="17" />
-                        </span>
-                      </div>
-                    </a>
+                    <div class="avatar-md profile-user-wid mb-4">
+                      <span class="avatar-title rounded-circle bg-light">
+                        <img src="/assets/Dags.jpg" alt="" height="17" />
+                      </span>
+                    </div>
                   </div>
+
                   <div class="p-2">
                     <form class="form-horizontal" action="index.html">
                       <div class="mb-3">

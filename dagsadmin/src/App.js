@@ -60,15 +60,14 @@ import Coupon from "./Pages/Coupon/Coupon";
 import EditCoupon from "./Pages/Coupon/EditCoupon";
 import CreateCoupon from "./Pages/Coupon/CreateCoupon";
 import InactiveCoupon from "./Pages/Coupon/InactiveCoupon";
+import Carousel from "./Pages/Carousel/Carousel";
+import CreateCrousel from "./Pages/Carousel/CreateCrousel";
+import './consoleOverrides';
+import DeactivatedLogistic from "./Pages/Logistic/DeactivatedPartners";
 
 const App = () => {
 
   const { currentUser } = useSelector((state) => state.user);
-  console.log(currentUser);
-
-
-  // const currentUser = true;
-
   const [sidebarVisible, setSidebarVisible] = useState(false);
 
   const toggleSidebar = () => {
@@ -100,7 +99,7 @@ const App = () => {
 
                   <Route path="/users/allUsers" element={<AllUsers />} />
                   <Route path="/users/createUser" element={<CreateUser />} />
-                  <Route path="/users/UserProfile" element={<UserProfile />} />
+                  <Route path="/users/UserProfile/:phone" element={<UserProfile />} />
 
                   {/* orders routes */}
 
@@ -115,7 +114,7 @@ const App = () => {
                     element={<CancelledOrders />}
                   />
 
-                  <Route path="/orders/orderDetails" element={<OrderDetails />} />
+                  <Route path="/orders/orderDetails/:id" element={<OrderDetails />} />
 
                   {/* invoice routes */}
 
@@ -124,7 +123,7 @@ const App = () => {
                     element={<InvoiceList />}
                   />
 
-                  <Route path="/invoice/invoiceDetail" element={<InvoiceDetails />} />
+                  <Route path="/invoice/invoiceDetail/:id" element={<InvoiceDetails />} />
 
                   {/* vendors Routes*/}
 
@@ -138,8 +137,8 @@ const App = () => {
                     element={<VenderCreation />}
                   />
                   <Route path="/vendors/ApproveVendors" element={<Approve />} />
-                  <Route path="/vendors/vendorProfile" element={<VendorProfile />} />
-                  <Route path="/vendors/approveVendorProfile" element={<ApproveVendor />} />
+                  <Route path="/vendors/vendorProfile/:id" element={<VendorProfile />} />
+                  <Route path="/vendors/approveVendorProfile/:id" element={<ApproveVendor />} />
                   <Route path="/vendors/deactivatedVendors" element={<DeactivatedVendors />} />
 
                   {/* Payments Routes */}
@@ -183,7 +182,11 @@ const App = () => {
                     element={<ApprovePartner />}
                   />
                   <Route
-                    path="/logistic/partnerProfile"
+                    path="/logistic/deactivatedLogistic"
+                    element={<DeactivatedLogistic />}
+                  />
+                  <Route
+                    path="/logistic/partnerProfile/:id"
                     element={<PartnerProfile />}
                   />
                   <Route
@@ -193,10 +196,10 @@ const App = () => {
 
                   {/* categories */}
 
-                  <Route
+                  {/* <Route
                     path="/categories/allServices"
                     element={<AllServices />}
-                  />
+                  /> */}
                   <Route
                     path="/categories/createSubServices"
                     element={<CreateSubServices />}
@@ -230,6 +233,12 @@ const App = () => {
                   <Route path="/coupon/editCoupon/:id" element={<EditCoupon />} />
                   <Route path="/coupon/createCoupon" element={<CreateCoupon />} />
                   <Route path="/coupon/inactiveCoupons" element={<InactiveCoupon />} />
+
+                  {/* Coupon */}
+
+                  <Route path="/carousel/allCarousel" element={<Carousel />} />
+                  {/* <Route path="/coupon/editCoupon/:id" element={<EditCoupon />} /> */}
+                  <Route path="/carousel/createCarousel" element={<CreateCrousel />} />
                 </Routes>
               </div>
             </div>

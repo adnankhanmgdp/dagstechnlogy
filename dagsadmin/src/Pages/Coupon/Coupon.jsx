@@ -85,7 +85,6 @@ const Coupon = () => {
 
   return (
     <div className="main-content">
-      <ToastContainer />
       <div className="page-content">
         <div className="container-fluid">
           <div className="row">

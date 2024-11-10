@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
@@ -12,14 +12,15 @@ const ServiceProvidingList = () => {
   const [newItem, setNewItem] = useState({});
   const [options, setOptions] = useState([]);
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate()
 
   // console.log("binary data: " + binaryData);
 
-  console.log("options: " + options);
+  // console.log("options: " + options);
   const [formData, setFormData] = useState({});
-  
-  const[serviceForm, setServiceForm] = useState({});
-  console.log(serviceForm,"serviceForm");
+
+  const [serviceForm, setServiceForm] = useState({});
+  // console.log(serviceForm,"serviceForm");
 
   const handleEdit = (id) => {
     setEditableRowId(id);
@@ -29,7 +30,7 @@ const ServiceProvidingList = () => {
     }));
   };
 
-    const token = localStorage.getItem("token");
+  const token = localStorage.getItem("token");
 
   const handleSave = (id) => {
     setEditableRowId(null);
@@ -50,51 +51,51 @@ const ServiceProvidingList = () => {
     setInitialData((prevData) => prevData.filter((item) => item.id !== id));
   };
 
-const handleAddItem = () => {
-  const id = initialData.length + 1;
-  setInitialData([
-    ...initialData,
-    { id, name: newItem.name, price: newItem.price },
-  ]);
+  const handleAddItem = () => {
+    const id = initialData.length + 1;
+    setInitialData([
+      ...initialData,
+      { id, name: newItem.name, price: newItem.price },
+    ]);
 
-  const handleAddItem = async () => {
-    try {
-      const { itemName, unitPrice } = formData; // Destructure only the required properties
-      console.log("datatatta",itemName,unitPrice);
-      const res = await fetch(
-        `${process.env.REACT_APP_API_URL}/addItem`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
+    const handleAddItem = async () => {
+      try {
+        const { itemName, unitPrice } = formData; // Destructure only the required properties
+        // console.log("datatatta",itemName,unitPrice);
+        const res = await fetch(
+          `${process.env.REACT_APP_API_URL}/addItem`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify(formData),
           },
-          body: JSON.stringify(formData),
-        },
-      );
+        );
 
-      const data = await res.json();
-      if (res.ok) {
-        // console.log("item", data);
-        // Clear the form data after successful submission
+        const data = await res.json();
+        if (res.ok) {
+          // console.log("item", data);
+          // Clear the form data after successful submission
+        }
+      } catch (error) {
+        // console.log(error);
       }
-    } catch (error) {
-      // console.log(error);
+    };
+    handleAddItem();
+
+
+    setNewItem({});
+    setEditedRows((prev) => {
+      delete prev[id];
+      return { ...prev };
+    });
+    if (lastInputRef.current) {
+      lastInputRef.current.focus();
     }
   };
-  handleAddItem();
-
-
-  setNewItem({});
-  setEditedRows((prev) => {
-    delete prev[id];
-    return { ...prev };
-  });
-  if (lastInputRef.current) {
-    lastInputRef.current.focus();
-  }
-};
-;
+  ;
 
   const handleChange = (e, id, field) => {
     const { value } = e.target;
@@ -124,8 +125,8 @@ const handleAddItem = () => {
         const data = await res.json();
         if (res.ok) {
           // console.log("dtadd",data)
-           setOptions(data.service);
-           setLoading(false);
+          setOptions(data.service);
+          setLoading(false);
         }
       } catch (error) {
         // console.log(error);
@@ -133,67 +134,65 @@ const handleAddItem = () => {
     };
 
     getServices();
-  
+
   }, [])
 
 
- const handleSubmit = async (e) => {
-   e.preventDefault();
+  const handleSubmit = async (e) => {
+    e.preventDefault();
 
-  //  console.log("serviceform",serviceForm)
+    try {
+      const res = await fetch(`${process.env.REACT_APP_API_URL}/addService`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(serviceForm), // Use FormData object as the body
+      });
 
-   try {
-     const res = await fetch(`${process.env.REACT_APP_API_URL}/addService`, {
-       method: "POST",
-       headers: {
-         "Content-Type": "application/json",
-         Authorization: `Bearer ${token}`,
-       },
-       body: JSON.stringify(serviceForm), // Use FormData object as the body
-     });
-
-     const data = await res.json();
-     if (res.ok) {
-       toast.success(`${data.serviceName} added successfully to the service`);
-      //  console.log(data);
-     } else {
-       toast.error("Error adding service");
-      //  console.log(data);
-     }
-   } catch (error) {
-     toast.warning(error.message);
-    //  console.log(error);
-   }
- };
+      const data = await res.json();
+      if (res.ok) {
+        toast.success(`${data.serviceName} added successfully to the service`);
+        navigate('/categories/ManageSubServices')
+      } else {
+        toast.error("Error adding service");
+        //  console.log(data);
+      }
+    } catch (error) {
+      toast.warning(error.message);
+      //  console.log(error);
+    }
+  };
 
 
   const handleServiceSelect = (e) => {
     // console.log(e.target.value);
-    setFormData({...formData,serviceId: e.target.value});
+    setFormData({ ...formData, serviceId: e.target.value });
   }
 
   const updateServiceData = (e) => {
-    setServiceForm({...serviceForm, [e.target.id]:e.target.value})
+    setServiceForm({ ...serviceForm, [e.target.id]: e.target.value })
   }
 
-const serviceImageUpdation = (event) => {
-  const file = event.target.files[0];
+  const serviceImageUpdation = (event) => {
+    const file = event.target.files[0];
 
-  if (!file) {
-    return;
-  } else {
-    
-    const reader = new FileReader();
-  
-    reader.onloadend = () => {
-      const base64String = reader.result.split(",")[1];
-      setServiceForm((prevData) => ({ ...prevData, imgData: base64String }));
-    };
-  
-    reader.readAsDataURL(file);
-  }
+    if (!file) {
+      return;
+    } else {
 
-};
+      const reader = new FileReader();
+
+      reader.onloadend = () => {
+        const base64String = reader.result.split(",")[1];
+        setServiceForm((prevData) => ({ ...prevData, imgData: base64String }));
+      };
+
+      reader.readAsDataURL(file);
+    }
+
+  };
 
 
   return (
@@ -201,7 +200,6 @@ const serviceImageUpdation = (event) => {
       className="main-content"
       style={{ background: "#F8F8FB", minHeight: "100vh" }}
     >
-      <ToastContainer />
       <div className="page-content">
         <div className="container-fluid">
           <div className="row">
@@ -213,7 +211,7 @@ const serviceImageUpdation = (event) => {
                     <li className="breadcrumb-item">
                       <Link to="/tables">Categories</Link>
                     </li>
-                    <li className="breadcrumb-item active">Create Subservices</li>
+                    <li className="breadcrumb-item active">Create Services</li>
                   </ol>
                 </div>
               </div>
@@ -274,7 +272,7 @@ const serviceImageUpdation = (event) => {
             </div>
           </div>
 
-          <div className="row mt-4">
+          {/* <div className="row mt-4">
             <div className="col-12">
               <div className="card">
                 <div className="card-body">
@@ -445,7 +443,7 @@ const serviceImageUpdation = (event) => {
                 </div>
               </div>
             </div>
-          </div>
+          </div> */}
         </div>
       </div>
     </div>

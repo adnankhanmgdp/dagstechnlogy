@@ -18,7 +18,8 @@ const {
     updateLogistic,
     createLogistic,
     fetchlogisticOrders,
-    deleteUnapprovedLogistic
+    deleteUnapprovedLogistic,
+    Logistic
 } = require('../controllers/admin/logistic.admin')
 
 const {
@@ -47,7 +48,8 @@ const {
     fetchItem,
     deleteItem,
     deleteService,
-    getServiceDetails
+    getServiceDetails,
+    updateItem
 } = require("../controllers/admin/service.admin")
 
 const {
@@ -66,7 +68,8 @@ const {
     editVendor,
     createvendor,
     fetchVendorOrders,
-    deleteUnapprovedVendor
+    deleteUnapprovedVendor,
+    Vendor
 } = require("../controllers/admin/vendor.admin")
 
 const {
@@ -102,6 +105,7 @@ const { vendorFeedback } = require("../controllers/admin/feedback.admin")
 const { getTimeSlots, createTimeSlot, deleteTimeSlot } = require("../controllers/admin/timeSlot.admin")
 const { createCoupon, fetchCoupon, editCoupon, deleteCoupon, coupon } = require("../controllers/admin/coupon.admin")
 const { fetchCarousel, deleteCarousel, createCarousel } = require("../controllers/admin/carousel.admin")
+const { formSumbit, newsletter } = require("../controllers/admin/landingpage.admin")
 
 //auth
 router.post("/credintials", logIP, credentials)
@@ -120,6 +124,7 @@ router.post("/updateLogistic", auth, logIP, updateLogistic)
 router.post("/createLogistic", auth, logIP, createLogistic)
 router.post("/logisticOrders", fetchlogisticOrders)
 router.post("/deleteUnapprovedLogistic", auth, logIP, deleteUnapprovedLogistic)
+router.get("/logistic/:id", auth, logIP, Logistic)
 
 //user
 router.get("/fetchUsers", auth, logIP, fetchUsers)
@@ -137,17 +142,18 @@ router.post("/editVendor", auth, logIP, editVendor)
 router.post("/createVendor", auth, logIP, createvendor)
 router.post("/vendorOrders", auth, logIP, fetchVendorOrders)
 router.post("/deleteUnapprovedVendor", auth, logIP, deleteUnapprovedVendor)
+router.get("/vendor/:id", auth, logIP, Vendor)
 
 // payments
 // router.get('/getPayments', getPayments)
 
 // bank
-router.post("/createBankDetails", auth, logIP, createBankDetails)
+router.post("/bank", auth, logIP, createBankDetails)
 router.post("/fetchBankDetails", auth, logIP, fetchBankDetails)
 
 //orders
 router.get("/fetchOrders", auth, logIP, viewOrders)
-router.get("/getOrder", auth, logIP, getOrder)
+router.post("/getOrder", auth, logIP, getOrder)
 router.put("/updateOrder", auth, logIP, updateOrder)
 router.get("/getCancelledOrders", auth, logIP, getCancelledOrders)
 router.post("/createOrder", auth, logIP, createOrder)
@@ -170,7 +176,9 @@ router.post('/addItem', auth, logIP, addItemToService)
 router.post('/updateService', auth, logIP, editService)
 router.post('/deleteItem', auth, logIP, deleteItem)
 router.post('/deleteService', auth, logIP, deleteService)
-router.post('/editItemInService', auth, logIP, editItemInService)
+router.post('/editItem', auth, logIP, editItemInService)
+router.put('/item', auth, logIP, updateItem)
+router.post('/item', auth, logIP, fetchItem)
 
 //settlement
 router.get("/vendorSettlement", auth, logIP, vendorSettlement)
@@ -193,6 +201,7 @@ router.put("/minAmount", auth, logIP, updateMinAmount)
 router.put("/platform", auth, logIP, updatePlatformFee)
 
 //feedback
+router.post("/fetchFeedback", auth, logIP, vendorFeedback)
 
 //timeSlot
 router.post("/createTimeSlot", auth, logIP, createTimeSlot)
@@ -211,5 +220,8 @@ router.get("/carousel", auth, logIP, fetchCarousel)
 router.post("/carousel", auth, logIP, createCarousel)
 router.delete("/carousel/:id", auth, logIP, deleteCarousel)
 
+//landing page
+router.post("/formSubmit", formSumbit)
+router.post("/newsletter", newsletter)
 
 module.exports = { adminRoutes: router }; 

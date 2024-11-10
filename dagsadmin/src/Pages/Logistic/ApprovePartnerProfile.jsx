@@ -1,4 +1,4 @@
-import React, { useRef } from "react";
+import React, { useRef, useState } from "react";
 import "datatables.net-bs4";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { Modal } from "bootstrap";
@@ -8,19 +8,24 @@ import "react-toastify/dist/ReactToastify.css";
 
 const ApprovePartnerProfile = () => {
   const modalRef = useRef();
+  const [showModal, setShowModal] = useState(false);
 
   const navigate = useNavigate()
 
   const location = useLocation();
   const logistic = location.state?.logistic;
-  console.log(logistic)
+  // console.log(logistic)
 
   // console.log("vendor",logistic);
 
+  const handleShow = () => setShowModal(true);
+  const handleClose = () => setShowModal(false);
+
   const handleApprove = () => {
     // Show the modal when Approve button is clicked
-    const modal = new Modal(modalRef.current);
-    modal.show();
+    // const modal = new Modal(modalRef.current);
+    // modal.show();
+    handleShow();
   };
   const token = localStorage.getItem("token");
 
@@ -44,6 +49,7 @@ const ApprovePartnerProfile = () => {
       const data = await res.json();
       if (res.ok) {
         // console.log(data);
+        toast.success("Logistic approved");
         navigate("/logistic/approvePartner");
       }
     } catch (error) {
@@ -82,7 +88,6 @@ const ApprovePartnerProfile = () => {
       className="main-content"
       style={{ backgroundColor: "#F6F6F9", minHeight: "100vh" }}
     >
-      <ToastContainer />
       <div className="page-content">
         <div className="container-fluid">
           <div className="row ">
@@ -92,7 +97,11 @@ const ApprovePartnerProfile = () => {
                   <div className="row">
                     <div className="mx-auto mt-3">
                       <img
-                        src="https://tse2.mm.bing.net/th?id=OIP.6UhgwprABi3-dz8Qs85FvwHaHa&pid=Api&P=0&h=180"
+                        src={
+                          logistic?.profilePic
+                            ? logistic?.profilePic
+                            : "https://tse3.mm.bing.net/th?id=OIP.K4jXSK4XQahOLPEliCtvlwHaHa&pid=Api&P=0&h=180"
+                        }
                         className="avatarCustom"
                         alt="user's img"
                       />
@@ -184,7 +193,7 @@ const ApprovePartnerProfile = () => {
                   </h4>
                   <div className="mt-4 ml-3 row">
 
-                  <div className="text-center col-6 ">
+                    <div className="text-center col-6 ">
                       <img
                         className="img-responsive object-contain w-50"
                         src={
@@ -231,49 +240,42 @@ const ApprovePartnerProfile = () => {
           </div>
         </div>
       </div>
-      {/* Modal for confirmation */}
-      <div
-        ref={modalRef}
-        className="modal fade"
-        tabindex="-1"
-        aria-labelledby="confirmModalLabel"
-        aria-hidden="true"
-      >
-        <div className="modal-dialog">
-          <div className="modal-content">
-            <div className="modal-header">
-              <h5 className="modal-title" id="confirmModalLabel">
-                Confirmation
-              </h5>
-              <button
-                type="button"
-                className="btn-close"
-                data-bs-dismiss="modal"
-                aria-label="Close"
-              ></button>
-            </div>
-            <div className="modal-body">
-              Are you sure you want to make changes?
-            </div>
-            <div className="modal-footer">
-              <button
-                type="button"
-                className="btn btn-secondary"
-                data-bs-dismiss="modal"
-              >
-                No
-              </button>
-              <button
-                onClick={handleChangeStatus}
-                type="button"
-                className="btn btn-primary"
-              >
-                Yes
-              </button>
+
+      {/* new modal */}
+
+      {showModal && (
+        <div className="modal show" style={{ display: "block" }}>
+          <div className="modal-dialog">
+            <div className="modal-content">
+              <div className="modal-header">
+                <h5 className="modal-title">Approval Confirmation</h5>
+                <button type="button" className="close" onClick={handleClose}>
+                  <span>&times;</span>
+                </button>
+              </div>
+              <div className="modal-body">
+                <p>Are you sure you want to approve this Logistic?</p>
+              </div>
+              <div className="modal-footer">
+                <button
+                  type="button"
+                  className="btn btn-secondary"
+                  onClick={handleClose}
+                >
+                  No
+                </button>
+                <button
+                  type="button"
+                  className="btn btn-primary"
+                  onClick={handleChangeStatus}
+                >
+                  Yes
+                </button>
+              </div>
             </div>
           </div>
         </div>
-      </div>
+      )}
     </div>
   );
 };

@@ -1,56 +1,58 @@
-import React,{useState, useEffect} from "react";
+import React, { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 
 const TopNavigation = ({ onToggleSidebar, subMenuStates }) => {
 
   const [isFullscreen, setIsFullscreen] = useState(false);
-  const [notification, setNotification] = useState([]);
-  
-  const{ currentUser } = useSelector((state)=>state.user)
+  // const [notification, setNotification] = useState([]);
 
-   const handleFullscreenToggle = () => {
-     if (!isFullscreen) {
-       document.documentElement.requestFullscreen().catch((err) => {
-         console.error(
-           `Error attempting to enable full-screen mode: ${err.message}`,
-         );
-       });
-     } else {
-       if (document.exitFullscreen) {
-         document.exitFullscreen();
-       }
-     }
-     setIsFullscreen(!isFullscreen);
-   };
-  
-  useEffect(() => {
-    const getNotified = async () => {
-        try {
-          const res = await fetch(
-            `${process.env.REACT_DOMAIN_URL}/getNotifications`,
-            {
-              method: "GET",
-              headers: {
-                "Content-Type": "application/json",
-              },
-            },
-          );
-          const data = await res.json();
-          if (res.ok) {
-            setNotification(data);
-          }
-        } catch (error) {
-          console.log(error)
-        }
+  const { currentUser } = useSelector((state) => state.user)
+
+  const handleFullscreenToggle = () => {
+    if (!isFullscreen) {
+      document.documentElement.requestFullscreen().catch((err) => {
+        console.error(
+          `Error attempting to enable full-screen mode: ${err.message}`,
+        );
+      });
+    } else {
+      if (document.exitFullscreen) {
+        document.exitFullscreen();
+      }
     }
-    getNotified();
-  }, [])
-  
+    setIsFullscreen(!isFullscreen);
+  };
+
+  // useEffect(() => {
+  //   const getNotified = async () => {
+  //     try {
+  //       const res = await fetch(
+  //         `${process.env.REACT_DOMAIN_URL}/getNotifications`,
+  //         {
+  //           method: "GET",
+  //           headers: {
+  //             "Content-Type": "application/json",
+  //           },
+  //         },
+  //       );
+  //       console.log(res)
+  //       const data = await res.json();
+  //       if (res.ok) {
+  //         setNotification(data);
+  //       }
+  //     } catch (error) {
+  //       console.log(error)
+  //     }
+  //   }
+  //   getNotified();
+  // }, [])
+
   const handleLogout = () => {
     localStorage.clear();
     window.location.href = "/";
   }
+  console.log("helllllo")
 
   return (
     <>
@@ -83,7 +85,7 @@ const TopNavigation = ({ onToggleSidebar, subMenuStates }) => {
             </div>
 
             {/* <!-- App Search--> */}
-            <form class="app-search ml-3 d-none d-lg-block">
+            {/* <form class="app-search ml-3 d-none d-lg-block">
               <div class="position-relative">
                 <input
                   style={{ backgroundColor: "#F8F8FB" }}
@@ -93,7 +95,7 @@ const TopNavigation = ({ onToggleSidebar, subMenuStates }) => {
                 />
                 <span class="bx bx-search-alt"></span>
               </div>
-            </form>
+            </form> */ }
           </div>
 
           <div class="d-flex">

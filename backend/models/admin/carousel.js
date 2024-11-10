@@ -10,6 +10,9 @@ const CarouselSchema = new mongoose.Schema({
     description: {
         type: String
     },
+    index: {
+        type: String
+    },
     route: {
         type: String
     }

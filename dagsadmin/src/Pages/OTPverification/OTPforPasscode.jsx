@@ -1,5 +1,5 @@
 import React, { useRef, useState, useEffect } from "react";
-import { useNavigate} from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { useDispatch, useSelector } from "react-redux";
 import { clearError } from "../../redux/UserSlice";
 
@@ -8,8 +8,8 @@ const OTPforPasscode = () => {
 
   const { phone } = useSelector((state) => state.phone)
   const { email } = useSelector((state) => state.phone);
-  console.log("phone", phone, email)
-  
+  // console.log("phone", phone, email)
+
   const token = localStorage.getItem("token");
 
   const navigate = useNavigate();
@@ -54,13 +54,13 @@ const OTPforPasscode = () => {
           }),
         });
         const data = await res.json();
-        console.log("data", data);
+        // console.log("data", data);
       } catch (error) {
         console.log(error);
       }
     };
     resendCode();
-  },[])
+  }, [])
 
   const handleSubmit = async (e) => {
     const otpData = otp.join("");
@@ -79,7 +79,7 @@ const OTPforPasscode = () => {
         }),
       });
       const data = await res.json();
-      console.log("data",data)
+      // console.log("data",data)
       if (res.ok) {
         dispatch(clearError())
         navigate("/verify/forgotPasscode");
@@ -89,7 +89,7 @@ const OTPforPasscode = () => {
     }
   };
 
-  const resendCode = async() => {
+  const resendCode = async () => {
     try {
       const res = await fetch(`${process.env.REACT_APP_API_URL}/resendOTP`, {
         method: "POST",
@@ -101,7 +101,7 @@ const OTPforPasscode = () => {
         }),
       });
       const data = await res.json();
-      console.log("data",data);
+      // console.log("data",data);
     } catch (error) {
       console.log(error);
     }

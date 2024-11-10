@@ -1,762 +1,807 @@
 <!DOCTYPE html>
 <html lang="en">
-   <head>
-      <meta charset="UTF-8" />
-      <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-      <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-      <link rel="icon" href="/images/favicon.ico" type="images/x-icon"/>
-      <title>Dags</title>
-      <!-- remix icon  -->
-      <link rel="stylesheet" href="css/remixicon.css" />
-      <!-- Swiper-slider Css -->
-      <link rel="stylesheet" href="css/swiper-bundle.min.css" />
-      <!-- bootstrap  -->
-      <link rel="stylesheet" href="css/bootstrap.min.css" />
-      <link rel="stylesheet" href="css/style.min.css" />
-   </head>
-   <body data-bs-spy="scroll" data-bs-target="#navbarCollapse">
-      <header>
-         <nav class="navbar navbar-expand-lg fixed-top navbar-custom sticky sticky-light"
-            id="navbar">
-            <div class="container">
-               <div class="navbar-brand logo">
-                  <a href="">
-                  <img width="100px" src="images/Dags.jpg" alt="DagsLogo">
-                  </a>
-               </div>
-               <button class="navbar-toggler" type="button"
-                  data-bs-toggle="collapse" data-bs-target="#navbarCollapse"
-                  aria-controls="navbarCollapse" aria-expanded="false"
-                  aria-label="Toggle navigation">
-               <span class="fw-bold text-dark fs-4"><i
-                  class="ri-menu-5-line"></i></span>
-               </button>
-               <div class="collapse navbar-collapse" id="navbarCollapse">
-                  <ul class="navbar-nav ms-auto" id="navbar-navlist">
-                     <li class="nav-item">
-                        <a class="nav-link" href="index.html#home">Home</a>
-                     </li>
-                     <li class="nav-item">
-                        <a class="nav-link" href="index.html#about">About</a>
-                     </li>
-                     <li class="nav-item">
-                        <a class="nav-link" href="index.html#features">Features</a>
-                     </li>
-                     <li class="nav-item">
-                        <a class="nav-link" href="index.html#download">Download</a>
-                     </li>
-                     <li class="nav-item">
-                        <a class="nav-link" href="index.html#faq">FAQ</a>
-                     </li>
-                     <li class="nav-item">
-                        <a class="nav-link" href="index.html#contact">Contact</a>
-                     </li>
-                  </ul>
-               </div>
-            </div>
-         </nav>
-      </header>
-      <!-- header part end  -->
-      <!-- hero section start  -->
-      <section class="hero-part bg-img bg-home" id="home">
+
+<head>
+   <meta charset="UTF-8" />
+   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+   <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+   <link rel="icon" href="/images/favicon.ico" type="images/x-icon" />
+   <title>Dags</title>
+   <!-- remix icon  -->
+   <link rel="stylesheet" href="css/remixicon.css" />
+   <!-- Swiper-slider Css -->
+   <link rel="stylesheet" href="css/swiper-bundle.min.css" />
+   <!-- bootstrap  -->
+   <link rel="stylesheet" href="css/bootstrap.min.css" />
+   <link rel="stylesheet" href="css/style.min.css" />
+
+   <style>
+      input::-webkit-outer-spin-button,
+      input::-webkit-inner-spin-button {
+         -webkit-appearance: none;
+         margin: 0;
+      }
+
+      /* Firefox */
+      input[type=number] {
+         -moz-appearance: textfield;
+      }
+
+      .carousel-inner {
+         height: 520px;
+
+      }
+
+      @media only screen and (max-width: 768px) {
+
+         /* For mobile phones: */
+         .carousel-inner {
+            height: 620px;
+         }
+      }
+   </style>
+
+</head>
+
+<body data-bs-spy="scroll" data-bs-target="#navbarCollapse">
+
+   <header>
+      <nav class="navbar navbar-expand-lg fixed-top navbar-custom sticky sticky-light"
+         style="background-color: #0a1332;" id="navbar">
          <div class="container">
-            <!-- row start  -->
-            <div
-               class="row position-relative align-items-center justify-content-center">
-               <div class="col-lg-6 order-2 order-lg-1">
-                  <div class="headline mb-4">
-                     <a href="index.html#" class="bg-light">
+            <div class="navbar-brand logo">
+               <a href="">
+                  <img width="180px" src="images/Dags.jpg" alt="DagsLogo">
+               </a>
+            </div>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse"
+               aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
+               <span class="fw-bold text-white fs-4"><i class="ri-menu-5-line"></i></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarCollapse">
+               <ul class="navbar-nav ms-auto" id="navbar-navlist">
+                  <li class="nav-item">
+                     <a class="nav-link" href="index.html#home">Home</a>
+                  </li>
+                  <li class="nav-item">
+                     <a class="nav-link" href="index.html#about">About</a>
+                  </li>
+                  <li class="nav-item">
+                     <a class="nav-link" href="index.html#features">Features</a>
+                  </li>
+                  <li class="nav-item">
+                     <a class="nav-link" href="index.html#download">Download</a>
+                  </li>
+                  <li class="nav-item">
+                     <a class="nav-link" href="index.html#faq">FAQ</a>
+                  </li>
+                  <li class="nav-item">
+                     <a class="nav-link" href="index.html#contact">Contact</a>
+                  </li>
+               </ul>
+            </div>
+         </div>
+      </nav>
+   </header>
+
+   <!-- header part end  -->
+   <!-- hero section start  -->
+   <section class="hero-part bg-img bg-home" id="home">
+      <div class="container">
+         <!-- row start  -->
+         <div class="row position-relative align-items-center justify-content-center">
+            <div class="col-lg-6 order-2 order-lg-1">
+               <div class="headline mb-4">
+                  <a href="index.html#" class="bg-light">
                      <span class="badge btn-custom">we are New</span>
                      Be part of our laundry revolution!
                      <i class="ri-arrow-right-line"></i>
                      <span class="ti-angle-right"></span>
-                     </a>
+                  </a>
+               </div>
+               <div class="hero-text">
+                  <h1 class="display-6 lh-55 text-dark">
+                     WELCOME TO
+                     <span style="color: #eaa124;" class="fw-semibold">
+                        DAGS</span>
+                  </h1>
+                  <h4 class="text-dark">
+                     Digital Aggregator of Garment Services
+
+                  </h4>
+                  <h5><i>"You Wear We Care"</i> </h5>
+                  <p class="fw-medium mt-3 lh-base">
+                     "Our mission is to simplify and streamline the laundry process, making it convenient and efficient
+                     for both customers and laundry shop owners"
+                  </p>
+               </div>
+               <div class="used_app">
+                  <p>
+                     Download Our App
+                  </p>
+               </div>
+               <div class="main-btn mt-4">
+                  <a href="index.html#" class="btn btn-custom fs-6 mb-3"><img src="images/playstore.png" alt
+                        class=" border-end pe-2" /><span class="ps-2">Play Store</span></a>
+                  <a href="index.html#" class="btn btn-light border fs-6 mb-3 text-dark"><img
+                        src="images/apple-logo.png" alt class="broder border-end pe-2" /><span class="ps-2">App
+                        Store</span></a>
+               </div>
+            </div>
+            <div class="col-lg-4 order-lg-2">
+               <div class=" text-center mb-3">
+                  <img src="images/screens/dagsHome.png" alt class="img-fluid w-75" />
+               </div>
+            </div>
+         </div>
+         <!-- row end  -->
+      </div>
+   </section>
+   <section class="section about-part-1 bg-light" id="about">
+      <div class="container">
+         <!-- row start  -->
+         <div class="row align-items-center justify-content-center">
+            <div class="col-lg-5">
+               <div class="bg-white p-5 shadow-sm rounded-3 mt-4 position-relative overflow-hidden">
+                  <div class="about-header">
+                     <div class="title-sm">
+                        <h6 style="color: #eaa124;">Why Choose Us ?</h6>
+                     </div>
+                     <div class="main-title mt-4">
+                        <h2 class="display-6 lh-55 font-bold text-dark">
+                           Focused <span style="color:#eaa124 ;">expertise</span> <br> for exceptional service.
+                        </h2>
+                     </div>
                   </div>
-                  <div class="hero-text">
-                     <h1 class="display-6 lh-55 text-dark">
-                        Simplified Laundry Care,  
-                        <span style="color: #eaa124;" class="fw-semibold">
-                        Efficiently</span>
-                        Delivered
-                     </h1>
-                     <p class="fw-medium mt-3 lh-base">
-                        "Experience hassle-free laundry with efficient, simplified care, <br> conveniently delivered to your door."
-                     </p>
+                  <p class="mt-3 chooseText">
+                     At DAGS we have aggregated a network of top-tier laundry shops specializing in ironing, dry
+                     cleaning, and various other clothing care services, all under one convenient platform. We are
+                     redefining the clothing care experience by providing unmatched convenience, quality, and
+                     reliability to our customers. With our easy-to-use platform, scheduling a pickup, arranging for
+                     specific services, and managing your orders is as simple as a few taps on your phone. Our mission
+                     is to simplify and streamline the laundry process, making it convenient and efficient for both
+                     customers and laundry shop owners. With a commitment to quality, reliability, and innovation, DAGS
+                     Technology is reshaping the landscape of laundry services, creating a win-win scenario for all
+                     stakeholders involved. Join thousands of satisfied customers who have made the switch to
+                     convenient, reliable, and affordable laundry care with us since our launch in 2024.
+                  </p>
+                  <!-- <div class="btn-part mt-4">
+                     <a href="index.html#" style="background-color: #eaa124; color: white;" class="btn fs-6">Learn
+                        More</a>
+                  </div> -->
+               </div>
+            </div>
+            <div class="col-lg-6">
+               <div class="row mt-2 g-3">
+                  <div class="col-lg-6">
+                     <div class="icon-text h-100 d-flex bg-white p-3 rounded-3">
+                        <!-- <lord-icon src="https://cdn.lordicon.com/nkmsrxys.json" trigger="loop"
+                           colors="primary:#121331,secondary:#3a41c4" style="width: 80px; height: 80px">
+                        </lord-icon> -->
+                        <div class="ms-3 mt-3">
+                           <h3>Our Mission</h3>
+                           <!-- <p class="text-dark fs-6 mb-2">Happy Clients
+                           </p> -->
+                           <p>Our mission is to simplify and streamline the laundry process, making it convenient and efficient for both customers and laundry shop owners.
+                           </p>
+                        </div>
+                     </div>
                   </div>
-                  <div class="used_app">
-                     <p>
-                        Download Our App
-                     </p>
+                  <div class="col-lg-6">
+                     <div class="icon-text d-flex bg-white p-3 rounded-3">
+                        <!-- <lord-icon src="https://cdn.lordicon.com/nkmsrxys.json" trigger="loop"
+                           colors="primary:#121331,secondary:#3a41c4" style="width: 80px; height: 80px">
+                        </lord-icon> -->
+                        <div class="ms-3 mt-3">
+                           <h3>Our Vision</h3>
+                           <!-- <p class="text-dark fs-6 mb-2">Happy Clients
+                           </p> -->
+                           <p>To become the foremost choice for consumers seeking convenient, reliable laundry services
+                              while empowering local laundry shop owners to expand their reach, optimize operations,
+                              enhance efficiency and generate livelihood.
+                           </p>
+                        </div>
+                     </div>
                   </div>
-                  <div class="main-btn mt-4">
-                     <a href="index.html#" class="btn btn-custom fs-6 mb-3"><img
-                        src="images/playstore.png" alt
-                        class=" border-end pe-2" /><span
-                        class="ps-2">Play Store</span></a>
-                     <a href="index.html#"
-                        class="btn btn-light border fs-6 mb-3 text-dark"><img
-                        src="images/apple-logo.png" alt
-                        class="broder border-end pe-2" /><span
-                        class="ps-2">App Store</span></a>
+                  <div class="col-lg-6">
+                     <div class="icon-text d-flex bg-white p-3 rounded-3">
+                        <lord-icon src="https://cdn.lordicon.com/nkmsrxys.json" trigger="loop"
+                           colors="primary:#121331,secondary:#3a41c4" style="width: 80px; height: 80px">
+                        </lord-icon>
+                        <div class="ms-3 mt-3">
+                           <h3>100 +</h3>
+                           <p class="text-dark fs-6 mb-2">Happy Partners
+                           </p>
+                        </div>
+                     </div>
+                  </div>
+                  <div class="col-lg-6">
+                     <div class="icon-text d-flex bg-white p-3 rounded-3">
+                        <lord-icon src="https://cdn.lordicon.com/eszyyflr.json" trigger="loop"
+                           colors="primary:#121331,secondary:#3a41c4" style="width: 80px; height: 80px">
+                        </lord-icon>
+                        <div class="ms-3 mt-3">
+                           <h3>12000</h3>
+                           <p class="text-dark fs-6 mb-2">Downloads</p>
+                        </div>
+                     </div>
                   </div>
                </div>
-               <div class="col-lg-4 order-lg-2">
-                  <div class=" text-center mb-3">
-                     <img src="images/screens/dagsHome.png" alt
-                        class="img-fluid w-75" />
+               <div class="row mt-2 g-3">
+                  <div class="col-lg-6">
+                     <div class="icon-text d-flex bg-white p-3 rounded-3">
+                        <lord-icon src="https://cdn.lordicon.com/pithnlch.json" trigger="loop"
+                           colors="primary:#121331,secondary:#3a41c4" style="width: 80px; height: 80px">
+                        </lord-icon>
+                        <div class="ms-3 mt-3">
+                           <h3>4000 +</h3>
+                           <p class="text-dark fs-6 mb-2">Happy Users
+                           </p>
+                        </div>
+                     </div>
+                  </div>
+                  <div class="col-lg-6">
+                     <div class="icon-text d-flex bg-white p-3 rounded-3">
+                        <lord-icon src="https://cdn.lordicon.com/kbtmbyzy.json" trigger="loop"
+                           colors="primary:#121331,secondary:#3a41c4" style="width: 80px; height: 80px">
+                        </lord-icon>
+                        <div class="ms-3 mt-3">
+                           <h3>1 +</h3>
+                           <p class="text-dark fs-6 mb-2">Years in the market
+                           </p>
+                        </div>
+                     </div>
                   </div>
                </div>
             </div>
-            <!-- row end  -->
          </div>
-      </section>
-      <section class="section about-part-1 bg-light" id="about">
-         <div class="container">
-            <!-- row start  -->
-            <div class="row align-items-center justify-content-center">
-               <div class="col-lg-5">
-                  <div
-                     class="bg-white p-5 shadow-sm rounded-3 mt-4 position-relative overflow-hidden">
-                     <div class="about-header">
-                        <div class="title-sm">
-                           <h6 style="color: #eaa124;">Why Choose Us ?</h6>
+         <!-- row end  -->
+      </div>
+   </section>
+   <!-- about section end  -->
+   <!-- feature section start  -->
+   <section class="section feature-part pb-0" id="features">
+      <div class="container">
+         <!-- row start -->
+         <div class="row align-items-center">
+            <div class="col-lg-6">
+               <div class="feature-img">
+                  <div class="img-phone">
+                     <img src="images/services/services.png" alt class="img-fluid" />
+                  </div>
+               </div>
+            </div>
+            <div class="col-lg-6">
+               <div class="feature-header">
+                  <div class="title-sm">
+                     <h6 style="color: #eaa124;">Our Feature</h6>
+                  </div>
+                  <div class="main-title mt-4">
+                     <h3 class="display-6 lh-25 text-dark">
+                        Key Features of <span style="color: #eaa124;">DAGS </span>Laundry Service Platform
+                     </h3>
+                  </div>
+               </div>
+               <p style="font-size: 17px;" class="pt-2 pb-2">
+                  Track your
+                  order in real-time through the app, receive notifications when your laundry is picked up and
+                  delivered, and even access detailed care instructions for each garment. We believe laundry
+                  shouldn't be a chore, it should be convenient, reliable, and stress-free.
+               </p>
+
+               <div id="carouselExample" class="carousel slide" data-bs-ride="carousel" data-bs-touch="true">
+                  <div class="carousel-indicators">
+                     <button type="button" style="background-color: #0a1332; margin-top: 40px;"
+                        data-bs-target="#carouselExample" data-bs-slide-to="0" class="active" aria-current="true"
+                        aria-label="Slide 1"></button>
+                     <button type="button" style="background-color: #0a1332; margin-top: 40px;"
+                        data-bs-target="#carouselExample" data-bs-slide-to="1" aria-label="Slide 2"></button>
+                  </div>
+                  <div class="carousel-inner">
+
+                     <div class="carousel-item active">
+                        <div class="d-flex mt-2">
+                           <div class="number">
+                              <i class="ri-number-1 p-2 text-dark bg-primary-subtle rounded-circle"></i>
+                           </div>
+                           <div class="text ms-3">
+                              <h6 class="text-dark">Convenient Access</h6>
+                              <p style="font-size: 17px;">
+                                 With this, customers can easily locate and connect with nearby Laundry
+                                 shops, eliminating the hassle of searching for a reliable service provider.
+                              </p>
+                           </div>
                         </div>
-                        <div class="main-title mt-4">
-                           <h2 class="display-6 lh-55 font-bold text-dark">
-                              Focused <span style="color:#eaa124 ;">expertise</span> <br> for exceptional service.
+                        <div class="d-flex pb-2 mt-2">
+                           <div class="number">
+                              <i class="ri-number-2 p-2 text-dark bg-primary-subtle rounded-circle"></i>
+                           </div>
+                           <div class="text ms-3">
+                              <h6 class="text-dark">Time-Saving</h6>
+                              <p style="font-size: 17px;">
+                                 Our platform allows customers to schedule pickup and delivery of their laundry, saving
+                                 them
+                                 valuable time and effort.
+                              </p>
+                           </div>
+                        </div>
+                        <div class="d-flex pb-2 mt-2">
+                           <div class="number">
+                              <i class="ri-number-3 p-2 text-dark bg-primary-subtle rounded-circle"></i>
+                           </div>
+                           <div class="text ms-3">
+                              <h6 class="text-dark">Transparent Pricing</h6>
+                              <p style="font-size: 17px;">
+                                 Customers can compare prices and services from various Laundry shops, ensuring they get
+                                 the best
+                                 value for their money.
+                              </p>
+                           </div>
+                        </div>
+                        <div class="d-flex pb-2 mt-2">
+                           <div class="number">
+                              <i class="ri-number-4 p-2 text-dark bg-primary-subtle rounded-circle"></i>
+                           </div>
+                           <div class="text ms-3">
+                              <h6 class="text-dark">Quality Assurance</h6>
+                              <p style="font-size: 17px;">
+                                 Ironing shops on our platform are vetted for quality and reliability, giving customers
+                                 peace of
+                                 mind about the safety and care of their lovely and close to heart clothing.
+                              </p>
+                           </div>
+                        </div>
+                     </div>
+
+                     <div class="carousel-item">
+                        <div class="d-flex mt-2">
+                           <div class="number">
+                              <i class="ri-number-5 p-2 text-dark bg-primary-subtle rounded-circle"></i>
+                           </div>
+                           <div class="text ms-3">
+                              <h6 class="text-dark">Mobile App Integration</h6>
+                              <p style="font-size: 17px;">
+                                 Our user- friendly mobile app provides a seamless experience for customers to place
+                                 orders, track the status of their laundry, and make secure payments.
+                              </p>
+                           </div>
+                        </div>
+                        <div class="d-flex pb-2 mt-2">
+                           <div class="number">
+                              <i class="ri-number-6 p-2 text-dark bg-primary-subtle rounded-circle"></i>
+                           </div>
+                           <div class="text ms-3">
+                              <h6 class="text-dark">Efficient Management for Laundry Shops</h6>
+                              <p style="font-size: 17px;">
+                                 We offers a robust backend system for shops to manage orders, track inventory, and
+                                 optimize their operations.
+                              </p>
+                           </div>
+                        </div>
+                        <div class="d-flex pb-2 mt-2">
+                           <div class="number">
+                              <i class="ri-number-7 p-2 text-dark bg-primary-subtle rounded-circle"></i>
+                           </div>
+                           <div class="text ms-3">
+                              <h6 class="text-dark">Eco-Friendly Initiative</h6>
+                              <p style="font-size: 17px;">
+                                 We promote sustainability by encouraging the use of eco-friendly packaging and
+                                 providing options for customers to donate gently used clothing.
+                              </p>
+                           </div>
+                        </div>
+                     </div>
+
+                  </div>
+               </div>
+            </div>
+         </div>
+         <!-- row end  -->
+      </div>
+   </section>
+   <!-- feature section end  -->
+   <section class="section guide-app" id="download">
+      <div class="container">
+         <div class="guide-header text-center">
+            <div class="main-title mt-4">
+               <h2 class="display-6 lh-55 text-dark">
+                  How to work with Dags technology app
+               </h2>
+               <p>
+                  We provide guide how to work Dags application
+               </p>
+            </div>
+            <img src="images/dags-process.png" class="w-100" alt="">
+         </div>
+         <div style="background-color: #F7F8FF; padding: 60px; border-radius: 20px;"
+            class="guide-content text-start mt-5">
+            <div class="row align-items-center justify-content-between">
+               <div class="col-lg-3">
+                  <h4 style="color: #eaa124;" class="mt-4"><strong> 1.</strong> Download the Dags App</h4>
+                  <p class="my-3">Search for "Dags" on the Google Play Store/App store and download the app to your
+                     Android/apple device
+                  </p>
+                  <div class="main-btn mt-4 d-flex" style="margin-left: -30px;">
+                     <a href="#" class="btn p-0 m-0"><img src="images/app-store.png" alt=""></a>
+                     <a href="#" class="btn p-0 m-0 ms-2"><img src="images/play-store.png" alt=""></a>
+                  </div>
+               </div>
+               <div style="color: #eaa124;" class="col-lg-1 d-none d-lg-block ">
+                  <i class="ri-arrow-right-circle-fill ms-lg-5 fs-2"></i>
+               </div>
+               <div class="col-lg-3 ms-lg-5 my-4">
+                  <h4 style="color: #eaa124;"><strong> 2.</strong> Sign Up or Sign In</h4>
+                  <p class="my-3">Open the Dags app and register if you are a first time user/ log in using your
+                     existing credentials.
+                  </p>
+                  <!-- <a href="index.html#" style="color: #eaa124; text-decoration: underline;"
+                     class=" p-1 underline fs-5 fw-semibold mt-4">View More</a> -->
+               </div>
+               <div style="color: #eaa124;" class="col-lg-1 d-none d-lg-block ">
+                  <i class="ri-arrow-right-circle-fill ms-lg-5 fs-2"></i>
+               </div>
+               <div class="col-lg-3 ms-lg-5">
+                  <h4 style="color: #eaa124;"><strong> 3.</strong> Explore and Place Your Order</h4>
+                  <p class="my-3">Browse the app's features, chose a service and schedule your pickup and delivery
+                     times.
+                  </p>
+                  <!-- <a href="index.html#" style="color: #eaa124; text-decoration: underline;"
+                     class="fs-5 fw-semibold mt-4">View App</a> -->
+               </div>
+            </div>
+         </div>
+      </div>
+   </section>
+
+   <section class="section cta pb-0">
+      <div class="container-fluid">
+         <div class="cta-app bg-light">
+            <!-- row start  -->
+            <div class="row align-items-center justify-content-between">
+               <div class="col-lg-6 text-center">
+                  <div class="p-3">
+                     <div class="cta-header">
+                        <div class="main-title mt-3">
+                           <h2 class="text-dark display-6 lh-55">
+                              Get
+                              <span style="color:#bf9b59;" class="fw-semibold">
+                                 early access
+                              </span>
+                              for application
                            </h2>
                         </div>
                      </div>
-                     <p class="mt-3 chooseText">
-                        Ditch the laundromat and reclaim your weekends. DagsWash picks up your dirty laundry
-                        and delivers it fresh and folded, right to your door. Get peace of mind with transparent
-                        pricing and secure online payment system.
+                     <p class="my-4 lh-base">
+                        <strong class="text-dark">Subscribe</strong> to
+                        get latest laundary <br> updates
                      </p>
-                     <div class="btn-part mt-4">
-                        <a href="index.html#" style="background-color: #eaa124; color: white;" class="btn fs-6">Learn
-                        More</a>
+                     <div class="form-button mb-4">
+                        <form action="https://dagstechnology.in/admin/api/newsletter" method="post"
+                           class="d-flex align-items-center justify-content-center">
+                           <input type="email" name="email" class="form-control border rounded-2"
+                              placeholder="Your email" required />
+                           <button type="submit" style="background-color: #bf9b59; color: white !important;"
+                              class="btn ms-2 rounded-2">
+                              <i class="ri-mail-add-line fs-5 fw-normal"></i>
+                           </button>
+                        </form>
                      </div>
+                     <span class="text-dark fw-semibold me-1">Support
+                        :</span>
+                     <a href="mailto:hello@dagstechnology.in" class="text-muted">
+                        hello@dagstechnology.in</a>
                   </div>
                </div>
                <div class="col-lg-6">
-                  <div class="row mt-2 g-3">
-                     <div class="col-lg-6">
-                        <div
-                           class="icon-text d-flex bg-white p-3 rounded-3">
-                           <lord-icon
-                              src="https://cdn.lordicon.com/nkmsrxys.json"
-                              trigger="loop"
-                              colors="primary:#121331,secondary:#3a41c4"
-                              style="width: 80px; height: 80px">
-                           </lord-icon>
-                           <div class="ms-3 mt-3">
-                              <h3>300 +</h3>
-                              <p class="text-dark fs-6 mb-2">Happy Clients
-                              </p>
-                              <p>It comes down to how your customer
-                                 experiences
-                              </p>
+                  <div class="img-future position-relative">
+                     <div id="carouselExampleCaptions" class="carousel slide carousel-fade" data-bs-ride="carousel">
+                        <div class="carousel-inner">
+                           <div class="carousel-item hero-part active" data-bs-interval="3000"
+                              style="background:url('images/cta/cta.jpg');">
+                              <div class="carousel-image d-flex w-100 align-items-center">
+                                 <div class="bg-overlay"></div>
+                              </div>
+                           </div>
+                           <div class="carousel-item hero-part" data-bs-interval="3000"
+                              style="background:url('images/cta/cta2.jpg');">
+                              <div class="carousel-image d-flex w-100 align-items-center">
+                                 <div class="bg-overlay"></div>
+                              </div>
+                           </div>
+                           <div class="carousel-item hero-part" data-bs-interval="3000"
+                              style="background:url('images/cta/cta3.jpg');">
+                              <div class="carousel-image d-flex w-100 align-items-center">
+                                 <div class="bg-overlay"></div>
+                              </div>
                            </div>
                         </div>
-                     </div>
-                     <div class="col-lg-6">
-                        <div
-                           class="icon-text d-flex bg-white p-3 rounded-3">
-                           <lord-icon
-                              src="https://cdn.lordicon.com/eszyyflr.json"
-                              trigger="loop"
-                              colors="primary:#121331,secondary:#3a41c4"
-                              style="width: 80px; height: 80px">
-                           </lord-icon>
-                           <div class="ms-3 mt-3">
-                              <h3>2 M</h3>
-                              <p class="text-dark fs-6 mb-2">Download</p>
-                              <p>The best form of customer service is
-                                 self-service
-                              </p>
-                           </div>
-                        </div>
-                     </div>
-                  </div>
-                  <div class="row mt-2 g-3">
-                     <div class="col-lg-6">
-                        <div
-                           class="icon-text d-flex bg-white p-3 rounded-3">
-                           <lord-icon
-                              src="https://cdn.lordicon.com/pithnlch.json"
-                              trigger="loop"
-                              colors="primary:#121331,secondary:#3a41c4"
-                              style="width: 80px; height: 80px">
-                           </lord-icon>
-                           <div class="ms-3 mt-3">
-                              <h3>50000 +</h3>
-                              <p class="text-dark fs-6 mb-2">Happy User
-                              </p>
-                              <p>They will never forget how you made them
-                                 feel.
-                              </p>
-                           </div>
-                        </div>
-                     </div>
-                     <div class="col-lg-6">
-                        <div
-                           class="icon-text d-flex bg-white p-3 rounded-3">
-                           <lord-icon
-                              src="https://cdn.lordicon.com/kbtmbyzy.json"
-                              trigger="loop"
-                              colors="primary:#121331,secondary:#3a41c4"
-                              style="width: 80px; height: 80px">
-                           </lord-icon>
-                           <div class="ms-3 mt-3">
-                              <h3>4 +</h3>
-                              <p class="text-dark fs-6 mb-2">Year Of Expe
-                              </p>
-                              <p>Consequat vitae felis vitae pharetra
-                                 tincidunt
-                              </p>
-                           </div>
-                        </div>
+                        <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleCaptions"
+                           data-bs-slide="prev">
+                           <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                           <span class="visually-hidden">Previous</span>
+                        </button>
+                        <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleCaptions"
+                           data-bs-slide="next">
+                           <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                           <span class="visually-hidden">Next</span>
+                        </button>
                      </div>
                   </div>
                </div>
-            </div>
-            <!-- row end  -->
-         </div>
-      </section>
-      <!-- about section end  -->
-      <!-- feature section start  -->
-      <section class="section feature-part pb-0" id="features">
-         <div class="container">
-            <!-- row start -->
-            <div class="row align-items-center">
-               <div class="col-lg-6">
-                  <div class="feature-img">
-                     <div class="img-phone">
-                        <img src="images/services/services.png" alt
-                           class="img-fluid" />
-                     </div>
-                  </div>
-               </div>
-               <div class="col-lg-6">
-                  <div class="feature-header">
-                     <div class="title-sm">
-                        <h6 style="color: #eaa124;">Our Feature</h6>
-                     </div>
-                     <div class="main-title mt-4">
-                        <h3 class="display-6 lh-25 text-dark">
-                           Make a big splash in
-                           the <span style="color: #eaa124;"> app
-                           world</span>
-                        </h3>
-                     </div>
-                  </div>
-                  <p style="font-size: 17px;" class="pt-2 pb-2">
-                    Track your
-                     order in real-time through the app, receive notifications when your laundry is picked up and
-                     delivered, and even access detailed care instructions for each garment. We believe laundry
-                     shouldn't be a chore, it should be convenient, reliable, and stress-free.
-                  </p>
-                  <div class="d-flex mt-2">
-                     <div class="number">
-                        <i
-                           class="ri-number-1 p-2 text-dark bg-primary-subtle rounded-circle"></i>
-                     </div>
-                     <div class="text ms-3">
-                        <h6 class="text-dark">Eco-Friendly Focus</h6>
-                        <p style="font-size: 17px;">
-                           DagsWash prioritizes sustainability! We use eco-friendly detergents and
-                           high-efficiency machines to keep your clothes clean while minimizing our environmental impact.
-                        </p>
-                     </div>
-                  </div>
-                  <div class="d-flex pb-2 mt-2">
-                     <div class="number">
-                        <i
-                           class="ri-number-2 p-2 text-dark bg-primary-subtle rounded-circle"></i>
-                     </div>
-                     <div class="text ms-3">
-                        <h6 class="text-dark">Expertise You Can Trust</h6>
-                        <p style="font-size: 17px;">
-                           Our laundry professionals are highly trained and experienced in
-                           handling all types of fabrics and garments. We offer specialized care for delicates, activewear,
-                           and more.
-                        </p>
-                     </div>
-                  </div>
-                  <div class="d-flex pb-2 mt-2">
-                     <div class="number">
-                        <i
-                           class="ri-number-3 p-2 text-dark bg-primary-subtle rounded-circle"></i>
-                     </div>
-                     <div class="text ms-3">
-                        <h6 class="text-dark">Stain Removal Powerhouse</h6>
-                        <p style="font-size: 17px;">
-                           Don't sweat stubborn stains! DagsWash boasts advanced stain
-                           removal techniques to get your clothes looking their absolute best.
-                        </p>
-                     </div>
-                  </div>
-                  <div class="d-flex pb-2 mt-2">
-                     <div class="number">
-                        <i
-                           class="ri-number-4 p-2 text-dark bg-primary-subtle rounded-circle"></i>
-                     </div>
-                     <div class="text ms-3">
-                        <h6 class="text-dark">Customization at Your Fingertips</h6>
-                        <p style="font-size: 17px;">
-                           Through the DagsWash app, you can personalize your 
-                           laundry experience. Select wash settings, request special handling, and even schedule next-day
-                           delivery.
-                        </p>
-                     </div>
-                  </div>
-               </div>
-            </div>
-            <!-- row end  -->
-         </div>
-      </section>
-      <!-- feature section end  -->
-      <section class="section guide-app" id="download">
-         <div class="container">
-            <div class="guide-header text-center">
-               <div class="main-title mt-4">
-                  <h2 class="display-6 lh-55 text-dark">
-                     How to work with Dags technology app
-                  </h2>
-                  <p>
-                     We provide guide how to work Dags application
-                  </p>
-               </div>
-            </div>
-            <div style="background-color: #F7F8FF; padding: 60px; border-radius: 20px;" class="guide-content text-start mt-5">
-               <div  class="row align-items-center justify-content-between">
-                  <div class="col-lg-3">
-                     <h4 style="color: #eaa124;" class="mt-4"><strong> 1.</strong > Download Dags App</h4>
-                     <p class="my-3">Search for "DagsWash" on the Google Play Store and
-                        download the app to your Android device
-                     </p>
-                     <div class="main-btn mt-4 d-flex">
-                        <a href="index.html#" class="btn p-0 m-0"><img src="images/app-store.png" alt=""></a>
-                        <a href="index.html#" class="btn p-0 m-0 ms-2"><img src="images/play-store.png" alt=""></a>
-                     </div>
-                  </div>
-                  <div style="color: #eaa124;" class="col-lg-1 d-none d-lg-block ">
-                     <i class="ri-arrow-right-circle-fill ms-lg-5 fs-2"></i>
-                  </div>
-                  <div class="col-lg-3 ms-lg-5 my-4">
-                     <h4 style="color: #eaa124;"><strong> 2.</strong> Sign Up or Sign In</h4>
-                     <p class="my-3">Open the DagsWash app and create a new account or sign in using
-                        your existing credentials if you've used the service before.
-                     </p>
-                     <a href="index.html#" style="color: #eaa124; text-decoration: underline;" class=" p-1 underline fs-5 fw-semibold mt-4">View More</a>
-                  </div>
-                  <div style="color: #eaa124;" class="col-lg-1 d-none d-lg-block ">
-                     <i class="ri-arrow-right-circle-fill ms-lg-5 fs-2"></i>
-                  </div>
-                  <div class="col-lg-3 ms-lg-5">
-                     <h4 style="color: #eaa124;"><strong> 3.</strong> Explore and Place Your Order</h4>
-                     <p class="my-3">Browse the app's features, schedule your pickup and
-                        delivery times, and choose any laundry preferences you have.
-                     </p>
-                     <a href="index.html#" style="color: #eaa124; text-decoration: underline;" class="fs-5 fw-semibold mt-4">View App</a>
-                  </div>
-               </div>
+               <!-- row end  -->
             </div>
          </div>
-      </section>
-
-      <section class="section cta pb-0">
-        <div class="container-fluid">
-            <div class="cta-app bg-light">
-                <!-- row start  -->
-                <div class="row align-items-center justify-content-between">
-                    <div class="col-lg-6 text-center">
-                        <div class="p-3">
-                            <div class="cta-header">
-                                <div class="main-title mt-3">
-                                    <h2 class="text-dark display-6 lh-55">
-                                        Get
-                                        <span style="color:#bf9b59;" class="fw-semibold">
-                                            early access
-                                        </span>
-                                        for application
-                                    </h2>
-                                </div>
-                            </div>
-                            <p class="my-4 lh-base">
-                                <strong class="text-dark">Subscribe</strong> to
-                                get latest laundary <br> updates
-                            </p>
-                            <div class="form-button mb-4">
-                                <form
-                                    class="d-flex align-items-center justify-content-center">
-                                    <input type="email"
-                                        class="form-control border rounded-2"
-                                        placeholder="Your email" required />
-                                    <button type="submit"
-                                    style="background-color: #bf9b59; color: white !important;"
-                                        class="btn ms-2 rounded-2">
-                                        <i
-                                            class="ri-mail-add-line fs-5 fw-normal"></i>
-                                    </button>
-                                </form>
-                            </div>
-                            <span class="text-dark fw-semibold me-1">Support
-                                :</span>
-                            <a href="index.html#" class="text-muted">
-                                contact123@mail.com</a>
-                        </div>
-                    </div>
-                    <div class="col-lg-6">
-                        <div class="img-future position-relative">
-                            <div id="carouselExampleCaptions"
-                                class="carousel slide carousel-fade"
-                                data-bs-ride="carousel">
-                                <div class="carousel-inner">
-                                    <div class="carousel-item hero-part active"
-                                        data-bs-interval="3000"
-                                        style="background:url('images/cta/cta.jpg');">
-                                        <div
-                                            class="carousel-image d-flex w-100 align-items-center">
-                                            <div class="bg-overlay"></div>
-                                        </div>
-                                    </div>
-                                    <div class="carousel-item hero-part"
-                                        data-bs-interval="3000"
-                                        style="background:url('images/cta/cta2.jpg');">
-                                        <div
-                                            class="carousel-image d-flex w-100 align-items-center">
-                                            <div class="bg-overlay"></div>
-                                        </div>
-                                    </div>
-                                    <div class="carousel-item hero-part"
-                                        data-bs-interval="3000"
-                                        style="background:url('images/cta/cta3.jpg');">
-                                        <div
-                                            class="carousel-image d-flex w-100 align-items-center">
-                                            <div class="bg-overlay"></div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <button class="carousel-control-prev"
-                                    type="button"
-                                    data-bs-target="#carouselExampleCaptions"
-                                    data-bs-slide="prev">
-                                    <span class="carousel-control-prev-icon"
-                                        aria-hidden="true"></span>
-                                    <span
-                                        class="visually-hidden">Previous</span>
-                                </button>
-                                <button class="carousel-control-next"
-                                    type="button"
-                                    data-bs-target="#carouselExampleCaptions"
-                                    data-bs-slide="next">
-                                    <span class="carousel-control-next-icon"
-                                        aria-hidden="true"></span>
-                                    <span class="visually-hidden">Next</span>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                    <!-- row end  -->
-                </div>
+   </section>
+   <!-- cta section end  -->
+   <section class="section app-screenshort position-relative overflow-hidden">
+      <div class="container">
+         <div class="ss-header text-center mb-5 pb-5">
+            <div class="title-sm">
+               <h6 style="color: #bf9b59;">Our App</h6>
             </div>
-    </section>
-      <!-- cta section end  -->
-      <section class="section app-screenshort position-relative overflow-hidden">
-         <div class="container">
-            <div class="ss-header text-center mb-5 pb-5">
-               <div class="title-sm">
-                  <h6 style="color: #bf9b59;">Our App</h6>
-               </div>
-               <div class="main-title mt-4">
-                  <h2 class="text-dark display-6 lh-55">
-                     Dags App Screenshot
-                  </h2>
-                  <p class="mt-3 lh-base">
-                  </p>
-               </div>
-            </div>
-            <div class="screenshort mt-5">
-               <div class="row align-items-center justify-content-center">
-                  <div class="col-lg-12">
-                     <div class="swiper mySwiper overflow-hidden">
-                        <div style="height: 600px;" class="swiper-wrapper">
-                           <div class="swiper-slide p-2"><img height="200px"
-                              src="images/screens/screen1.png" alt=""
-                              class="img-fluid w-75"></div>
-                           <div class="swiper-slide p-2"><img
-                              src="images/screens/screen2.png" alt=""
-                              class="img-fluid w-75"></div>
-                           <div class="swiper-slide p-2 "><img
-                              src="images/screens/screen3.png" alt=""
-                              class="img-fluid w-75"></div>
-                           <div class="swiper-slide p-2"><img
-                              src="images/screens/screen4.png" alt=""
-                              class="img-fluid w-75"></div>
-                        </div>
-                        <div class="swiper-pagination"></div>
-                     </div>
-                  </div>
-               </div>
-               <img src="images/mobile.png" alt="" class="img-fluid mobile-phone">
+            <div class="main-title mt-4">
+               <h2 class="text-dark display-6 lh-55">
+                  Dags App Screenshot
+               </h2>
+               <p class="mt-3 lh-base">
+               </p>
             </div>
          </div>
-      </section>
-      <!-- price section end  -->
-      <section id="faq" class="section faq">
-  <div class="container">
-    <div class="contact-header text-center mb-5">
-      <div class="title-sm">
-        <h6 style="color: #e4b666;">Need Support</h6>
-      </div>
-      <div class="main-title my-4">
-        <h2 class="display-6 text-dark">Frequently asked Questions</h2>
-        <p class="mt-3 lh-base">
-          The website's good percentage of the users will purchase your goods and services.
-        </p>
-      </div>
-    </div>
-    <div class="row align-items-center justify-content-between mt-5" id="faqContainer">
-      <!-- FAQs will be dynamically inserted here -->
-    </div>
-  </div>
-</section>
-
-      <hr style="width: 90vw;" class="h-2 mx-auto">
-      
-      <!-- video section end  -->
-      <!-- contact-part start  -->
-      <section class="section contact-part bg-light" id="contact">
-         <div class="container">
-            <div class="contact-header text-center mb-5">
-               <div class="title-sm">
-                  <h6 style="color: #e4b666;">Contact us</h6>
-               </div>
-               <div class="main-title my-4">
-                  <h2 class="display-6 text-dark">
-                     Get <span style="color: #e4b666;">in
-                     touch</span>
-                  </h2>
-                  <p class="mt-3 lh-base">
-                     You need support fill this contact form and contact our
-                     team
-                  </p>
-               </div>
-            </div>
-            <div class="row mt-5">
+         <div class="screenshort mt-5">
+            <div class="row align-items-center justify-content-center">
                <div class="col-lg-12">
-                  <div class="contact-box px-5 rounded-2">
-                     <div
-                        class="row align-items-center justify-content-between">
-                        <div class="col-lg-6">
-                           <div class="custom-form p-3">
-                              <h5 class="mb-4">Need Support :</h5>
-                              <form action="https://sheetdb.io/api/v1/qyx340579if9w" method="post" id="sheetdb-form">
-                                 <div class="row">
-                                    <div class="col-lg-6">
-                                       <div class="mb-3">
-                                          <input id="name"
-                                             type="text"
-                                             name="data[name]"
-                                             class="form-control"
-                                             placeholder="Name"
-                                             required />
-                                       </div>
+                  <div class="swiper mySwiper overflow-hidden">
+                     <div style="height: 600px;" class="swiper-wrapper">
+                        <div class="swiper-slide p-2"><img height="200px" src="images/screens/screen1.png" alt=""
+                              class="img-fluid w-75"></div>
+                        <div class="swiper-slide p-2"><img src="images/screens/screen2.png" alt=""
+                              class="img-fluid w-75"></div>
+                        <div class="swiper-slide p-2 "><img src="images/screens/screen3.png" alt=""
+                              class="img-fluid w-75"></div>
+                        <div class="swiper-slide p-2"><img src="images/screens/screen4.png" alt=""
+                              class="img-fluid w-75"></div>
+                     </div>
+                     <div class="swiper-pagination"></div>
+                  </div>
+               </div>
+            </div>
+            <img src="images/mobile.png" alt="" class="img-fluid mobile-phone">
+         </div>
+      </div>
+   </section>
+   <!-- price section end  -->
+   <section id="faq" class="section faq">
+      <div class="container">
+         <div class="contact-header text-center mb-5">
+            <div class="title-sm">
+               <h6 style="color: #e4b666;">Need Support</h6>
+            </div>
+            <div class="main-title my-4">
+               <h2 class="display-6 text-dark">Frequently asked Questions</h2>
+               <p class="mt-3 lh-base">
+                  The website's good percentage of the users will purchase your goods and services.
+               </p>
+            </div>
+         </div>
+         <div class="row align-items-center justify-content-between mt-5" id="faqContainer">
+            <!-- FAQs will be dynamically inserted here -->
+         </div>
+      </div>
+   </section>
+
+   <hr style="width: 90vw;" class="h-2 mx-auto">
+
+   <!-- video section end  -->
+   <!-- contact-part start  -->
+   <section class="section contact-part bg-light" id="contact">
+      <div class="container">
+         <div class="contact-header text-center mb-5">
+            <div class="title-sm">
+               <h6 style="color: #e4b666;">Contact us</h6>
+            </div>
+            <div class="main-title my-4">
+               <h2 class="display-6 text-dark">
+                  Get <span style="color: #e4b666;">in
+                     touch</span>
+               </h2>
+               <p class="mt-3 lh-base">
+                  You need support fill this contact form and contact our
+                  team
+               </p>
+            </div>
+         </div>
+         <div class="row mt-5">
+            <div class="col-lg-12">
+               <div class="contact-box px-5 rounded-2">
+                  <div class="row align-items-center justify-content-between">
+                     <div class="col-lg-6">
+                        <div class="custom-form p-3">
+                           <h5 class="my-4">Need Support :</h5>
+                           <form action="https://dagstechnology.in/admin/api/formSubmit" method="post" id="messageForm">
+                              <div class=" row">
+                                 <div class="col-lg-6">
+                                    <div class="mb-3">
+                                       <input id="name" type="text" name="name" class="form-control" placeholder="Name"
+                                          required />
                                     </div>
-                                    <!-- col end -->
-                                    <div class="col-lg-6">
-                                       <div class="mb-3">
-                                          <input name="data[email]"
-                                             id="email" type="email"
-                                             class="form-control"
-                                             placeholder="Email"
-                                             required />
-                                       </div>
-                                    </div>
-                                    <!-- col end -->
-                                    <div class="col-lg-12">
-                                       <div class="mb-3">
-                                          <input type="text"
-                                             class="form-control"
-                                             id="subject"
-                                             name="data[subject]"
-                                             placeholder="Subject"
-                                             required />
-                                       </div>
-                                    </div>
-                                    <!-- col end -->
-                                    <div class="col-lg-12">
-                                       <div class="mb-3">
-                                          <textarea name="data[comments]"
-                                             id="comments" rows="5"
-                                             class="form-control"
-                                             required
-                                             placeholder="Message"></textarea>
-                                       </div>
-                                    </div>
-                                    <!-- col end -->
                                  </div>
-                                 <!-- row end -->
-                                 <div class="row">
-                                    <div class="col-sm-12">
-                                       <button type="submit"
-                                       style="background-color: #eaa124; color: white;"
-                                          class="btn = fs-6">
+                                 <!-- col end -->
+                                 <div class="col-lg-6">
+                                    <div class="mb-3">
+                                       <input name="email" id="email" type="email" class="form-control"
+                                          placeholder="Email" required />
+                                    </div>
+                                 </div>
+                                 <!-- col end -->
+                                 <div class="col-lg-6">
+                                    <div class="mb-3">
+                                       <input type="number" class="form-control" id="phone" name="phone"
+                                          placeholder="Phone Number" required />
+                                    </div>
+                                 </div>
+                                 <div class="col-lg-6">
+                                    <div class="mb-3">
+                                       <input type="text" class="form-control" id="subject" name="subject"
+                                          placeholder="Subject" required />
+                                    </div>
+                                 </div>
+                                 <!-- col end -->
+                                 <div class="col-lg-12">
+                                    <div class="mb-3">
+                                       <textarea name="message" id="comments" rows="5" class="form-control" required
+                                          placeholder="Message"></textarea>
+                                    </div>
+                                 </div>
+                                 <div class="col-lg-12">
+                                    <div class="mb-3">
+                                       <div class="g-recaptcha" data-sitekey="6LfmWR8qAAAAAHY2TOsUVXaW-7cXlon6DQCUNaag">
+                                       </div>
+                                    </div>
+                                 </div>
+                                 <!-- col end -->
+                              </div>
+                              <!-- row end -->
+                              <div class="row">
+                                 <div class="col-sm-12">
+                                    <button type="button" onclick="handleFormSumbit()"
+                                       style="background-color: #eaa124; color: white;" class="btn = fs-6">
                                        Send Message
-                                       </button>
-                                    </div>
-                                    <!-- col end -->
+                                    </button>
                                  </div>
-                                 <!-- row end -->
-                              </form>
-                           </div>
-                        </div>
-                        <!-- col end -->
-                        <div class="col-lg-5">
-                           <img src="images/Contact-us.png" alt=""
-                              class="img-fluid">
+                                 <!-- col end -->
+                              </div>
+                              <!-- row end -->
+                           </form>
                         </div>
                      </div>
-                     <!-- row end -->
+                     <!-- col end -->
+                     <div class="col-lg-5">
+                        <img src="images/Contact-us.png" alt="" class="img-fluid">
+                     </div>
                   </div>
+                  <!-- row end -->
+               </div>
+            </div>
+         </div>
+         <!-- row end -->
+      </div>
+   </section>
+
+   <!-- footer-part start -->
+   <footer style="background-color: #0a1332;" class=" section pb-5" id="contacts">
+      <div class="container">
+         <div class="footer-info">
+            <!-- row start -->
+            <div class="row">
+               <div class="col-lg-4 col-md-4 col-12">
+                  <div class="logo">
+                     <img src="images/Dags.jpg" width="180px" alt="">
+                  </div>
+                  <p class="mt-4 text-white-50">Stay in the loop! Follow us for the latest news on product releases,
+                     services, and more."
+                  </p>
+                  <h5 class="text-white">Download App</h5>
+                  <div class="main-btn mt-4">
+                     <a href="#" class="btn p-0 m-0"><img src="images/app-store.png" alt=""></a>
+                     <a href="#" class="btn p-0 m-0 ms-2"><img src="images/play-store.png" alt=""></a>
+                  </div>
+               </div>
+               <div class="col-lg-4 col-md-4 col-12 pt-2">
+                  <h5 class="text-light fs-5">Useful Links</h5>
+                  <ul class="list-unstyled mt-4">
+                     <li><a href="TermsOfServices.html" class="footerLink text-white-50">Terms
+                           and conditions</a>
+                     </li>
+                     <li><a href="privacyPolicy.html" class="footerLink text-white-50">Privacy
+                           Policy</a>
+                     </li>
+                     <li><a href="RefundAndCancellation.html" class="footerLink text-white-50">Refund and
+                           cancellation</a>
+                     </li>
+                     <li><a href="ShippingPolicy.html" class="footerLink text-white-50">Shipping Policy</a>
+                     </li>
+
+                  </ul>
+               </div>
+               <div class="col-lg-4 col-md-6 col-12 pt-2">
+
+                  <div class="footer-icon">
+                     <h5 class="text-light fs-5 mb-4">Followed by</h5>
+                     <a href="#" class="icon-link icon-link-hover text-white-50"><i
+                           class="ri-facebook-fill me-2 bi"></i>
+                     </a>
+                     <a href="#" class="icon-link icon-link-hover text-white-50"><i
+                           class="ri-instagram-line mx-2 bi"></i>
+                     </a>
+                     <a href="#" class="icon-link icon-link-hover text-white-50"><i
+                           class="ri-linkedin-box-fill mx-2 bi"></i>
+                     </a>
+                     <a href="#" class="icon-link icon-link-hover text-white-50"><i class="ri-twitter-fill mx-2 bi"></i>
+                     </a>
+
+                  </div>
+
+                  <div class="mt-4">
+                     <h5 style="color: #e4b666;" class="text-light fs-5 mb-4">Contact Us</h5>
+                     <div class="d-flex align-items-center">
+                        <i class="ri-mail-send-line me-2 text-white-50"></i>
+                        <a href="mailto:hello@dagstechnology.in" class="text-white-50">
+                           hello@dagstechnology.in</a>
+                     </div>
+                     <div class="d-flex align-items-center">
+                        <i class="ri-cellphone-line me-2 text-white-50"></i>
+                        <a href="tel:08591652263" class="text-white-50">
+                           +91 85916 52263</a>
+                     </div>
+                  </div>
+
                </div>
             </div>
             <!-- row end -->
          </div>
-      </section>
-      <!-- footer-part start -->
-      <footer style="background-color: #bf9b59;" class=" section pb-5" id="contacts">
-         <div class="container">
-            <div class="footer-info">
-               <!-- row start -->
-               <div class="row">
-                  <div class="col-lg-4 col-md-4 col-12">
-                     <div class="logo">
-                        <img src="images/Dags.jpg" width="100px" alt="">
-                     </div>
-                     <p class="mt-4 text-white-50">Stay in the loop! Follow us for the latest news on product releases, services, and more."
-                     </p>
-                     <h5 class="text-white">Download App</h5>
-                     <div class="main-btn mt-4">
-                        <a href="index.html#" class="btn p-0 m-0"><img src="images/app-store.png" alt=""></a>
-                        <a href="index.html#" class="btn p-0 m-0 ms-2"><img src="images/play-store.png" alt=""></a>
-                     </div>
-                  </div>
-                  <div class="col-lg-4 col-md-4 col-12 pt-2">
-                     <h5 class="text-light fs-5">Useful Links</h5>
-                     <ul class="list-unstyled mt-4">
-                        <li><a href="TermsOfServices.html" class="footerLink text-white-50">Terms
-                           and conditions</a>
-                        </li>
-                        <li><a href="privacyPolicy.html" class="footerLink text-white-50">Privacy
-                           Policy</a>
-                        </li>
-                        <li><a href="RefundAndCancellation.html" class="footerLink text-white-50">Refund and cancellation</a>
-                        </li>
-                        <li><a href="ShippingPolicy.html" class="footerLink text-white-50">Shipping Policy</a>
-                        </li>
-                        
-                     </ul>
-                  </div>
-                  <div class="col-lg-4 col-md-6 col-12 pt-2">
-                     <div class="footer-icon">
-                        <h5 class="text-light fs-5 mb-4">Followed by</h5>
-                        <a href="index.html#"
-                           class="icon-link icon-link-hover text-white-50"><i
-                           class="ri-facebook-fill me-2 bi"></i>
-                        </a>
-                        <a href="index.html#"
-                           class="icon-link icon-link-hover text-white-50"><i
-                           class="ri-instagram-line mx-2 bi"></i>
-                        </a>
-                        <a href="index.html#"
-                           class="icon-link icon-link-hover text-white-50"><i
-                           class="ri-linkedin-box-fill mx-2 bi"></i>
-                        </a>
-                        <a href="index.html#"
-                           class="icon-link icon-link-hover text-white-50"><i
-                           class="ri-twitter-fill mx-2 bi"></i>
-                        </a>
-                        <a href="index.html#"
-                           class="icon-link icon-link-hover text-white-50"><i
-                           class="ri-mail-line mx-2 bi"></i>
-                        </a>
-                        <a href="index.html#"
-                           class="icon-link icon-link-hover text-white-50"><i
-                           class="ri-google-fill mx-2 bi"></i>
-                        </a>
-                        <a href="index.html#"
-                           class="icon-link icon-link-hover text-white-50"><i
-                           class="ri-slack-fill mx-2 bi"></i>
-                        </a>
-                     </div>
-                     <div class="mt-4">
-                        <h5 style="color: #e4b666;" class="text-light fs-5 mb-4">Contact Us</h5>
-                        <div class="d-flex align-items-center">
-                           <i
-                              class="ri-mail-send-line me-2 text-white-50"></i>
-                           <a href="index.html" class="text-white-50">
-                           support@gmail.com</a>
-                        </div>
-                        <form class="form subscribe">
-                           <input placeholder="Email"
-                              class="form-control w-75" required>
-                           <a href="index.html#" class="submit"></a>
-                        </form>
-                     </div>
-                  </div>
-               </div>
-               <!-- row end -->
-            </div>
-         </div>
-      </footer>
-
-      <!-- pm2 restart 1 -->  
-      <!-- command -->
-
-      <!-- footer-part end -->
-      <div style="background-color: #e8b75c;" class=" py-3">
-         <div class="copy-info text-center text-light">
-            © <script>
-               document.write(new Date().getFullYear())
-            </script> Dags<a href="index.html#"
-               class="text-white-50 text-decoration-underline">
-            </a>
-         </div>
       </div>
-      <script>
-  // Add event listener to collapse elements
-  const accordions = document.querySelectorAll('.accordion-item');
-  accordions.forEach((accordion) => {
-    accordion.addEventListener('shown.bs.collapse', function () {
-      // Change color of opened accordion button
-      this.querySelector('.accordion-button').classList.add('opened');
-    });
-    accordion.addEventListener('hidden.bs.collapse', function () {
-      // Remove color from closed accordion button
-      this.querySelector('.accordion-button').classList.remove('opened');
-    });
-  });
-</script>
-      <script>
-         var form = document.getElementById('sheetdb-form');
-         form.addEventListener('submit', function (e) {
-             e.preventDefault();
-             fetch(form.action,{
-                 method:'POST',
-                 body: new FormData(document.getElementById('sheetdb-form'))
-             }).then(
-                 response => response.json()
-             ).then((html)=>{
-                 window.open('d.html', '_blank');
-             })
-         })
-      </script>
-      <script src="js/bootstrap.bundle.min.js"></script>
-      <script src="js/swiper-bundle.min.js"></script>
-      <script src="https://cdn.lordicon.com/lordicon-1.1.0.js"></script>
-      <script src="js/app.js"></script>
-      <script src="/js/index.js"></script>
-   </body>
+   </footer>
+
+   <!-- pm2 restart 1 -->
+   <!-- command -->
+
+   <!-- footer-part end -->
+   <div style="background-color: #3a4784" class=" py-3">
+      <div class="copy-info text-center text-light">
+         ©
+         <script>
+            document.write(new Date().getFullYear())
+         </script> DAGS Technology Pvt. Ltd.<a href="#" class="text-white-50 text-decoration-underline">
+         </a>
+      </div>
+   </div>
+   <script>
+      // Add event listener to collapse elements
+      const accordions = document.querySelectorAll('.accordion-item');
+      accordions.forEach((accordion) => {
+         accordion.addEventListener('shown.bs.collapse', function () {
+            // Change color of opened accordion button
+            this.querySelector('.accordion-button').classList.add('opened');
+         });
+         accordion.addEventListener('hidden.bs.collapse', function () {
+            // Remove color from closed accordion button
+            this.querySelector('.accordion-button').classList.remove('opened');
+         });
+      });
+   </script>
+   <script>
+      function handleFormSumbit() {
+         if (grecaptcha.getResponse() != '') {
+            messageForm.submit();
+         }
+      }
+   </script>
+   <script src="js/bootstrap.bundle.min.js"></script>
+   <script src="js/swiper-bundle.min.js"></script>
+   <script src="https://cdn.lordicon.com/lordicon-1.1.0.js"></script>
+   <script src="js/app.js"></script>
+   <script src="/js/index.js"></script>
+</body>
+
 </html>

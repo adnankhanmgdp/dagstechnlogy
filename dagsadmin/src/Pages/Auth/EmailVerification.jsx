@@ -14,33 +14,32 @@ const EmailVerification = () => {
     setFormData({ ...formData, [e.target.id]: e.target.value });
   };
 
-      const handleSubmit = async () => {
-        try {
-          const res = await fetch(
-            `${process.env.REACT_APP_API_URL}/resendOTP`,
-            {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({
-                email: formData.email,
-              }),
-            },
-          );
-          const data = await res.json();
-          // console.log("data", data);
-        } catch (error) {
-          // console.log(error);
-        }
-      };
+  const handleSubmit = async () => {
+    try {
+      const res = await fetch(
+        `${process.env.REACT_APP_API_URL}/resendOTP`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            email: formData.email,
+          }),
+        },
+      );
+      const data = await res.json();
+      // console.log("data", data);
+    } catch (error) {
+      // console.log(error);
+    }
+  };
 
   return (
     <div
       className="d-flex align-items-center justify-content-center vh-100"
       style={{ backgroundColor: "#F8F8FB" }}
     >
-      <ToastContainer />
       <div class="account-pages">
         <div style={{ paddingTop: "15vh" }} class="container">
           <div class="d-flex row justify-content-center">
@@ -70,13 +69,13 @@ const EmailVerification = () => {
                 </div>
                 <div class="card-body pt-0">
                   <div class="auth-logo">
-                    <a href="index.html" class="auth-logo-light">
+   
                       <div class="avatar-md profile-user-wid mb-4">
                         <span class="avatar-title rounded-circle bg-light">
                           <img src="/assets/Dags.jpg" alt="" height="17" />
                         </span>
                       </div>
-                    </a>
+                  
                   </div>
                   <div class="p-2">
                     <form class="form-horizontal" action="index.html">

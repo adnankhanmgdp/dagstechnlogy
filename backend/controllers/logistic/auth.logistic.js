@@ -231,44 +231,68 @@
 const jwt = require("jsonwebtoken");
 const Logistic = require("../../models/logistic/delivery.model");
 const bcrypt = require("bcryptjs");
+const BankDetails = require('../../models/vendor/bankDetails.model');
 const { generateOTP, sendOTP } = require("../../utils/admin/generateOTP");
 const { updateLogistic } = require("../admin/logistic.admin");
 const fs = require('fs');
 const path = require('path');
 const { v4: uuidv4 } = require('uuid');
+const verifyingDetails = require("../../Tempelates/verifyingDetails");
+const documentUpdateRequestTemplate = require("../../Tempelates/documentUpdateRequestTemplate");
+const mailSender = require("../../utils/admin/mailSender");
 
 exports.register = async (req, res) => {
-    const { phone, isNewIP, name, email } = req.body;
+    const { phone, name, email } = req.body;
     const ip = req.ip;
+
     if (!phone) {
         return res.status(400).json({
             message: "No phone number provided"
-        })
+        });
     }
+
+    // Check if a logistic with the same phone exists
     const checkLogisticPresent = await Logistic.findOne({ phone });
 
     if (checkLogisticPresent) {
+        if (checkLogisticPresent.status === false) {
+            // Logistic exists with status false, delete and create a new one
+            await Logistic.deleteOne({ phone });
+        } else {
+            // Logistic exists and is active
+            return res.status(401).json({
+                success: false,
+                message: "Logistic already exists"
+            });
+        }
+    }
+
+    const checkEmailPresent = await Logistic.findOne({ email });
+    if(checkEmailPresent){
         return res.status(401).json({
             success: false,
-            message: "Logistic already exists"
-        })
+            message: "Email already exists"
+        });
     }
+
+    // Generate OTP and hash it
     const phoneOTP = generateOTP();
     const hashedOTP = await bcrypt.hash(phoneOTP, 10);
 
     try {
-        const logistic = await Logistic.create({ phone, OTP: hashedOTP, name, email });
+        // Create a new logistic with status false (inactive)
+        const logistic = await Logistic.create({ phone, OTP: hashedOTP, name, email, status: false });
         sendOTP(phoneOTP, phone);
-        console.log(phone, phoneOTP)
+        console.log("logistic phone", phone, "otp", phoneOTP);
         const currentTime = new Date(Date.now() + (330 * 60000)).toISOString();
-        logistic.lastLogin = currentTime
+        logistic.lastLogin = currentTime;
         if (!logistic.ip.includes(ip)) {
             logistic.ip.push(ip);
             await logistic.save();
         }
         return res.status(200).json({
             success: true,
-            message: "OTP sent successfully",
+            message: "OTP sent successfully. Please verify your OTP.",
             logistic
         });
     } catch (error) {
@@ -278,7 +302,7 @@ exports.register = async (req, res) => {
             error: error.message
         });
     }
-}
+};
 
 exports.verifyOTP = async (req, res) => {
     const { phone, otp } = req.body;
@@ -290,6 +314,7 @@ exports.verifyOTP = async (req, res) => {
 
     try {
         const logistic = await Logistic.findOne({ phone });
+        console.log(logistic)
         if (!logistic) {
             return res.status(404).json({
                 message: "Logistic not found"
@@ -305,7 +330,6 @@ exports.verifyOTP = async (req, res) => {
         const currentTime = new Date(Date.now() + (330 * 60000));
         const timeDiff = Math.abs(currentTime - lastLoginTime);
         const minutesDiff = Math.ceil(timeDiff / (1000 * 60));
-        console.log(minutesDiff)
         if (minutesDiff > 5) {
             return res
                 .status(401)
@@ -318,12 +342,22 @@ exports.verifyOTP = async (req, res) => {
                 expiresIn: "30m",
             }
         );
+
+        if (logistic.verificationStatus == "pending") {
+            console.log("hi")
+            const emailBody = documentUpdateRequestTemplate(logistic.name);
+            await mailSender(logistic.email, 'Logistic Registered', emailBody);
+        }
+        logistic.status = true;
+        await logistic.save();
+
         return res.status(200).json({
             success: true,
             message: "OTP verified successfully",
             token
         });
     } catch (error) {
+        console.log(error.message)
         return res.status(500).json({
             success: false,
             message: "Failed to verify OTP",
@@ -342,6 +376,7 @@ exports.login = async (req, res) => {
                 message: "Please register first"
             });
         }
+        // console.log("helow")
         const phoneOTP = generateOTP();
         const hashedOTP = await bcrypt.hash(phoneOTP, 10);
         logistic.OTP = hashedOTP;
@@ -371,9 +406,19 @@ exports.login = async (req, res) => {
 }
 
 exports.updateProfile = async (req, res) => {
-    const { phone , docs } = req.body;
+    const { phone, docs } = req.body;
     try {
         let document;
+
+        const email = req.body.email;
+
+        // Check if email is provided and exists in the database
+        if (email) {
+            const emailExists = await Logistic.findOne({ email: email });
+            if (emailExists && emailExists.phone != phone) {
+                return res.status(400).json({ message: 'Email already exists' });
+            }
+        }
         // console.log(docs)
         const updatedLogistic = await Logistic.findOneAndUpdate(
             { phone: phone },
@@ -430,7 +475,7 @@ exports.updateDocs = async (req, res) => {
             req.body,
             { new: true }
         );
-        
+
         if (!updatedLogistic) {
             return res.status(404).json({ message: 'logistic not found' });
         }
@@ -442,6 +487,10 @@ exports.updateDocs = async (req, res) => {
         const logisticDoc = `${process.env.UPLOAD_URL}` + document.slice(5);
         updatedLogistic.document = logisticDoc
         await updatedLogistic.save();
+
+        const emailBody = verifyingDetails(updatedLogistic.name);
+        await mailSender(updatedLogistic.email, 'Registration Confirmation', emailBody);
+
         res.status(200).json({
             message: "Logistic Updated successfully",
             updatedLogistic
@@ -475,11 +524,31 @@ exports.fetchProfile = async (req, res) => {
     try {
         const { phone } = req.body;
         const logistic = await Logistic.findOne({ phone });
+        // console.log(logistic)
+        let bankDetails = await BankDetails.findOne({ bankId: logistic.logisticId });
+
+        if (!bankDetails) {
+            // Create a new BankDetails document with blank fields
+            bankDetails = new BankDetails({
+                accountHolderName: "",
+                bankName: "",
+                accountNumber: "",
+                IFSC: "",
+                branch: "",
+                address: "",
+                bankId: logistic.logisticId,
+                city: "",
+                bankFor: ""
+            });
+            await bankDetails.save();
+        }
         return res.json({
             message: "Profile fetched successfully",
-            logistic
+            logistic,
+            bankDetails
         })
     } catch (err) {
+        console.log(err)
         res.status(400).json({ message: err.message });
     }
 }

@@ -328,7 +328,7 @@ h5,h6{
     color: #fd7e14
 }
 .navbar.nav-sticky .navbar-nav .nav-item .nav-link{
-    color:#515279
+    color:#ffffff
 }
 .navbar.nav-sticky .navbar-nav .nav-item .nav-link:hover{
     color: #fd7e14 !important
@@ -400,7 +400,7 @@ h5,h6{
 }
 @media(max-width: 991px){
     .navbar .navbar-nav .nav-item .nav-link{
-        color:#283032 !important
+        color:#ffffff !important
     }
 }
 .bg-img{

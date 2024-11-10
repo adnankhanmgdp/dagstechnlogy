@@ -21,6 +21,7 @@ const EditCoupon = () => {
 
   useEffect(() => {
     const fetchCoupon = async () => {
+      // console.log(id)
       try {
         const res = await fetch(`${process.env.REACT_APP_API_URL}/coupon/${id}`, {
           method: "GET",
@@ -30,10 +31,16 @@ const EditCoupon = () => {
           },
         });
         const data = await res.json();
+        // console.log(data)
         if (res.ok) {
+          // Properly parse the expiryAt date and convert status and isFlat
           setCoupon({
-            ...data.coupon,
+            couponName: data.coupon.couponName || "",
+            couponDiscount: data.coupon.couponDiscount || "",
+            description: data.coupon.description || "",
             expiryAt: data.coupon.expiryAt ? new Date(data.coupon.expiryAt).toISOString().substring(0, 10) : "",
+            maxDiscount: data.coupon.maxDiscount || "",
+            minAmount: data.coupon.minAmount || "",
             status: data.coupon.status ? "active" : "inactive",
             isFlat: data.coupon.isFlat ? "flat" : "percentage",
           });
@@ -182,7 +189,6 @@ const EditCoupon = () => {
               Save
             </button>
           </form>
-          <ToastContainer />
         </div>
       </div>
     </div>

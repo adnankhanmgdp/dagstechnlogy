@@ -1,21 +1,23 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 const CreateUser = () => {
 
   const [formData, setFormData] = useState({});
-  console.log(formData);
+  const navigate = useNavigate();
+  // console.log(formData);
 
   const token = localStorage.getItem("token");
 
   const handleChange = (e) => {
-    setFormData({...formData, [e.target.id]: e.target.value });
+    setFormData({ ...formData, [e.target.id]: e.target.value });
   }
 
-  const handleSubmit = async(e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     try {
       const res = await fetch(
         `${process.env.REACT_APP_API_URL}/createUser`,
@@ -31,10 +33,11 @@ const CreateUser = () => {
 
       const data = await res.json();
       if (res.ok) {
-        console.log(data);
+        // console.log(data);
         toast.success("user created successfully")
+        navigate("/users/allUsers");
       }
-      console.log(data)
+      // console.log(data)
 
     } catch (error) {
       console.log(error.message);
@@ -46,7 +49,6 @@ const CreateUser = () => {
       style={{ background: "#F8F8FB", height: "100vh", paddingTop: "200px" }}
       className="main-content d-flex justify-content-center align-items-center"
     >
-      <ToastContainer/>
       <div className="page-content">
         <div className="container">
           <form className="border bg-white mt-5 p-4">

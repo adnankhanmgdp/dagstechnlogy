@@ -18,8 +18,8 @@ const VendorSettlement = () => {
   const [vendorBank, setVendorBank] = useState({})
   const [vendorDetails, setVendorDetails] = useState({})
 
-  console.log("vendorBank", vendorBank);
-  console.log("vendorDetails", vendorDetails);
+  // console.log("vendorBank", vendorBank);
+  // console.log("vendorDetails", vendorDetails);
 
   useEffect(() => {
     if (vendorSettlements.length > 0) {
@@ -42,7 +42,7 @@ const VendorSettlement = () => {
     setShow(false)
   };
 
-  console.log("yesClick", yesClick);
+  // console.log("yesClick", yesClick);
 
   const token = localStorage.getItem('token');
 
@@ -81,8 +81,9 @@ const VendorSettlement = () => {
           body: JSON.stringify({ vendorId: user.orders[0].vendorId }),
         });
         const data = await res.json();
+        console.log(data.vendor)
         if (res.ok) {
-          setVendorDetails(data.vendor);
+          setVendorDetails(data.vendor[0]);
         }
       } catch (error) {
         console.error("Error fetching vendor settlements", error);
@@ -118,7 +119,7 @@ const VendorSettlement = () => {
         const data = await res.json();
         if (res.ok) {
           setVendorSettlements(data);
-          console.log("data", data);
+          // console.log("data", data);
         }
       } catch (error) {
         console.error("Error fetching vendor settlements", error);
@@ -159,7 +160,7 @@ const VendorSettlement = () => {
 
       const data = await res.json();
       if (res.ok) {
-        console.log(data)
+        // console.log(data)
       }
 
     } catch (error) {
@@ -173,7 +174,6 @@ const VendorSettlement = () => {
 
   return (
     <div className="main-content" style={{ backgroundColor: "#F6F6F9" }}>
-      <ToastContainer />
       <div className="page-content">
         <div className="container-fluid p-2">
           <h5 className="text-center">Settlement of Vendor</h5>
@@ -196,7 +196,7 @@ const VendorSettlement = () => {
                     <tr className="text-center" key={user.vendorId}>
                       <td>{user.orders[0].vendorId}</td>
                       <td>{user.orders.length}</td>
-                      <td>₹ {user.totalSettlement}</td>
+                      <td>₹ {(user.totalSettlement).toFixed(2)}</td>
                       <td>
                         <button
                           onClick={() => handleShow(user)}
@@ -229,7 +229,11 @@ const VendorSettlement = () => {
                 className="text-center ml-3 w-50 d-flex flex-column border p-4 bg-white mb-3"
               >
                 <img
-                  src="/assets/images/users/avatar-1.jpg"
+                 src={
+                  vendorDetails && vendorDetails.profilePic
+                    ? vendorDetails.profilePic
+                    : "https://www.pngall.com/wp-content/uploads/5/Profile-Avatar-PNG-Free-Download.png"
+                }
                   alt="VendorImage"
                   className="avatar-sm mx-auto rounded-circle"
                 />
@@ -243,7 +247,7 @@ const VendorSettlement = () => {
               <div className="mx-auto mt-4">
                 <span>Amount to Settle :</span> <br />
                 <span style={{ fontSize: "25px" }}>
-                  ₹{modalData.totalSettlement}
+                  ₹{(modalData.totalSettlement).toFixed(2)}
                 </span>{" "}
                 <br />
                 <button

@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { isTokenExpired } from "./isTokenExpired ";
-const useTokenExpiryChecker = (onTokenExpired, checkInterval = 60000) => {
+const useTokenExpiryChecker = (onTokenExpired, checkInterval = 15 * 60 * 1000) => {
   useEffect(() => {
     const interval = setInterval(() => {
       const token = localStorage.getItem("token");

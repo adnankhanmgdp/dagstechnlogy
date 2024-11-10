@@ -15,12 +15,13 @@ const { createOrder, fetchServices, verifyPayment, fetchAllOrders, viewItem, vie
 
 const { auth } = require('../middlewares/user/auth')
 const { findNearestVendor, ShortestDistanceForVendor, ShortestDistanceforUser } = require("../controllers/user/logistic.user")
-const { giveReview, showReview } = require("../controllers/user/vendor.user")
+const { giveReview, showReview, time, getFormattedTime } = require("../controllers/user/vendor.user")
 const { fetchNotifications } = require("../controllers/user/notifications.user")
 const { tnc } = require("../controllers/user/tnc.user")
 const { getActiveCoupons } = require("../controllers/user/coupon.user")
 const { getTimeSlots } = require("../controllers/user/timeSlot.user")
 const { fetchCarousel } = require("../controllers/user/carousel.user")
+const { available } = require("../controllers/user/availablity.user")
 
 router.post("/signup", register)
 router.post("/verifyOTP", verifyOTP)
@@ -46,7 +47,7 @@ router.post("/ShortestDistanceForVendor", ShortestDistanceForVendor)
 router.post("/ShortestDistanceforUser", ShortestDistanceforUser)
 
 //notigications
-router.get("/notifications", fetchNotifications)
+router.post("/notifications", fetchNotifications)
 
 //timeslot
 router.get('/timeSlot', getTimeSlots)
@@ -61,6 +62,14 @@ router.get("/tnc", tnc)
 
 router.post("/review", giveReview)
 router.post("/showReview", showReview)
+
+//available
+router.post("/serviceAvailable", available)
+
+
+// router.get("/timee", time)
+
+// router.get("/timeee", getFormattedTime)
 
 
 module.exports = { userRoutes: router }

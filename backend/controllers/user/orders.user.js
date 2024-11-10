@@ -90,7 +90,7 @@ exports.createOrder = async (req, res) => {
         let orderPicsUrls = []
         if (orderPics[0].length > 10) {
             orderPicsUrls = await saveOrderPics(orderPics);
-            console.log(orderPicsUrls[0])
+            // console.log(orderPicsUrls[0])
         }
 
         if (deliveryType == "normal") {
@@ -99,11 +99,11 @@ exports.createOrder = async (req, res) => {
             date.setHours(date.getHours() + 4);
         }
 
-        //calculate if any coupon applied
+        //calculate if any coupon applied isFlat true means flat discount else percentage discount
         if (coupon) {
-            if (coupon.status == true && coupon.isFlat && allAmount > coupon.minAmount) {
+            if (coupon.status == true && coupon.isFlat && allAmount >= coupon.minAmount) {
                 discountedPrice = coupon.couponDiscount;
-            } else if (coupon.status == true && coupon.isFlat == false && allAmount > coupon.minAmount) {
+            } else if (coupon.status == true && coupon.isFlat == false && allAmount >= coupon.minAmount) {
                 discountedPrice = (allAmount * coupon.couponDiscount) / 100;
                 if (discountedPrice > coupon.maxDiscount) {
                     discountedPrice = coupon.couponDiscount
@@ -115,6 +115,7 @@ exports.createOrder = async (req, res) => {
                 })
             }
         }
+        
         let couponName = null;
         if(coupon){
             couponName = coupon.couponName
@@ -130,6 +131,8 @@ exports.createOrder = async (req, res) => {
                     finalAmount: total,
                     discount: discountedPrice,
                     coupon: couponName ,
+                    platformFee:misc.platformFee,
+                    deliveryType:deliveryType,
                     deliveryFee: deliveryFee * 2,
                     vendorId: vendorId,
                     taxes: taxAmount,
@@ -159,9 +162,9 @@ exports.createOrder = async (req, res) => {
         await user.save();
         if(coupon){
             coupon.usedTimes += 1;
+            await coupon.save();
         }
-        await coupon.save();
-        console.log(parseInt((allAmount + deliveryFee * 2 + taxAmount) * 100))
+        // console.log(parseInt((allAmount + deliveryFee * 2 + taxAmount) * 100))
         const razorpayOrder = await razorpay.orders.create({
             amount: parseInt(total * 100),
             currency: 'INR',
@@ -211,10 +214,10 @@ async function saveOrderPics(orderPics) {
 exports.verifyPayment = async (req, res) => {
     const { razorpayOrderId, orderId, paymentId, paymentSignature } = req.body
     try {
-        console.log(paymentId, orderId, razorpayOrderId, paymentSignature)
+        // console.log(paymentId, orderId, razorpayOrderId, paymentSignature)
         const payment = await razorpay.payments.fetch(paymentId);
         const isSignatureValid = verifySignature(paymentSignature, razorpayOrderId, paymentId);
-        console.log(isSignatureValid)
+        // console.log(isSignatureValid)
         if (!isSignatureValid) {
             return res.json({ message: "Invalid payment signature", payment, isSignatureValid });
         }
@@ -261,12 +264,12 @@ exports.verifyPayment = async (req, res) => {
 const verifySignature = (paymentSignature, razorpayOrderId, paymentId) => {
 
     const secret = process.env.RAZORPAY_SECRET_KEY;
-    console.log("orderid---->" + razorpayOrderId)
-    console.log("paymentID---->" + paymentId)
+    // console.log("orderid---->" + razorpayOrderId)
+    // console.log("paymentID---->" + paymentId)
     const generatedSignature = crypto.createHmac('sha256', secret)
         .update(razorpayOrderId + "|" + paymentId)
         .digest('hex');
-    console.log(generatedSignature)
+    // console.log(generatedSignature)
     return generatedSignature === paymentSignature;
 };
 
@@ -384,7 +387,7 @@ exports.viewItem = async (req, res) => {
 exports.cancelledStatus = async (req, res) => {
     try {
         const { orderId, refundRequest } = req.body;
-        console.log(req.body)
+        // console.log(req.body)
 
         const order = await Order.findOneAndUpdate(
             { orderId },

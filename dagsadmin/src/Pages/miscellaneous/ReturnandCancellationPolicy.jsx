@@ -67,7 +67,6 @@ const handleEditorChange = (content) => {
 
   return (
     <div className="main-content" style={styles.mainContent}>
-      <ToastContainer />
       <div className="page-content" style={styles.pageContent}>
         {showEditor ? (
           <div className="container-fluid" style={styles.formContainer}>

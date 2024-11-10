@@ -9,10 +9,23 @@ const Order = () => {
   const navigate = useNavigate();
   const token = localStorage.getItem("token");
 
-  const formatDate = (isoString) => {
-    const date = new Date(isoString);
-    const options = { day: "2-digit", month: "short", year: "numeric" };
-    return date.toLocaleDateString("en-US", options);
+  // const formatDate = (isoString) => {
+  //   const date = new Date(isoString);
+  //   const options = { day: "2-digit", month: "short", year: "numeric" };
+  //   return date.toLocaleDateString("en-US", options);
+  // };
+  const formatDate = (date) => {
+    const options = {
+      timeZone: 'UTC',
+      hour12: true,
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric'
+    };
+    return new Intl.DateTimeFormat('en-US', options).format(new Date(date));
   };
 
   useEffect(() => {
@@ -53,12 +66,14 @@ const Order = () => {
       }
 
       // Initialize DataTable
-      $(tableRef.current).DataTable();
+      $(tableRef.current).DataTable({
+        order: [[1, "desc"]]
+      });
     }
   }, [orders]);
 
   const handleNavigation = (order) => {
-    navigate("/orders/orderDetails", { state: { order } });
+    navigate(`/orders/orderDetails/${order.orderId}`, { state: { order } });
   };
 
   return (
@@ -124,7 +139,7 @@ const Order = () => {
                               width: "100px",
                             }}
                           >
-                            {order.orderStatus[0].status}
+                            {order.orderStatus[order.orderStatus.length - 1].status}
                           </span>
                         </div>
                       </td>

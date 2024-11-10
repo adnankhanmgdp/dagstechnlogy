@@ -37,7 +37,7 @@ exports.settlement = async (req, res) => {
                     vendorId: vendorId, // Filter orders by vendorId
                     orderStatus: { // Ensure order has 'initiated' status and exclude 'cancelled' status
                         $elemMatch: {
-                            status: 'initiated'
+                            status: 'readyToDelivery'
                         },
                         $not: {
                             $elemMatch: {
@@ -50,13 +50,15 @@ exports.settlement = async (req, res) => {
             {
                 $group: {
                     _id: null,
-                    totalAmount: { $sum: '$vendorFee' } // Summing up the 'vendorFee' field of matching orders
+                    totalAmount: { $sum: '$vendorFee' } // Sum up the 'vendorFee' field of matching orders
                 }
             }
         ]);
 
         if (dueAmount.length > 0 && totalAmount.length > 0) {
             amountEarned = totalAmount[0].totalAmount - dueAmount[0].totalAmount
+        } else {
+            amountEarned = totalAmount[0].totalAmount
         }
 
         res.status(200).json({

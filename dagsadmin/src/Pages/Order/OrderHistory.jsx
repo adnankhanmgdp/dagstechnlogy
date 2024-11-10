@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import $ from "jquery";
 import { Link, useNavigate } from "react-router-dom";
-import "datatables.net-bs4"; 
+import "datatables.net-bs4";
 
 const Order = () => {
   const tableRef = useRef();
@@ -25,13 +25,12 @@ const Order = () => {
           },
         );
         const data = await res.json();
-        console.log("this is dataaaaaaaa",data)
+        // console.log("this is dataaaaaaaa", data)
 
         if (res.ok) {
           const deliveredOrders = data.populatedOrders.filter(
             (order) =>
-              order.orderStatus[order.orderStatus.length - 1].status === "delivered" ||
-              order.orderStatus[order.orderStatus.length - 1].status === "cancelled",
+              order.orderStatus[order.orderStatus.length - 1].status === "delivered"
           );
           setOrders(deliveredOrders);
         }
@@ -50,19 +49,21 @@ const Order = () => {
       }
 
       // Initialize DataTable
-      $(tableRef.current).DataTable();
+      $(tableRef.current).DataTable({
+        order: [[1, "desc"]]
+      });
     }
   }, [orders]);
 
   const handleNavigation = (order) => {
-    navigate("/orders/orderDetails", { state: { order } });
+    navigate(`/orders/orderDetails/${order.orderId}`, { state: { order } });
   };
 
-    const formatDate = (isoString) => {
-      const date = new Date(isoString);
-      const options = { day: "2-digit", month: "short", year: "numeric" };
-      return date.toLocaleDateString("en-US", options);
-    };
+  const formatDate = (isoString) => {
+    const date = new Date(isoString);
+    const options = { day: "2-digit", month: "short", year: "numeric" };
+    return date.toLocaleDateString("en-US", options);
+  };
 
   return (
     <>
@@ -125,13 +126,13 @@ const Order = () => {
                                   order.orderStatus[0].status === "Cancelled"
                                     ? "#a7ebc0"
                                     : order.orderStatus[0].status ===
-                                        "Delivered"
+                                      "Delivered"
                                       ? "#ffa8a8"
                                       : "",
                                 width: "100px",
                               }}
                             >
-                          {order.orderStatus[order.orderStatus.length-1].status}
+                              {order.orderStatus[order.orderStatus.length - 1].status}
                             </span>
                           </div>
                         </td>

@@ -9,6 +9,7 @@ import { Button, Modal } from "react-bootstrap";
 
 const LogisticSettlement = () => {
   const tableRef = useRef();
+  const navigate = useNavigate();
 
   const [logisticPickupSettlement, setLogisticPickupSettlement] = useState([]);
   const [logisticDeliverySettlement, setLogisticDeliverySettlement] = useState([]);
@@ -19,8 +20,8 @@ const LogisticSettlement = () => {
   const [logisticBank, setLogisticBank] = useState({});
   const [logisticDetails, setLogisticDetails] = useState({});
 
-  console.log("logisticBank", logisticBank);
-  console.log("logisticDetails", logisticDetails);
+  // console.log("logisticBank", logisticBank);
+  // console.log("logisticDetails", logisticDetails);
 
   useEffect(() => {
     if (logisticPickupSettlement.length > 0) {
@@ -43,14 +44,14 @@ const LogisticSettlement = () => {
     setShow(false);
   };
 
-  console.log("yesClick", yesClick);
+  // console.log("yesClick", yesClick);
 
   const token = localStorage.getItem("token");
 
   const handleShow = (user) => {
     setYesClick(user);
 
-    console.log("bandjhbhfvbdjbjdsfgbbgrffgvb", user.orders[0].logisticId);
+    // console.log("bandjhbhfvbdjbjdsfgbbgrffgvb", user.orders[0].logisticId);
 
     const logisticBank = async () => {
       try {
@@ -88,7 +89,7 @@ const LogisticSettlement = () => {
         );
         const data = await res.json();
         if (res.ok) {
-          console.log("fetchLogistic",data.logistic)
+          // console.log("fetchLogistic",data.logistic)
           setLogisticDetails(data.logistic[0]);
         }
       } catch (error) {
@@ -117,7 +118,7 @@ const LogisticSettlement = () => {
         const data = await res.json();
         if (res.ok) {
           setLogisticPickupSettlement(data);
-          console.log("data", data);
+          // console.log("data", data);
         }
       } catch (error) {
         console.error("Error fetching vendor settlements", error);
@@ -131,7 +132,6 @@ const LogisticSettlement = () => {
     setVerifyPayment(true);
   };
 
-  const navigate = useNavigate();
 
   const closeSettleModal = () => {
     setShow(true);
@@ -155,9 +155,12 @@ const LogisticSettlement = () => {
 
       const data = await res.json();
       if (res.ok) {
-        console.log(data);
+        toast.success("Amount Settled Successfully")
+        navigate("/settlement/SettlementHistory");
       }
-    } catch (error) {}
+    } catch (error) {
+      console.error(error.message)
+    }
 
     setShow(false);
     setVerifyPayment(false);
@@ -177,7 +180,7 @@ const LogisticSettlement = () => {
       <ToastContainer />
       <div className="page-content">
         <div className="container-fluid p-2">
-          <h5 className="text-center">Settlement of Logistic delivery</h5>
+          <h5 className="text-center">Settlement of Logistic pickup</h5>
           <div className="table-responsive tableBg p-3">
             <table
               ref={tableRef}
@@ -194,10 +197,10 @@ const LogisticSettlement = () => {
               <tbody>
                 {logisticPickupSettlement.length > 0 ? (
                   logisticPickupSettlement.map((user) => (
-                    <tr className="text-center" key={user.orders[0].logisticId}>
-                      <td>{user.orders[0].logisticId}</td>
-                      <td>{user.orders.length}</td>
-                      <td>₹ {user.totalSettlement}</td>
+                    <tr className="text-center" key={user?.orders[0]?.logisticId}>
+                      <td>{user?.orders[0].logisticId[0]}</td>
+                      <td>{user?.orders.length}</td>
+                      <td>₹ {(user?.totalSettlement.toFixed(2))}</td>
                       <td>
                         <button
                           onClick={() => handleShow(user)}
@@ -230,21 +233,25 @@ const LogisticSettlement = () => {
                 className="text-center ml-3 w-50 d-flex flex-column border p-4 bg-white mb-3"
               >
                 <img
-                  src="/assets/images/users/avatar-1.jpg"
+                  src={
+                    logisticDetails && logisticDetails?.profilePic
+                      ? logisticDetails?.profilePic
+                      : "https://www.pngall.com/wp-content/uploads/5/Profile-Avatar-PNG-Free-Download.png"
+                  }
                   alt="VendorImage"
                   className="avatar-sm mx-auto rounded-circle"
                 />
                 <div className="mt-2 d-flex flex-column flex-start">
                   <span>
-                    {logisticDetails.name} ({logisticDetails.logisticId})
+                    {logisticDetails?.name} ({logisticDetails?.logisticId})
                   </span>
-                  <span>{logisticDetails.address}</span>
+                  <span>{logisticDetails?.address}</span>
                 </div>
               </div>
               <div className="mx-auto mt-4">
                 <span>Amount to Settle :</span> <br />
                 <span style={{ fontSize: "25px" }}>
-                  ₹{modalData.totalSettlement}
+                  ₹{(modalData?.totalSettlement).toFixed(2)}
                 </span>{" "}
                 <br />
                 <button
@@ -271,7 +278,7 @@ const LogisticSettlement = () => {
                         type="text"
                         className="form-control bg-white"
                         id="accountHolderName"
-                        value={logisticBank.accountHolderName}
+                        value={logisticBank?.accountHolderName}
                         readOnly
                       />
                     </div>
@@ -285,7 +292,7 @@ const LogisticSettlement = () => {
                         type="text"
                         className="form-control bg-white"
                         id="accountNo"
-                        value={logisticBank.accountNumber}
+                        value={logisticBank?.accountNumber}
                         readOnly
                       />
                     </div>
@@ -299,7 +306,7 @@ const LogisticSettlement = () => {
                         type="text"
                         className="form-control bg-white"
                         id="bankName"
-                        value={logisticBank.bankName}
+                        value={logisticBank?.bankName}
                         readOnly
                       />
                     </div>
@@ -313,7 +320,7 @@ const LogisticSettlement = () => {
                         type="text"
                         className="form-control bg-white"
                         id="ifscCode"
-                        value={logisticBank.IFSC}
+                        value={logisticBank?.IFSC}
                         readOnly
                       />
                     </div>
@@ -333,8 +340,8 @@ const LogisticSettlement = () => {
                 <tbody>
                   {modalData.orders.map((order, index) => (
                     <tr className="text-center" key={index}>
-                      <td>{order.orderDate}</td>
-                      <td>{order.orderId}</td>
+                      <td>{order?.orderDate}</td>
+                      <td>{order?.orderId}</td>
                       <td>
                         <button
                           onClick={() => seeDetails(order)}

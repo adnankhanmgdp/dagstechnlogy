@@ -43,16 +43,17 @@ exports.credentials = async (req, res) => {
                         phone
                     });
             } else {
+                const date = Date(Date.now() + (8 * 60 * 60 * 1000))
                 const token = jwt.sign(
-                    { email: admin.email, id: admin._id },
+                    { email: admin.email, id: admin._id , date },
                     process.env.JWT_SECRET,
                     {
-                        expiresIn: "30m",
+                        expiresIn: "8h",  // Set the JWT to expire in 8 hours
                     }
                 );
 
                 const options = {
-                    expires: new Date(Date.now() + 30 * 60 * 1000),
+                    expires: new Date(Date.now() + 8 * 60 * 60 * 1000),  // Set the cookie to expire in 8 hours
                     httpOnly: true,
                 };
                 res.cookie("token", token, options).status(200).json({
@@ -113,11 +114,12 @@ exports.verifyOTP = async (req, res) => {
                 .json({ success: false, message: "OTP expired" });
         }
 
+        const date = Date(Date.now() + (8 * 60 * 60 * 1000))
         const token = jwt.sign(
-            { email: admin.email, id: admin._id },
+            { email: admin.email, id: admin._id , date },
             process.env.JWT_SECRET,
             {
-                expiresIn: "30m",
+                expiresIn: "8h",
             }
         );
 
@@ -180,7 +182,7 @@ exports.twoSV = async (req, res) => {
 };
 
 exports.forgotPassword = async (req, res) => {
-    const { password, cpassword, phone } = req.body;
+    const { password, cpassword } = req.body;
     console.log(req.body)
     if (password !== cpassword) {
         return res.status(401).json({

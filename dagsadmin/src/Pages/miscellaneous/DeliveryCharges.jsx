@@ -52,7 +52,7 @@ const DeliveryCharges = () => {
 
   const handleSaveClick = async (key) => {
     // console.log(key)
-    console.log(editedValues[key])
+    // console.log(editedValues[key])
     try {
       const res = await fetch(
         `${process.env.REACT_APP_API_URL}/DeliveryCharge`,
@@ -150,7 +150,6 @@ const DeliveryCharges = () => {
   return (
     <div className="main-content" style={{ backgroundColor: "#F6F6F9" }}>
       <div className="page-content">
-        <ToastContainer />
         <div>
           <div className="container-fluid p-5 bg-white">
             <h5 className="text-center">Delivery Charges</h5>

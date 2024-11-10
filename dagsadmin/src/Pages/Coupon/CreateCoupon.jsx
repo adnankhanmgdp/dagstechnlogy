@@ -47,7 +47,6 @@ const CreateCoupon = () => {
       }
     } catch (error) {
       toast.error("An error occurred while creating the coupon");
-      console.error(error);
     }
   };
 
@@ -114,14 +113,14 @@ const CreateCoupon = () => {
             </div>
             <div className="form-group d-flex align-items-center">
               <div className="form-group mr-3">
-              <label>Expiry At</label>
-              <input
-                type="date"
-                name="expiryAt"
-                value={coupon.expiryAt}
-                onChange={handleChange}
-                className="form-control"
-              />
+                <label>Expiry At</label>
+                <input
+                  type="date"
+                  name="expiryAt"
+                  value={coupon.expiryAt}
+                  onChange={handleChange}
+                  className="form-control"
+                />
               </div>
               <div className="form-group">
                 <label>Discount Type</label>
@@ -140,18 +139,6 @@ const CreateCoupon = () => {
               Save
             </button>
           </form>
-          <ToastContainer
-            position="top-right"
-            autoClose={5000}
-            hideProgressBar={false}
-            newestOnTop={false}
-            closeOnClick
-            rtl={false}
-            pauseOnFocusLoss
-            draggable
-            pauseOnHover
-            style={{ zIndex: 9999 }} // Ensuring the toast is on top
-          />
         </div>
       </div>
     </div>

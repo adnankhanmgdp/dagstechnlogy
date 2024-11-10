@@ -5,7 +5,7 @@ import { Link, useNavigate } from "react-router-dom";
 const AllUsers = () => {
   const [message, setMessage] = useState("");
   const [users, setUsers] = useState([]);
-  console.log(users);
+  // console.log(users);
 
   const token = localStorage.getItem("token");
 
@@ -36,7 +36,7 @@ const AllUsers = () => {
   const navigate = useNavigate();
 
   const handleClick = (row) => {
-    navigate("/users/UserProfile", {
+    navigate(`/users/UserProfile/${row.phone}`, {
       state: {
         user: row,
       },

@@ -1,29 +1,29 @@
 import React, { useEffect, useRef, useState } from "react";
 import $ from "jquery";
 import { Link, useNavigate } from "react-router-dom";
-import "datatables.net-bs4"; 
+import "datatables.net-bs4";
 
 const VendorsList = () => {
   const tableRef = useRef();
 
   const [vendors, setVendors] = useState([])
   const [inactiveVendors, setInactiveVendor] = useState([])
-  console.log(vendors);
+  // console.log(vendors);
 
   const navigate = useNavigate();
   const token = localStorage.getItem("token");
 
-useEffect(() => {
-  if (vendors.length > 0) {
-    // Destroy previous instance of DataTable if exists
-    if ($.fn.dataTable.isDataTable(tableRef.current)) {
-      $(tableRef.current).DataTable().destroy();
-    }
+  useEffect(() => {
+    if (vendors.length > 0) {
+      // Destroy previous instance of DataTable if exists
+      if ($.fn.dataTable.isDataTable(tableRef.current)) {
+        $(tableRef.current).DataTable().destroy();
+      }
 
-    // Initialize DataTable
-    $(tableRef.current).DataTable();
-  }
-}, [vendors]);
+      // Initialize DataTable
+      $(tableRef.current).DataTable();
+    }
+  }, [vendors]);
 
   useEffect(() => {
     const fetchVendors = async () => {
@@ -52,11 +52,11 @@ useEffect(() => {
       }
     }
     fetchVendors();
-  },[])
+  }, [])
 
   const handleViewProfile = (vendor) => {
-    navigate("/vendors/vendorProfile", {
-      state:vendor
+    navigate(`/vendors/vendorProfile/${vendor.vendorId}`, {
+      state: vendor
     });
   }
 
@@ -98,11 +98,11 @@ useEffect(() => {
                 </thead>
                 <tbody>
                   {vendors.map((vendor) => (
-                    <tr key={vendor.vendorId}>
-                      <td className="text-center">{vendor.vendorId?vendor.vendorId:"---"}</td>
-                      <td className="text-center">{vendor.name?vendor.name:"---"}</td>
-                      <td className="text-center">{vendor.address?vendor.address:"---"}</td>
-                      <td className="text-center">{vendor.orders.length ? vendor.orders.length: "----"} </td>
+                    <tr key={vendor?.vendorId}>
+                      <td className="text-center">{vendor.vendorId ? vendor.vendorId : "---"}</td>
+                      <td className="text-center">{vendor.name ? vendor.name : "---"}</td>
+                      <td className="text-center">{vendor.address ? vendor.address : "---"}</td>
+                      <td className="text-center">{vendor.orders.length ? vendor.orders.length : "----"} </td>
                       {/* <td className="mt-4 text-center">
                         <div>
                           <span

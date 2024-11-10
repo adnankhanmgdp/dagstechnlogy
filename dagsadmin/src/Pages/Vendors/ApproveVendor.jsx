@@ -3,7 +3,7 @@ import $ from "jquery";
 import "datatables.net-bs4";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { Modal } from "bootstrap";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
@@ -12,15 +12,49 @@ const ApproveVendor = () => {
   const navigate = useNavigate();
   const [showModal, setShowModal] = useState(false);
   const location = useLocation();
-  const vendors = location.state.vendors;
+  const { id } = useParams()
+  const [vendors, setVendor] = useState()
+  const vendor = location?.state?.vendors;
   const token = localStorage.getItem("token");
 
+  // useEffect(() => {
+  //   const table = $(tableRef.current).DataTable();
+  //   return () => {
+  //     table.destroy();
+  //   };
+  // }, []);
+
+
   useEffect(() => {
+    const fetchVendorDetails = async () => {
+      // console.log("hi")
+      try {
+        const res = await fetch(`${process.env.REACT_APP_API_URL}/vendor/${id}`, {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        // console.log(res.vendor)
+        const data = await res.json();
+        if (res.ok) {
+          setVendor(data.vendor);
+        } else {
+          toast.warning(data.message);
+        }
+      } catch (error) {
+        toast.error(error.message);
+      }
+    };
+
+    fetchVendorDetails();
+
     const table = $(tableRef.current).DataTable();
     return () => {
       table.destroy();
     };
   }, []);
+
 
   const handleShow = () => setShowModal(true);
   const handleClose = () => setShowModal(false);
@@ -45,7 +79,7 @@ const ApproveVendor = () => {
 
       const data = await res.json();
       if (res.ok) {
-        navigate("/vendors/approveVendors");
+        navigate("/vendors/allVendors");
         toast.success("Vendor approved");
       } else {
         toast.warning(data.message);
@@ -58,22 +92,25 @@ const ApproveVendor = () => {
   const handleRemoveVendor = async () => {
     try {
       const res = await fetch(
-        `${process.env.REACT_APP_API_URL}/deleteUnapprovedVendor`,
+        `${process.env.REACT_APP_API_URL}/editVendor`,
         {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
           },
-          body: JSON.stringify({ vendorId: vendors.vendorId }),
+          body: JSON.stringify({
+            vendorId: vendors.vendorId,
+            verificationStatus: "inactive",
+          }),
         },
       );
 
       const data = await res.json();
       if (res.ok) {
-        navigate("/vendors/approveVendors");
+        toast.warning("Vendor rejected 😥");
+        navigate("/vendors/deactivatedVendors");
         handleClose();
-        toast.success(data.message);
       } else {
         toast.warning(data.message);
       }
@@ -87,7 +124,6 @@ const ApproveVendor = () => {
       className="main-content"
       style={{ backgroundColor: "#F6F6F9", minHeight: "100vh" }}
     >
-      <ToastContainer />
       <div className="page-content">
         <div className="container-fluid">
           <div className="row">
@@ -97,7 +133,11 @@ const ApproveVendor = () => {
                   <div className="row">
                     <div className="mx-auto mt-3">
                       <img
-                        src="/assets/images/users/avatar-1.jpg"
+                        src={
+                          vendors?.profilePic
+                            ? vendors?.profilePic
+                            : "https://tse3.mm.bing.net/th?id=OIP.K4jXSK4XQahOLPEliCtvlwHaHa&pid=Api&P=0&h=180"
+                        }
                         className="avatarCustom"
                         alt="user's img"
                       />
@@ -105,7 +145,7 @@ const ApproveVendor = () => {
                     <div className="col-12">
                       <div className="p-3">
                         <h5 className="text-center">
-                          {vendors.name}'s Profile
+                          {vendors?.name}'s Profile
                         </h5>
                         <p className="text-center text-primary">
                           " It will seem like simplified "
@@ -141,7 +181,7 @@ const ApproveVendor = () => {
                     Personal Information
                   </h4>
                   <p className="text-muted mb-4 font-size-14">
-                    Hi I'm {vendors.name}, has been the industry's standard
+                    Hi I'm {vendors?.name}, has been the industry's standard
                     dummy text To an English person, it will seem like
                     simplified English, as a skeptical Cambridge.
                   </p>
@@ -152,25 +192,25 @@ const ApproveVendor = () => {
                           <th className="headingCustom" scope="row">
                             Full Name :
                           </th>
-                          <td>{vendors.name}</td>
+                          <td>{vendors?.name}</td>
                         </tr>
                         <tr>
                           <th className="headingCustom" scope="row">
                             Mobile :
                           </th>
-                          <td>{vendors.phone}</td>
+                          <td>{vendors?.phone}</td>
                         </tr>
                         <tr>
                           <th className="headingCustom" scope="row">
                             E-mail :
                           </th>
-                          <td>{vendors.email}</td>
+                          <td>{vendors?.email}</td>
                         </tr>
                         <tr>
                           <th className="headingCustom" scope="row">
                             Location :
                           </th>
-                          <td>{vendors.address}</td>
+                          <td>{vendors?.address}</td>
                         </tr>
                       </tbody>
                     </table>
@@ -187,31 +227,31 @@ const ApproveVendor = () => {
                     Verify Documents
                   </h4>
                   <div className="row">
-                  <div className="mt-4  col-6 text-center">
-                    <img
-                      src={
-                        vendors?.profilePic
-                          ? vendors?.profilePic
-                          : "https://tse3.mm.bing.net/th?id=OIP.K4jXSK4XQahOLPEliCtvlwHaHa&pid=Api&P=0&h=180"
-                      }
-                      alt="DocumentImage"
-                      className="w-50"
-                    />
-                    <h4>Vendor Profile</h4>
-                  </div>
+                    <div className="mt-4  col-6 text-center">
+                      <img
+                        src={
+                          vendors?.profilePic
+                            ? vendors?.profilePic
+                            : "https://tse3.mm.bing.net/th?id=OIP.K4jXSK4XQahOLPEliCtvlwHaHa&pid=Api&P=0&h=180"
+                        }
+                        alt="DocumentImage"
+                        className="w-50"
+                      />
+                      <h4>Vendor Profile</h4>
+                    </div>
 
-                  <div className="mt-4 col-6 text-center">
-                    <img
-                      src={
-                        vendors?.document
-                          ? vendors?.document
-                          : "https://tse3.mm.bing.net/th?id=OIP.K4jXSK4XQahOLPEliCtvlwHaHa&pid=Api&P=0&h=180"
-                      }
-                      alt="DocumentImage"
-                      className="w-50"
-                    />
+                    <div className="mt-4 col-6 text-center">
+                      <img
+                        src={
+                          vendors?.document
+                            ? vendors?.document
+                            : "https://tse3.mm.bing.net/th?id=OIP.K4jXSK4XQahOLPEliCtvlwHaHa&pid=Api&P=0&h=180"
+                        }
+                        alt="DocumentImage"
+                        className="w-50"
+                      />
                       <h4>Document: {vendors?.docType}</h4>
-                  </div>
+                    </div>
 
                   </div>
                 </div>

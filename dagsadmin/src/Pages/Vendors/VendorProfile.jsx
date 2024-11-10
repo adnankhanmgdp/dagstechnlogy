@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import $ from "jquery";
 import "datatables.net-bs4"; // Import the Bootstrap 4 DataTables extension
-import { useLocation, useNavigate } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { Button, Modal } from "react-bootstrap";
 import { ToastContainer, toast } from "react-toastify";
@@ -12,16 +12,19 @@ import moment from "moment";
 const VendorProfile = () => {
   const tableRef = useRef();
   const [orders, setOrders] = useState([]);
+  const { id } = useParams()
   const [bankDetails, setBankDetails] = useState({});
   const [vendorOrder, setVendorOrder] = useState([]);
   const [feedbacks, setFeedbacks] = useState([]);
+  const [ifscCode, setIfscCode] = useState(""); // State for IFSC code
+  const [averageRating, setAverageRating] = useState(""); // State for IFSC code
 
   const navigate = useNavigate();
   const location = useLocation();
   const vendor = location.state;
   // console.log("vendorData", vendor);
   // console.log("vendor orders",vendorOrder)
-  const [vendorData, updateVendor] = useState(vendor);
+  const [vendorData, updateVendor] = useState();
 
   // console.log("vendor data", vendor.vendorId)
 
@@ -30,6 +33,44 @@ const VendorProfile = () => {
   let count = 0;
 
   useEffect(() => {
+    const fetchVendorDetails = async () => {
+      try {
+        const res = await fetch(`${process.env.REACT_APP_API_URL}/vendor/${id}`, {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        const data = await res.json();
+        if (res.ok) {
+          updateVendor(data.vendor);
+        } else {
+          toast.warning(data.message);
+        }
+      } catch (error) {
+        toast.error(error.message);
+      }
+    };
+
+    fetchVendorDetails();
+  }, [count]);
+
+  useEffect(() => {
+    if (feedbacks?.length > 0) {
+      if ($.fn.dataTable.isDataTable(tableRef.current)) {
+        $(tableRef.current).DataTable().destroy();
+      }
+      $(tableRef.current).DataTable({
+        paging: true,
+        searching: true,
+        ordering: true,
+        info: true,
+      });
+    }
+  }, [feedbacks]);
+
+  useEffect(() => {
+    console.log("hii")
     const fetchOrders = async () => {
       try {
         const res = await fetch(
@@ -40,10 +81,11 @@ const VendorProfile = () => {
               "Content-Type": "application/json",
               Authorization: `Bearer ${token}`,
             },
-            body: JSON.stringify({ vendorId: vendorData.vendorId }),
+            body: JSON.stringify({ vendorId: id }),
           },
         );
         const data = await res.json();
+        console.log(data.populatedOrders)
         if (res.ok) {
           // console.log("data",data)
           setOrders(data.populatedOrders);
@@ -64,12 +106,14 @@ const VendorProfile = () => {
               "Content-Type": "application/json",
               Authorization: `Bearer ${token}`,
             },
-            body: JSON.stringify({ vendorId: vendorData.vendorId }),
+            body: JSON.stringify({ vendorId: id }),
           },
         );
         const data = await res.json();
         if (res.ok) {
+          console.log(data.feedbacks)
           setFeedbacks(data.feedbacks);
+          setAverageRating(data.averageRating)
         }
       } catch (error) {
         console.error("Error fetching orders:", error);
@@ -77,6 +121,7 @@ const VendorProfile = () => {
     };
 
     const fetchBankDetails = async () => {
+      // console.log(vendorData)
       try {
         const res = await fetch(
           `${process.env.REACT_APP_API_URL}/fetchBankDetails`,
@@ -86,9 +131,10 @@ const VendorProfile = () => {
               "Content-Type": "application/json",
               Authorization: `Bearer ${token}`,
             },
-            body: JSON.stringify({ bankId: vendorData.vendorId }),
+            body: JSON.stringify({ bankId: id }),
           },
         );
+
         const data = await res.json();
         if (res.ok) {
           setBankDetails(data.bankDetails ? data.bankDetails : {});
@@ -125,8 +171,19 @@ const VendorProfile = () => {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({ vendorId: vendorId, status: "inactive" }),
+        body: JSON.stringify({ vendorId: id, verificationStatus: "inactive" }),
       });
+
+      const data = await res.json();
+      console.log(data.updatedVendor)
+
+      if (res.ok) {
+        updateVendor({
+          verificationStatus: data.updatedVendor.verificationStatus
+        });
+        toast.success("Vendor Deactivated Successfully");
+        navigate("/vendors/deactivatedVendors");
+      }
     } catch (error) {
       console.error("Error deactivating vendor:", error);
     }
@@ -140,22 +197,65 @@ const VendorProfile = () => {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({ vendorId: vendorId, status: "active" }),
+        body: JSON.stringify({ vendorId: id, verificationStatus: "active" }),
       });
+
+      const data = await res.json();
+
+      if (res.ok) {
+        updateVendor({
+          verificationStatus: data.updatedVendor.verificationStatus
+        });
+        toast.success("Vendor Deactivated Successfully");
+        navigate("/vendors/allVendors");
+      }
     } catch (error) {
       console.error("Error deactivating vendor:", error);
     }
   };
 
   const vendorOrderModal = (order) => {
-    navigate("/orders/orderDetails", { state: { order } });
+    navigate(`/orders/orderDetails/${order.orderId}`, { state: { order } });
   };
 
-  // const vendorOrderModal = (order) => {
-  //   navigate("/invoice/invoiceDetail", {
-  //     state: { order },
-  //   });
-  // };
+  //IFSC
+  const fetchBankDetailsByIfsc = async (ifsc) => {
+    try {
+      console.log("hi", ifsc)
+      const res = await fetch(`https://ifsc.razorpay.com/${ifsc}`);
+      const data = await res.json();
+      if (res.ok) {
+        // setBankDetails({
+        //   bankName: data.BANK,
+        //   IFSC: data.IFSC,
+        //   city: data.CITY,
+        //   branch: data.BRANCH,
+        // });
+        document.getElementById('branch1').value = data.BRANCH
+        document.getElementById('city').value = data.CITY
+        document.getElementById('bankName1').value = data.BANK
+        console.log("hi", data)
+      } else {
+        toast.warning(data.message || "Unable to fetch bank details");
+      }
+    } catch (error) {
+      toast.error(error.message || "Error fetching bank details");
+    }
+  };
+
+  const handleChangetheIFSC = (e) => {
+    let ifsc = e.target.value
+    if (ifsc.length >= 11) {
+      console.log(ifsc)// Assuming IFSC code is of length 11
+      fetchBankDetailsByIfsc(ifsc);
+    } else {
+      // setBankDetails({});
+      document.getElementById('branch1').value = "Loading..."
+      document.getElementById('city').value = "Loading..."
+      document.getElementById('bankName1').value = "Loading..."
+    }
+    setFormData({ ...formData, [e.target.id]: e.target.value });
+  };
 
   const [showModal, setShowModal] = useState(false);
 
@@ -168,12 +268,12 @@ const VendorProfile = () => {
   };
 
   const handleEdit = async (e) => {
-    // console.log(formData);
+
     e.preventDefault();
-    // console.log(vendorData.vendorId);
-    // console.log("formData", formData);
-    const updatedFormData = { ...formData, vendorId: vendor.vendorId }
+
+    const updatedFormData = { ...formData, vendorId: id, bankId: vendorData.vendorId, bankFor: "vendor" }
     // console.log("updatedFormData", updatedFormData);
+
     try {
       const res = await fetch(`${process.env.REACT_APP_API_URL}/editVendor`, {
         method: "POST",
@@ -183,27 +283,36 @@ const VendorProfile = () => {
         },
         body: JSON.stringify(updatedFormData),
       });
+
+      // console.log(updatedFormData)
       const data = await res.json();
+      console.log(data.updateBankDetails)
       // console.log("edited", data);
       if (res.ok) {
-        setBankDetails({
-          accountHolderName: data.updateBankDetails.accountHolderName,
-          accountNumber: data.updateBankDetails.accountNumber,
-          bankName: data.updateBankDetails.bankName,
-          IFSC: data.updateBankDetails.IFSC,
-        });
         updateVendor({
           name: data.updatedVendor.name,
           email: data.updatedVendor.email,
           phone: data.updatedVendor.phone,
           address: data.updatedVendor.address,
+          profilePic: data.updatedVendor.profilePic,
+          verificationStatus: data.updatedVendor.verificationStatus,
+          capacity: data.updatedVendor.capaciy
+        });
+        setBankDetails({
+          accountHolderName: data.updateBankDetails.accountHolderName,
+          accountNumber: data.updateBankDetails.accountNumber,
+          bankName: data.updateBankDetails.bankName,
+          IFSC: data.updateBankDetails.IFSC,
+          city: data.updateBankDetails.city,
+          branch: data.updateBankDetails.branch,
         });
         setShowModal(false);
         count++;
         toast.success("vendor updated successfully");
       }
     } catch (error) {
-      console.log(error);
+      toast.error(error.message)
+      // console.log(error);
     }
   };
 
@@ -225,6 +334,20 @@ const VendorProfile = () => {
       }
     }
     return stars;
+  };
+
+  const formatDateToUTC = (date) => {
+    const options = {
+      timeZone: 'UTC',
+      hour12: true,
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric'
+    };
+    return new Intl.DateTimeFormat('en-US', options).format(new Date(date));
   };
   // const { latitude, longitude } = vendor.geoCoordinates;
 
@@ -275,7 +398,6 @@ const VendorProfile = () => {
   return (
     <div className="main-content" style={{ backgroundColor: "#F6F6F9" }}>
       <div className="page-content">
-        <ToastContainer />
         <div className="container-fluid">
           <div className="row">
             <div className="d-flex flex-column m-3 flex-xl-row">
@@ -285,12 +407,12 @@ const VendorProfile = () => {
                     <div className="mx-auto mt-3">
                       <img
                         src={
-                          vendor?.profilePic
-                            ? vendor?.profilePic
+                          vendorData && vendorData.profilePic
+                            ? vendorData.profilePic
                             : "https://tse3.mm.bing.net/th?id=OIP.K4jXSK4XQahOLPEliCtvlwHaHa&pid=Api&P=0&h=180"
                         }
                         className="avatarCustom"
-                        alt="user's img"
+                        alt={vendorData ? `${vendorData.name}'s profile` : "default profile"}
                       />
                     </div>
                     <div className="col-12">
@@ -303,7 +425,7 @@ const VendorProfile = () => {
                         </p>
                       </div>
 
-                      {vendor && vendor.status === "active" ? (
+                      {vendorData && vendorData.verificationStatus === "active" ? (
                         <div className="d-flex h-25 flex-column">
                           <button
                             onClick={() => setShowModal(true)}
@@ -314,7 +436,7 @@ const VendorProfile = () => {
                           </button>
                           <button
                             onClick={() =>
-                              handleDeactivateVendor(vendor.vendorId)
+                              handleDeactivateVendor(vendorData.vendorId)
                             }
                             style={{ borderRadius: "7px" }}
                             className="bg-danger mt-2 border-0 text-white pt-1 pb-1 pl-4 pr-4"
@@ -326,7 +448,7 @@ const VendorProfile = () => {
                         <div className="d-flex h-25 flex-column">
                           <button
                             onClick={() =>
-                              handleActivateVendor(vendor.vendorId)
+                              handleActivateVendor(vendorData.vendorId)
                             }
                             style={{ borderRadius: "7px" }}
                             className="bg-danger mt-2 mb-3 border-0 text-white pt-1 pb-1 pl-4 pr-4"
@@ -341,48 +463,59 @@ const VendorProfile = () => {
               </div>
 
               <div className="card">
-                <div className="card-body">
-                  <h4 className="card-title mb-4 font-size-20">
-                    Personal Information
-                  </h4>
-                  <p className="text-muted mb-4 font-size-14">
-                    Hi, I'm {vendorData && vendorData.name}, a trusted name in
-                    the industry, offering top-quality services and products.
-                    With years of experience, I strive to provide unparalleled
-                    customer satisfaction and value.
-                  </p>
-                  <div className="table-responsive">
-                    <table className="table table-nowrap mb-0">
-                      <tbody>
-                        <tr>
-                          <th className="headingCustom" scope="row">
-                            Full Name :
-                          </th>
-                          <td>{vendorData && vendorData.name}</td>
-                        </tr>
-                        <tr>
-                          <th className="headingCustom" scope="row">
-                            Mobile :
-                          </th>
-                          <td>{vendorData && vendorData.phone}</td>
-                        </tr>
-                        <tr>
-                          <th className="headingCustom" scope="row">
-                            E-mail :
-                          </th>
-                          <td>{vendorData && vendorData.email}</td>
-                        </tr>
-                        <tr>
-                          <th className="headingCustom" scope="row">
-                            Location :
-                          </th>
-                          <td>{vendorData && vendorData.address}</td>
-                        </tr>
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-              </div>
+  <div className="card-body">
+    <div className="d-flex justify-content-between align-items-center mb-4">
+      <h4 className="card-title font-size-20">Personal Information</h4>
+      <div>
+        {vendorData && vendorData.profilePic ? (
+          <a href={vendorData.profilePic} target="_blank" rel="noopener noreferrer" className="mr-3">
+            Profile pic
+          </a>
+        ) : (
+          <span className="text-muted mr-3" style={{ cursor: "not-allowed" }}>
+            Profile pic
+          </span>
+        )}
+        {vendorData && vendorData.document ? (
+          <a href={vendorData.document} target="_blank" rel="noopener noreferrer">
+            Document
+          </a>
+        ) : (
+          <span className="text-muted" style={{ cursor: "not-allowed" }}>
+            Document
+          </span>
+        )}
+      </div>
+    </div>
+    <p className="text-muted mb-4 font-size-14">
+      Hi, I'm {vendorData && vendorData.name}, a trusted name in the industry, offering top-quality services and products. With years of experience, I strive to provide unparalleled customer satisfaction and value.
+    </p>
+    <div className="table-responsive">
+      <table className="table table-nowrap mb-0">
+        <tbody>
+          <tr>
+            <th className="headingCustom" scope="row">Full Name :</th>
+            <td>{vendorData && vendorData.name}</td>
+          </tr>
+          <tr>
+            <th className="headingCustom" scope="row">Mobile :</th>
+            <td>{vendorData && vendorData.phone}</td>
+          </tr>
+          <tr>
+            <th className="headingCustom" scope="row">E-mail :</th>
+            <td>{vendorData && vendorData.email}</td>
+          </tr>
+          <tr>
+            <th className="headingCustom" scope="row">Address :</th>
+            <td>{vendorData && vendorData.address}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+
             </div>
           </div>
 
@@ -448,6 +581,20 @@ const VendorProfile = () => {
                   </div>
                   <div className="col-md-6">
                     <div className="form-group">
+                      <label className="headingCustom" htmlFor="branch">
+                        Branch:
+                      </label>
+                      <input
+                        type="text"
+                        className="form-control bg-white"
+                        id="branch"
+                        value={bankDetails.branch ? bankDetails.branch : "N/A"}
+                        readOnly
+                      />
+                    </div>
+                  </div>
+                  <div className="col-md-6">
+                    <div className="form-group">
                       <label className="headingCustom" htmlFor="ifscCode">
                         IFSC Code:
                       </label>
@@ -465,37 +612,13 @@ const VendorProfile = () => {
             </div>
           </div>
 
-          {/* { vendor.geoCoordinates?.latitude ? (
-            <div style={{ width: "100%", maxWidth: "100%" }}>
-              <iframe
-                width="100%"
-                height="170"
-                frameborder="0"
-                scrolling="no"
-                marginheight="0"
-                marginwidth="0"
-                src={`https://maps.google.com/maps?q=${latitude},${longitude}&hl=es&z=14&amp;output=embed`}
-                title="Vendor Location on Google Maps"
-                style={{ border: 0 }}
-                allowfullscreen=""
-                loading="lazy"
-              ></iframe>
-            </div>
-          ) : (
-            <div style={{ width: "100%", maxWidth: "100%" }}>
-              <p>
-                <i>geoCoordinates are not available</i>
-              </p>
-            </div>
-          )} */}
-
           <div className="row mt-4">
             <div className="col-12">
               <div className="card">
                 <div className="card-body">
                   <div className="d-flex flex-row justify-content-between">
                     <span>
-                      <h4 className="card-title">Recent Orders</h4>
+                      <h4 className="card-title">Orders</h4>
                     </span>
                     <div>
                       <Button
@@ -519,7 +642,7 @@ const VendorProfile = () => {
                     </div>
                   </div>
                   <p className="card-title-desc">
-                    This Datatables is about the recent orders that have been
+                    This Datatables is about the orders that have been
                     assigned to the Logistic.
                   </p>
                   <div className="table-responsive">
@@ -542,8 +665,8 @@ const VendorProfile = () => {
                         {vendorOrder?.map((order) => (
                           <tr key={order.orderId}>
                             <td>{order.orderId}</td>
-                            <td>{order.orderDate}</td>
-                            <td className="text-center">{order.amount}</td>
+                            <td>{formatDateToUTC(order.orderDate)}</td>
+                            <td className="text-center">{(order?.amount).toFixed(2)}</td>
                             <td>
                               <div>
                                 <span
@@ -586,7 +709,65 @@ const VendorProfile = () => {
                 </div>
               </div>
 
-              <div className="border rounded shadow-sm p-3">
+              {/* editing this*/}
+              <div className="card">
+                <div className="card-body">
+                  <div className="d-flex flex-row justify-content-between">
+                    <span>
+                      <h4 className="card-title">Reviews</h4>
+                    </span>
+                    <div style={{
+                      backgroundColor: "#f8f9fa",
+                      borderRadius: "5px",
+                      padding: "10px 20px",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center"
+                    }}>
+                      <h5 style={{
+                        margin: 0,
+                        color: "#333",
+                        fontWeight: "bold"
+                      }}>
+                        Average Rating: {averageRating}
+                      </h5>
+                    </div>
+                  </div>
+                  <p className="card-title-desc">
+                  All reviews given to vendors by users
+                  </p>
+                  <div className="table-responsive">
+                    <table
+                      ref={tableRef}
+                      className="table table-striped table-bordered"
+                    >
+                      <thead>
+                        <tr>
+                          <th className="headingCustom">Order ID</th>
+                          <th className="headingCustom">Feedback</th>
+                          <th className="headingCustom">Ratings</th>
+                          <th className="headingCustom">User</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {feedbacks?.length > 0 ?
+                          feedbacks?.map((feedback, index) => (
+                            <tr key={index}>
+                              <td>{feedback?.orderId}</td>
+                              <td>{feedback?.feedback}</td>
+                              <td>{renderStars(parseInt(feedback?.rating))}</td>
+                              <td>{(feedback?.userId)}</td>
+                            </tr>
+                          ))
+                          : "No Reviews"}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+
+
+              {/* <div className="border rounded shadow-sm p-3">
                 <h4 className="mt-3 pl-3 mb-3">Ratings & Reviews</h4>
                 <div className="d-flex flex-wrap">
                   {feedbacks?.length > 0
@@ -610,7 +791,8 @@ const VendorProfile = () => {
                     ))
                     : "No Reviews"}
                 </div>
-              </div>
+              </div> */}
+
             </div>
           </div>
         </div>
@@ -625,6 +807,7 @@ const VendorProfile = () => {
           <Modal.Body>
             <div className="border p-3 m-1">
               <form>
+
                 <div className="form-group">
                   <label>Full Name :</label>
                   <input
@@ -657,7 +840,7 @@ const VendorProfile = () => {
                   />
                 </div>
                 <div className="form-group">
-                  <label>Location :</label>
+                  <label>Address :</label>
                   <input
                     id="address"
                     type="text"
@@ -667,6 +850,18 @@ const VendorProfile = () => {
                     defaultValue={vendorData.address}
                   />
                 </div>
+                <div className="form-group">
+                  <label>Capacity :</label>
+                  <input
+                    id="capacity"
+                    type="text"
+                    className="form-control"
+                    placeholder="10"
+                    onChange={handleChangetheprofile}
+                    defaultValue={vendorData.capacity}
+                  />
+                </div>
+
                 {/* Add more fields as needed */}
               </form>
             </div>
@@ -674,7 +869,8 @@ const VendorProfile = () => {
               <div className="card-body">
                 <h5 className="card-title">Account Details</h5>
                 <div className="row">
-                  <div className="col-md-12">
+
+                  <div className="col-md-6">
                     <div className="form-group">
                       <label
                         className="headingCustom"
@@ -695,6 +891,7 @@ const VendorProfile = () => {
                       />
                     </div>
                   </div>
+
                   <div className="col-md-6">
                     <div className="form-group">
                       <label className="headingCustom" htmlFor="accountNo">
@@ -708,46 +905,85 @@ const VendorProfile = () => {
                         onChange={handleChangetheprofile}
                         defaultValue={
                           bankDetails.accountNumber
-                            ? bankDetails.accountNumber
+                            ? bankDetails?.accountNumber
                             : "N/A"
                         }
                       />
                     </div>
                   </div>
+
                   <div className="col-md-6">
                     <div className="form-group">
-                      <label className="headingCustom" htmlFor="bankName">
-                        Bank Name:
-                      </label>
-                      <input
-                        type="text"
-                        className="form-control bg-white"
-                        id="bankName"
-                        placeholder="Bank Of Baroda"
-                        onChange={handleChangetheprofile}
-                        defaultValue={
-                          bankDetails.bankName ? bankDetails.bankName : "N/A"
-                        }
-                      />
-                    </div>
-                  </div>
-                  <div className="col-md-6">
-                    <div className="form-group">
-                      <label className="headingCustom" htmlFor="ifscCode">
+                      <label className="headingCustom" htmlFor="IFSC">
                         IFSC Code:
                       </label>
                       <input
                         type="text"
                         className="form-control bg-white"
                         id="IFSC"
-                        onChange={handleChangetheprofile}
+                        onChange={handleChangetheIFSC}
                         placeholder="BARB0FGIETX"
                         defaultValue={
-                          bankDetails.IFSC ? bankDetails.IFSC : "N/A"
+                          bankDetails?.IFSC ? bankDetails?.IFSC : "N/A"
                         }
                       />
                     </div>
                   </div>
+
+                  <div className="col-md-6">
+                    <div className="form-group">
+                      <label className="headingCustom" htmlFor="bankName1">
+                        Bank Name:
+                      </label>
+                      <input
+                        type="text"
+                        className="form-control bg-white"
+                        id="bankName1"
+                        placeholder="Bank Of Baroda"
+                        onChange={handleChangetheprofile}
+                        defaultValue={
+                          bankDetails?.bankName ? bankDetails?.bankName : ""
+                        }
+                      />
+                    </div>
+                  </div>
+
+                  <div className="col-md-6">
+                    <div className="form-group">
+                      <label className="headingCustom" htmlFor="branch1">
+                        Branch:
+                      </label>
+                      <input
+                        type="text"
+                        className="form-control bg-white"
+                        id="branch1"
+                        placeholder="Bank Of Baroda"
+                        onChange={handleChangetheprofile}
+                        defaultValue={
+                          bankDetails?.branch ? bankDetails?.branch : "N/A"
+                        }
+                      />
+                    </div>
+                  </div>
+
+                  <div className="col-md-6">
+                    <div className="form-group">
+                      <label className="headingCustom" htmlFor="city">
+                        City:
+                      </label>
+                      <input
+                        type="text"
+                        className="form-control bg-white"
+                        id="city"
+                        placeholder="Bank Of Baroda"
+                        onChange={handleChangetheprofile}
+                        defaultValue={
+                          bankDetails?.city ? bankDetails?.city : "N/A"
+                        }
+                      />
+                    </div>
+                  </div>
+
                 </div>
               </div>
             </div>
@@ -761,7 +997,7 @@ const VendorProfile = () => {
               className="p-1 pl-2 pr-2"
               onClick={handleEdit}
             >
-              Edit
+              Save
             </button>
           </Modal.Footer>
         </Modal>

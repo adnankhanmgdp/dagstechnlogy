@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import $ from "jquery";
 import "datatables.net-bs4"; // Import the Bootstrap 4 DataTables extension
-import { useLocation, useNavigate } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { Button, Modal } from "react-bootstrap";
 import { ToastContainer, toast } from "react-toastify";
@@ -12,21 +12,54 @@ const PartnerProfile = () => {
   const [orders, setOrders] = useState([]);
   const [bankDetails, setBankDetails] = useState({});
   const [vendorOrder, setVendorOrder] = useState([]);
+  const { id } = useParams()
 
-  console.log("orders", orders)
-  console.log("vendorOrder", vendorOrder)
-
+  let count = 0;
   const navigate = useNavigate();
   const location = useLocation();
   const logistic = location.state;
-  const [logisticData, updatedLogistic] = useState(logistic);
-
-  // console.log("logistic", logisticData)
-  // console.log("logisticcccccccc",logistic)
+  const [logisticData, updatedLogistic] = useState();
 
   const token = localStorage.getItem("token");
 
-  let count = 0;
+  const formatDateToUTC = (date) => {
+    const options = {
+      timeZone: 'UTC',
+      hour12: true,
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric'
+    };
+    return new Intl.DateTimeFormat('en-US', options).format(new Date(date));
+  };
+
+  useEffect(() => {
+    const fetchLogisticDetails = async () => {
+      try {
+        const res = await fetch(`${process.env.REACT_APP_API_URL}/logistic/${id}`, {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        const data = await res.json();
+        // console.log(data)
+        if (res.ok) {
+          updatedLogistic(data.logistic);
+        } else {
+          toast.warning(data.message);
+        }
+      } catch (error) {
+        toast.error(error.message);
+      }
+    };
+
+    fetchLogisticDetails();
+  }, []);
+
 
   useEffect(() => {
     const fetchOrders = async () => {
@@ -40,7 +73,7 @@ const PartnerProfile = () => {
               Authorization: `Bearer ${token}`,
             },
             body: JSON.stringify({
-              logisticId: logistic.logisticId
+              logisticId: id
             }),
           },
         );
@@ -64,10 +97,11 @@ const PartnerProfile = () => {
               "Content-Type": "application/json",
               Authorization: `Bearer ${token}`,
             },
-            body: JSON.stringify({ bankId: logisticData.partnerId? logisticData.partnerId:logisticData.logisticId }),
+            body: JSON.stringify({ bankId: id }),
           },
         );
         const data = await res.json();
+        // console.log(data)
         if (res.ok) {
           setBankDetails(data.bankDetails || {});
         }
@@ -94,7 +128,7 @@ const PartnerProfile = () => {
     }
   }, [orders]);
 
-  const handleDeactivateVendor = async (logisticId) => {
+  const handleDeactivateLogistic = async (logisticId) => {
     try {
       const res = await fetch(
         `${process.env.REACT_APP_API_URL}/updateLogistic`,
@@ -104,10 +138,45 @@ const PartnerProfile = () => {
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
           },
-          body: JSON.stringify({ logisticId, status: "inactive" }),
+          body: JSON.stringify({ logisticId: id, verificationStatus: "inactive" }),
         },
       );
+      const data = await res.json();
       if (res.ok) {
+        updatedLogistic({
+          verificationStatus: data.updateLogistic.verificationStatus
+        });
+        toast.success("Logistic Deactivated Successfully");
+        navigate("/logistic/allPartners");
+      }
+    } catch (error) {
+      toast.error(error.message)
+      console.error("Error deactivating vendor:", error);
+    }
+  };
+
+  const handleActivateLogistic = async (logisticId) => {
+    try {
+      const res = await fetch(
+        `${process.env.REACT_APP_API_URL}/updateLogistic`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ logisticId: id, verificationStatus: "active" }),
+        },
+      );
+
+      const data = await res.json();
+      console.log(data)
+
+      if (res.ok) {
+        updatedLogistic({
+          verificationStatus: data.updateLogistic.verificationStatus
+        });
+        toast.success("Vendor activated Successfully");
         navigate("/logistic/allPartners");
       }
     } catch (error) {
@@ -134,9 +203,9 @@ const PartnerProfile = () => {
 
   const handleEdit = async (e) => {
     e.preventDefault();
-    const logisticId = logisticData.logisticId
+    const logisticId = id;
     const updatedFormData = { ...formData, logisticId };
-    console.log("formData", updatedFormData );
+    // console.log("formData", updatedFormData);
     try {
       const res = await fetch(
         `${process.env.REACT_APP_API_URL}/updateLogistic`,
@@ -149,20 +218,26 @@ const PartnerProfile = () => {
           body: JSON.stringify(updatedFormData),
         },
       );
-      console.log("res",res)
+      // console.log("res", res)
       const data = await res.json();
       if (res.ok) {
         setBankDetails({
-          accountHolderName: data.updateLogistic?.accountHolderName,
-          accountNumber: data.updateLogistic?.accountNumber,
-          bankName: data.updateLogistic?.bankName,
-          IFSC: data.updateLogistic?.IFSC,
+          accountHolderName: data.updateBankDetails?.accountHolderName,
+          accountNumber: data.updateBankDetails?.accountNumber,
+          bankName: data.updateBankDetails?.bankName,
+          IFSC: data.updateBankDetails?.IFSC,
+          city: data.updateBankDetails.city,
+          branch: data.updateBankDetails.branch,
         });
+        // console.log(data.updateLogistic)
         updatedLogistic({
           name: data.updateLogistic.name,
           email: data.updateLogistic.email,
           phone: data.updateLogistic.phone,
           address: data.updateLogistic.address,
+          profilePic: data.updateLogistic.profilePic,
+          verificationStatus: data.updateLogistic.verificationStatus,
+          capacity: data.updateLogistic.capacity,
         });
         setShowModal(false);
         count++;
@@ -173,10 +248,45 @@ const PartnerProfile = () => {
     }
   };
 
+  //IFSC
+  const fetchBankDetailsByIfsc = async (ifsc) => {
+    try {
+      const res = await fetch(`https://ifsc.razorpay.com/${ifsc}`);
+      const data = await res.json();
+      if (res.ok) {
+        // setBankDetails({
+        //   bankName: data.BANK,
+        //   IFSC: data.IFSC,
+        //   city: data.CITY,
+        //   branch: data.BRANCH,
+        // });
+        document.getElementById('branch1').value = data.BRANCH
+        document.getElementById('city').value = data.CITY
+        document.getElementById('bankName1').value = data.BANK
+      } else {
+        toast.warning(data.message || "Unable to fetch bank details");
+      }
+    } catch (error) {
+      toast.error(error.message || "Error fetching bank details");
+    }
+  };
+
+  const handleChangetheIFSC = (e) => {
+    let ifsc = e.target.value
+    if (ifsc.length >= 11) {
+      fetchBankDetailsByIfsc(ifsc);
+    } else {
+      // setBankDetails({});
+      document.getElementById('branch1').value = "Loading..."
+      document.getElementById('city').value = "Loading..."
+      document.getElementById('bankName1').value = "Loading..."
+    }
+    setFormData({ ...formData, [e.target.id]: e.target.value });
+  };
+
   return (
     <div className="main-content" style={{ backgroundColor: "#F6F6F9" }}>
       <div className="page-content">
-        <ToastContainer />
         <div className="container-fluid">
           <div className="row">
             <div className="d-flex flex-column m-3 flex-xl-row">
@@ -185,7 +295,11 @@ const PartnerProfile = () => {
                   <div className="row">
                     <div className="mx-auto mt-3">
                       <img
-                        src="https://tse2.mm.bing.net/th?id=OIP.6UhgwprABi3-dz8Qs85FvwHaHa&pid=Api&P=0&h=180"
+                        src={
+                          logisticData?.profilePic
+                            ? logisticData?.profilePic
+                            : "https://tse3.mm.bing.net/th?id=OIP.K4jXSK4XQahOLPEliCtvlwHaHa&pid=Api&P=0&h=180"
+                        }
                         className="avatarCustom"
                         alt="user's img"
                       />
@@ -199,7 +313,43 @@ const PartnerProfile = () => {
                           " It will seem like simplified "
                         </p>
                       </div>
-                      <div className="d-flex h-25 flex-column">
+
+
+                      {logisticData && logisticData.verificationStatus === "active" ? (
+                        <div className="d-flex h-25 flex-column">
+                          <button
+                            onClick={() => setShowModal(true)}
+                            style={{ borderRadius: "7px" }}
+                            className="bg-primary border-0 text-white pt-1 pb-1 pl-4 pr-4"
+                          >
+                            Edit vendor's profile
+                          </button>
+                          <button
+                            onClick={() =>
+                              handleDeactivateLogistic(logisticData.logisticId)
+                            }
+                            style={{ borderRadius: "7px" }}
+                            className="bg-danger mt-2 border-0 text-white pt-1 pb-1 pl-4 pr-4"
+                          >
+                            Deactivate Logistic
+                          </button>
+                        </div>
+                      ) : (
+                        <div className="d-flex h-25 flex-column">
+                          <button
+                            onClick={() =>
+                              handleActivateLogistic(logisticData.logisticId)
+                            }
+                            style={{ borderRadius: "7px" }}
+                            className="bg-danger mt-2 mb-3 border-0 text-white pt-1 pb-1 pl-4 pr-4"
+                          >
+                            Activate Logistic
+                          </button>
+                        </div>
+                      )}
+
+
+                      {/* <div className="d-flex h-25 flex-column">
                         <button
                           onClick={() => setShowModal(true)}
                           style={{ borderRadius: "7px" }}
@@ -216,7 +366,9 @@ const PartnerProfile = () => {
                         >
                           Deactivate Logistic
                         </button>
-                      </div>
+                      </div> */}
+
+
                     </div>
                   </div>
                 </div>
@@ -224,46 +376,58 @@ const PartnerProfile = () => {
 
               <div className="card">
                 <div className="card-body">
-                  <h4 className="card-title mb-4 font-size-20">
-                    Personal Information
-                  </h4>
+                  <div className="d-flex justify-content-between align-items-center mb-4">
+                    <h4 className="card-title font-size-20">Personal Information</h4>
+                    <div>
+                      {logisticData && logisticData.profilePic ? (
+                        <a href={logisticData.profilePic} target="_blank" rel="noopener noreferrer" className="mr-3">
+                          Profile pic
+                        </a>
+                      ) : (
+                        <span className="text-muted mr-3" style={{ cursor: "not-allowed" }}>
+                          Profile pic
+                        </span>
+                      )}
+                      {logisticData && logisticData.document ? (
+                        <a href={logisticData.document} target="_blank" rel="noopener noreferrer">
+                          Document
+                        </a>
+                      ) : (
+                        <span className="text-muted" style={{ cursor: "not-allowed" }}>
+                          Document
+                        </span>
+                      )}
+                    </div>
+                  </div>
                   <p className="text-muted mb-4 font-size-14">
-                    Hi, I'm {logisticData && logisticData.name}, a trusted name
-                    in the logistics industry, dedicated to providing efficient
-                    and reliable transportation and supply chain solutions.
+                    Hi, I'm {logisticData && logisticData.name}, a trusted name in the logistics industry, dedicated to providing efficient and reliable transportation and supply chain solutions.
                   </p>
                   <div className="table-responsive">
                     <table className="table table-nowrap mb-0">
                       <tbody>
                         <tr>
-                          <th className="headingCustom" scope="row">
-                            Full Name :
-                          </th>
+                          <th className="headingCustom" scope="row">Full Name :</th>
                           <td>{logisticData && logisticData.name}</td>
                         </tr>
                         <tr>
-                          <th className="headingCustom" scope="row">
-                            Mobile :
-                          </th>
+                          <th className="headingCustom" scope="row">Mobile :</th>
                           <td>{logisticData && logisticData.phone}</td>
                         </tr>
                         <tr>
-                          <th className="headingCustom" scope="row">
-                            E-mail :
-                          </th>
+                          <th className="headingCustom" scope="row">E-mail :</th>
                           <td>{logisticData && logisticData.email}</td>
                         </tr>
-                        <tr>
-                          <th className="headingCustom" scope="row">
-                            Location :
-                          </th>
-                          <td>{logisticData && logisticData.address}</td>
-                        </tr>
+                        {/* <tr>
+                          <th className="headingCustom" scope="row">Location :</th>
+                          <td>{logisticData && logisticData?.address}</td>
+                        </tr> */}
                       </tbody>
                     </table>
                   </div>
                 </div>
               </div>
+
+
             </div>
           </div>
 
@@ -285,8 +449,8 @@ const PartnerProfile = () => {
                         className="form-control bg-white"
                         id="accountHolderName"
                         value={
-                          bankDetails.accountHolderName
-                            ? bankDetails.accountHolderName
+                          bankDetails?.accountHolderName
+                            ? bankDetails?.accountHolderName
                             : ""
                         }
                         readOnly
@@ -303,8 +467,8 @@ const PartnerProfile = () => {
                         className="form-control bg-white"
                         id="accountNo"
                         value={
-                          bankDetails.accountNumber
-                            ? bankDetails.accountNumber
+                          bankDetails?.accountNumber
+                            ? bankDetails?.accountNumber
                             : ""
                         }
                         readOnly
@@ -320,7 +484,21 @@ const PartnerProfile = () => {
                         type="text"
                         className="form-control bg-white"
                         id="bankName"
-                        value={bankDetails.bankName ? bankDetails.bankName : ""}
+                        value={bankDetails?.bankName ? bankDetails?.bankName : ""}
+                        readOnly
+                      />
+                    </div>
+                  </div>
+                  <div className="col-md-6">
+                    <div className="form-group">
+                      <label className="headingCustom" htmlFor="branch">
+                        Branch:
+                      </label>
+                      <input
+                        type="text"
+                        className="form-control bg-white"
+                        id="branch"
+                        value={bankDetails.branch ? bankDetails.branch : "N/A"}
                         readOnly
                       />
                     </div>
@@ -334,7 +512,7 @@ const PartnerProfile = () => {
                         type="text"
                         className="form-control bg-white"
                         id="ifscCode"
-                        value={bankDetails.IFSC ? bankDetails.IFSC : ""}
+                        value={bankDetails?.IFSC ? bankDetails?.IFSC : ""}
                         readOnly
                       />
                     </div>
@@ -373,31 +551,31 @@ const PartnerProfile = () => {
                         {vendorOrder?.map((order) => (
                           <tr key={order.orderId}>
                             <td>{order.orderId}</td>
-                            <td>{order.orderDate}</td>
-                            <td className="text-center">{order.amount}</td>
+                            <td>{formatDateToUTC(order?.orderDate)}</td>
+                            <td className="text-center">{order?.amount}</td>
                             <td>
                               <div>
                                 <span
                                   className="p-2 rounded-pill"
                                   style={{
                                     backgroundColor:
-                                      order.orderStatus[0].status ===
-                                      "Delivered"
+                                      order.orderStatus[0]?.status ===
+                                        "Delivered"
                                         ? "#a7ebc0"
-                                        : order.orderStatus[0].status ===
-                                            "Pending"
+                                        : order.orderStatus[0]?.status ===
+                                          "Pending"
                                           ? "#ffa8a8"
-                                          : order.orderStatus[0].status ===
-                                              "Processing"
+                                          : order.orderStatus[0]?.status ===
+                                            "Processing"
                                             ? "#ffe38b"
-                                            : order.orderStatus[0].status ===
-                                                "Shipped"
+                                            : order.orderStatus[0]?.status ===
+                                              "Shipped"
                                               ? "#c9ecc3"
                                               : "",
                                     width: "100px",
                                   }}
                                 >
-                                  {order.orderStatus[0].status}
+                                  {order.orderStatus[order.orderStatus.length - 1].status}
                                 </span>
                               </div>
                             </td>
@@ -420,6 +598,7 @@ const PartnerProfile = () => {
           </div>
         </div>
       </div>
+
       {showModal && (
         <Modal show={showModal} onHide={handleClose}>
           <Modal.Header>
@@ -458,7 +637,7 @@ const PartnerProfile = () => {
                     className="form-control"
                     placeholder="john@gmail.com "
                     onChange={handleChangetheprofile}
-                    defaultValue={logisticData.email}
+                    defaultValue={logisticData?.email}
                   />
                 </div>
                 <div className="form-group">
@@ -469,7 +648,18 @@ const PartnerProfile = () => {
                     className="form-control"
                     placeholder="5/683 vikas nagar lucknow"
                     onChange={handleChangetheprofile}
-                    defaultValue={logisticData.address}
+                    defaultValue={logisticData?.address}
+                  />
+                </div>
+                <div className="form-group">
+                  <label>Capacity :</label>
+                  <input
+                    id="capacity"
+                    type="text"
+                    className="form-control"
+                    placeholder="10"
+                    onChange={handleChangetheprofile}
+                    defaultValue={logisticData?.capacity}
                   />
                 </div>
                 {/* Add more fields as needed */}
@@ -479,7 +669,8 @@ const PartnerProfile = () => {
               <div className="card-body">
                 <h5 className="card-title">Account Details</h5>
                 <div className="row">
-                  <div className="col-md-12">
+
+                  <div className="col-md-6">
                     <div className="form-group">
                       <label
                         className="headingCustom"
@@ -493,13 +684,14 @@ const PartnerProfile = () => {
                         id="accountHolderName"
                         onChange={handleChangetheprofile}
                         defaultValue={
-                          bankDetails.accountHolderName
-                            ? bankDetails.accountHolderName
+                          bankDetails?.accountHolderName
+                            ? bankDetails?.accountHolderName
                             : "No Data"
                         }
                       />
                     </div>
                   </div>
+
                   <div className="col-md-6">
                     <div className="form-group">
                       <label className="headingCustom" htmlFor="accountNo">
@@ -508,50 +700,89 @@ const PartnerProfile = () => {
                       <input
                         type="text"
                         className="form-control bg-white"
-                        id="accountNo"
+                        id="accountNumber"
                         onChange={handleChangetheprofile}
                         defaultValue={
-                          bankDetails.accountNumber
-                            ? bankDetails.accountNumber
+                          bankDetails?.accountNumber
+                            ? bankDetails?.accountNumber
                             : "No Data"
                         }
                       />
                     </div>
                   </div>
+
                   <div className="col-md-6">
                     <div className="form-group">
-                      <label className="headingCustom" htmlFor="bankName">
-                        Bank Name:
-                      </label>
-                      <input
-                        type="text"
-                        className="form-control bg-white"
-                        id="bankName"
-                        onChange={handleChangetheprofile}
-                        defaultValue={
-                          bankDetails.bankName
-                            ? bankDetails.bankName
-                            : "No Data"
-                        }
-                      />
-                    </div>
-                  </div>
-                  <div className="col-md-6">
-                    <div className="form-group">
-                      <label className="headingCustom" htmlFor="ifscCode">
+                      <label className="headingCustom" htmlFor="IFSC">
                         IFSC Code:
                       </label>
                       <input
                         type="text"
                         className="form-control bg-white"
-                        id="ifscCode"
-                        onChange={handleChangetheprofile}
+                        id="IFSC"
+                        onChange={handleChangetheIFSC}
                         defaultValue={
-                          bankDetails.IFSC ? bankDetails.IFSC : "No Data"
+                          bankDetails?.IFSC ? bankDetails?.IFSC : ""
                         }
                       />
                     </div>
                   </div>
+
+                  <div className="col-md-6">
+                    <div className="form-group">
+                      <label className="headingCustom" htmlFor="bankName1">
+                        Bank Name:
+                      </label>
+                      <input
+                        type="text"
+                        className="form-control bg-white"
+                        id="bankName1"
+                        onChange={handleChangetheprofile}
+                        defaultValue={
+                          bankDetails?.bankName
+                            ? bankDetails?.bankName
+                            : ""
+                        }
+                      />
+                    </div>
+                  </div>
+
+                  <div className="col-md-6">
+                    <div className="form-group">
+                      <label className="headingCustom" htmlFor="branch1">
+                        Branch:
+                      </label>
+                      <input
+                        type="text"
+                        className="form-control bg-white"
+                        id="branch1"
+                        placeholder="Bank Of Baroda"
+                        onChange={handleChangetheprofile}
+                        defaultValue={
+                          bankDetails?.branch ? bankDetails?.branch : "N/A"
+                        }
+                      />
+                    </div>
+                  </div>
+
+                  <div className="col-md-6">
+                    <div className="form-group">
+                      <label className="headingCustom" htmlFor="city">
+                        City:
+                      </label>
+                      <input
+                        type="text"
+                        className="form-control bg-white"
+                        id="city"
+                        placeholder="Bank Of Baroda"
+                        onChange={handleChangetheprofile}
+                        defaultValue={
+                          bankDetails?.city ? bankDetails?.city : "N/A"
+                        }
+                      />
+                    </div>
+                  </div>
+
                 </div>
               </div>
             </div>
@@ -565,7 +796,7 @@ const PartnerProfile = () => {
               className="p-1 pl-2 pr-2"
               onClick={handleEdit}
             >
-              Edit
+              Save
             </button>
           </Modal.Footer>
         </Modal>

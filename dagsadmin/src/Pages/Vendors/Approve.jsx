@@ -6,21 +6,21 @@ import "datatables.net-bs4";
 const Approve = () => {
   const tableRef = useRef();
   const [vendors, setVendors] = useState([]);
-  console.log("inactive",vendors)
+  // console.log("inactive", vendors)
   const navigate = useNavigate()
 
-useEffect(() => {
-  if (vendors.length > 0) {
-    // Destroy previous instance of DataTable if exists
-    if ($.fn.dataTable.isDataTable(tableRef.current)) {
-      $(tableRef.current).DataTable().destroy();
-    }
+  useEffect(() => {
+    if (vendors.length > 0) {
+      // Destroy previous instance of DataTable if exists
+      if ($.fn.dataTable.isDataTable(tableRef.current)) {
+        $(tableRef.current).DataTable().destroy();
+      }
 
-    // Initialize DataTable
-    $(tableRef.current).DataTable();
-  }
-}, [vendors]);
-  
+      // Initialize DataTable
+      $(tableRef.current).DataTable();
+    }
+  }, [vendors]);
+
   const token = localStorage.getItem("token");
 
   useEffect(() => {
@@ -40,20 +40,20 @@ useEffect(() => {
 
         if (res.ok) {
           // Filter orders to only include those with status "Delivered"
-          console.log("approve",data)
+          // console.log("approve", data)
           const inactiveVendors = data.vendors.filter(
-            (vendor) =>  vendor.verificationStatus === "pending",
+            (vendor) => vendor.verificationStatus === "pending",
           );
 
           setVendors(inactiveVendors);
         }
-      } catch (error) {}
+      } catch (error) { }
     };
     getOrders();
   }, []);
 
   const handleSendPartnerProfile = (vendors) => {
-    navigate("/vendors/approveVendorProfile", {
+    navigate(`/vendors/approveVendorProfile/${vendors.vendorId}`, {
       state: {
         vendors
       }
@@ -96,31 +96,36 @@ useEffect(() => {
                     <th>View Details</th>
                   </tr>
                 </thead>
+
                 <tbody>
-                  {vendors.map((vendors) => (
-                    <tr className="text-center" key={vendors.vendorId}>
-                      <td>{vendors.name ? vendors.name : "---"}</td>
-                      <td>{vendors.phone ? vendors.phone : "---"}</td>
-                      <td>{vendors.email ? vendors.email : "---"}</td>
-                      <td>{vendors.address ? vendors.address : "---"}</td>
-                      <td>
-                        {vendors.verificationStatus
-                          ? vendors.verificationStatus
-                          : "---"}
-                      </td>
-                      <td>
-                        {/* <Link to="/logistic/approvePartnerProfile"> */}
-                        <button
-                          onClick={() => handleSendPartnerProfile(vendors)}
-                          className="btn bg-success text-white"
-                        >
-                          View Details
-                        </button>
-                        {/* </Link> */}
+                  {vendors.length === 0 ? (
+                    <tr className="text-center">
+                      <td colSpan="6">
+                        <h5>No vendors found</h5>
                       </td>
                     </tr>
-                  ))}
+                  ) : (
+                    vendors.map((vendor) => (
+                      <tr className="text-center" key={vendor.vendorId}>
+                        <td>{vendor.name ? vendor.name : "---"}</td>
+                        <td>{vendor.phone ? vendor.phone : "---"}</td>
+                        <td>{vendor.email ? vendor.email : "---"}</td>
+                        <td>{vendor.address ? vendor.address : "---"}</td>
+                        <td>{vendor.verificationStatus ? vendor.verificationStatus : "---"}</td>
+                        <td>
+                          <button
+                            onClick={() => handleSendPartnerProfile(vendor)}
+                            className="btn bg-success text-white"
+                          >
+                            View Details
+                          </button>
+                        </td>
+                      </tr>
+                    ))
+                  )}
                 </tbody>
+
+
               </table>
             </div>
           </div>

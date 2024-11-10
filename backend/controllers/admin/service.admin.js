@@ -127,7 +127,6 @@ exports.deleteService = async (req, res) => {
     }
 };
 
-
 exports.editService = async (req, res) => {
     console.log("req.body", req.body);
 
@@ -198,7 +197,9 @@ exports.editItemInService = async (req, res) => {
 };
 
 exports.fetchServices = async (req, res) => {
-    const service = await Service.find()
+    const service = await Service.find().sort({
+        serviceId: 1
+    })
     try {
         res.json({ message: "Service fetched successfully", service });
     } catch (error) {
@@ -225,6 +226,44 @@ exports.fetchItem = async (req, res) => {
         res.json({ message: "Item fetched successfully", item });
     } catch (error) {
         res.status(500).json({ error: 'Could not fetch item', message: error.message });
+    }
+};
+
+exports.updateItem = async (req, res) => {
+    const { serviceId, itemId, itemName, unitPrice, icon } = req.body;
+
+    try {
+        const service = await Service.findOne({ serviceId });
+
+        if (!service) {
+            return res.status(404).json({ message: "Service not found" });
+        }
+
+        // Find the item by itemId within the service
+        const item = service.items.find(item => item.itemId === itemId);
+
+        if (!item) {
+            return res.status(404).json({ message: "Item not found" });
+        }
+
+        // Update item details
+        if (itemName) item.name = itemName;
+        if (unitPrice) item.unitPrice = unitPrice;
+
+        if (icon) {
+            let data = icon;
+            if (icon.length > 150) {
+                data = await ItemIcon(icon)
+            }
+            item.itemIcon = data
+        }
+
+        // Save the updated service
+        await service.save();
+
+        res.status(200).json({ message: "Item updated successfully", service });
+    } catch (error) {
+        res.status(500).json({ message: "An error occurred", error: error.message });
     }
 };
 

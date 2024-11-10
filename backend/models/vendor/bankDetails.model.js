@@ -22,6 +22,9 @@ const BankDetailsSchema = new mongoose.Schema({
     bankId: {
         type: String
     },
+    city: {
+        type: String
+    },
     bankFor: {
         type: String
     }

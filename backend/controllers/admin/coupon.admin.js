@@ -1,16 +1,19 @@
 const Coupon = require('../../models/admin/coupon.model')
 
 exports.createCoupon = async (req, res) => {
-    console.log(req.body)
     try {
-        const { couponName, couponDiscount, minAmount, maxDiscount, description, expiryAt, isFlat } = req.body;
-        console.log(req.body)
+        const { couponName, couponDiscount, minAmount, description, expiryAt, isFlat } = req.body;
+        let { maxDiscount } = req.body
 
         // Validation checks
-        if (!couponName || !couponDiscount || !minAmount || !maxDiscount || !description || !expiryAt) {
-            return res.json({
+        if (!couponName || !couponDiscount || !minAmount || !description || !expiryAt) {
+            return res.status(404).json({
                 message: "Please provide all the fields"
             })
+        }
+
+        if (!maxDiscount) {
+            maxDiscount = Number.MAX_SAFE_INTEGER;
         }
 
         const coupon = await Coupon.create({
@@ -37,24 +40,52 @@ exports.createCoupon = async (req, res) => {
 
 exports.fetchCoupon = async (req, res) => {
     try {
-        const activeCoupons = await Coupon.find({ status: true })
-        const inactiveCoupons = await Coupon.find({ status: false })
+        const now = new Date();
+        const istOffset = 5.5 * 60 * 60 * 1000;  // IST offset in milliseconds
+        const currentTimeIST = new Date(now.getTime() + istOffset);
+
+        // Fetch all coupons
+        const allCoupons = await Coupon.find();
+
+        const activeCoupons = [];
+        const expiredCoupons = [];
+        const inactiveCoupons = [];
+
+        // Check expiry and update status
+        for (const coupon of allCoupons) {
+            if (coupon.expiryAt <= currentTimeIST) {
+                if (coupon.status === true) {
+                    coupon.status = false;
+                    await coupon.save();
+                    expiredCoupons.push(coupon);
+                }
+                inactiveCoupons.push(coupon);
+            } else {
+                if (coupon.status === true) {
+                    activeCoupons.push(coupon);
+                } else {
+                    inactiveCoupons.push(coupon);
+                }
+            }
+        }
+
         res.json({
-            message: "Coupon fetched Successfully",
+            message: "Coupons fetched successfully",
             activeCoupons,
-            inactiveCoupons
-        })
+            inactiveCoupons,
+            expiredCouponsUpdated: expiredCoupons.length
+        });
     } catch (error) {
         res.status(500).json({
             message: "Internal Server Error",
             error: error.message
-        })
+        });
     }
-}
+};
 
 exports.coupon = async (req, res) => {
     try {
-        const { id } = req.query;
+        const { id } = req.params;
         const coupon = await Coupon.findById({ _id: id })
         res.json({
             message: "Coupon fetched Successfully",
@@ -71,10 +102,8 @@ exports.coupon = async (req, res) => {
 exports.deleteCoupon = async (req, res) => {
     try {
         const { id } = req.params;
-        console.log(id)
 
         const deletedCoupon = await Coupon.findByIdAndDelete(id);
-        console.log(deletedCoupon)
         if (!deletedCoupon) {
             return res.status(404).json({ message: "Coupon not found" });
         }
@@ -94,8 +123,11 @@ exports.deleteCoupon = async (req, res) => {
 exports.editCoupon = async (req, res) => {
     try {
         const { id } = req.params;
-        console.log(req.body)
         const updates = req.body;
+
+        if (!updates.maxDiscount) {
+            updates.maxDiscount = Number.MAX_SAFE_INTEGER;
+        }
 
         // Check for uniqueness of couponName if it is being updated
         if (updates.couponName) {
@@ -114,7 +146,6 @@ exports.editCoupon = async (req, res) => {
         if (!updatedCoupon) {
             return res.status(404).json({ message: "Coupon not found" });
         }
-        console.log(updatedCoupon)
 
         res.status(200).json({
             message: "Coupon updated successfully",

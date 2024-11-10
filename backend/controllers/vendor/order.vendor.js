@@ -8,8 +8,19 @@ const { calculateDistance } = require('../../utils/logistic/shortestdistance');
 
 exports.getVendorDashboard = async (req, res) => {
     const { vendorId } = req.body;
-    console.log(vendorId)
-    const today = new Date(Date.now() + (5.5 * 60 * 60 * 1000))
+    // console.log(vendorId)
+    const start = new Date(Date.now() + (5.5 * 60 * 60 * 1000))
+    const end = new Date(Date.now() + (5.5 * 60 * 60 * 1000))
+    start.setUTCHours(0, 0, 0, 0);
+    // Set time to 23:59:59 UTC for the end date
+    end.setUTCHours(23, 59, 59, 999);
+
+    // Add 5 hours and 30 minutes to match your storage format
+    start.setHours(start.getHours() + 5);
+    start.setMinutes(start.getMinutes() + 30);
+
+    end.setHours(end.getHours() + 5);
+    end.setMinutes(end.getMinutes() + 30);
     // const per = await Commission.find();
 
     try {
@@ -19,8 +30,8 @@ exports.getVendorDashboard = async (req, res) => {
                 $elemMatch: {
                     status: 'initiated',
                     time: {
-                        $gte: startOfDay(today),
-                        $lte: endOfDay(today)
+                        $gte: start,
+                        $lte: end
                     }
                 }
             }
@@ -36,7 +47,7 @@ exports.getVendorDashboard = async (req, res) => {
             vendorId: vendorId,
             'orderStatus': {
                 $elemMatch: {
-                    status: 'readyForDelivery',
+                    status: 'readyToDelivery',
                     // time: {
                     //     $gte: startOfDay(today),
                     //     $lte: endOfDay(today)
@@ -50,7 +61,7 @@ exports.getVendorDashboard = async (req, res) => {
         const previousDaysOrders = await Order.find({
             vendorId: vendorId,
             'orderDate': {
-                $lt: startOfDay(today)
+                $lt: start
             },
             'orderStatus.status': {
                 $nin: ['completed', 'cancelled']
@@ -171,7 +182,7 @@ exports.acceptOrder = async (req, res) => {
         let order = await Order.findOne({ secretKey });
 
         if (!order) {
-            return res.status(404).json({ error: "Invalid Secret Key" });
+            return res.status(401).json({ error: "Invalid Secret Key" });
         }
 
         if (order.vendorId !== vendorId) {
@@ -375,6 +386,30 @@ exports.week = async (req, res) => {
     try {
         const { vendorId, startDate, endDate } = req.body;
 
+        // Helper function to adjust for IST (UTC +5:30)
+        const adjustForIST = (date, isEndDate = false) => {
+            const istOffset = 330; // IST is UTC+5:30, which is 330 minutes
+            const offsetMillis = istOffset * 60 * 1000;
+            const adjustedDate = new Date(date.getTime() + offsetMillis);
+
+            if (isEndDate) {
+                // Set to end of the day
+                adjustedDate.setHours(23, 59, 59, 999);
+            } else {
+                // Set to start of the day
+                adjustedDate.setHours(0, 0, 0, 0);
+            }
+
+            return adjustedDate;
+        };
+
+        // Parse and adjust start and end dates
+        const startDateUTC = new Date(startDate);
+        const endDateUTC = new Date(endDate);
+
+        const startDateIST = adjustForIST(startDateUTC);
+        const endDateIST = adjustForIST(endDateUTC, true);
+
         // Helper function to get all dates in the range
         const getDatesInRange = (start, end) => {
             const date = new Date(start);
@@ -386,7 +421,7 @@ exports.week = async (req, res) => {
             return dates;
         };
 
-        const datesInRange = getDatesInRange(new Date(startDate), new Date(endDate));
+        const datesInRange = getDatesInRange(startDateIST, endDateIST);
 
         // Convert dates to day-of-week objects
         const dayOfWeekMap = datesInRange.map(date => {
@@ -402,8 +437,8 @@ exports.week = async (req, res) => {
                         $elemMatch: { status: "initiated" }
                     },
                     orderDate: {
-                        $gte: new Date(startDate),
-                        $lte: new Date(endDate)
+                        $gte: startDateIST,
+                        $lte: endDateIST
                     },
                     "orderStatus.status": { $ne: "cancelled" }
                 }
@@ -411,7 +446,7 @@ exports.week = async (req, res) => {
             {
                 $group: {
                     _id: { $dayOfWeek: "$orderDate" },
-                    totalRevenue: { $sum: "$amount" },
+                    totalRevenue: { $sum: "$vendorFee" },
                     count: { $sum: 1 },
                     date: { $first: "$orderDate" }
                 }

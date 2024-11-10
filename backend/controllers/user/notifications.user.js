@@ -9,12 +9,13 @@ exports.fetchNotifications = async (req, res) => {
         }
 
         const notifications = await Notification.find({
-            phone: phone,
-            notificationFor: "user"
-        });
+            id: phone
+        }).sort({
+            createdAt: -1
+        })
 
         res.status(200).json({
-            message:"Notifications fetched successfully",
+            message: "Notifications fetched successfully",
             notifications
         });
     } catch (error) {

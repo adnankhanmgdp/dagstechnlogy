@@ -2,9 +2,11 @@ const Carousel = require('../../models/admin/carousel')
 const path = require('path')
 const fs = require('fs')
 const { v4: uuidv4 } = require('uuid');
+
 exports.createCarousel = async (req, res) => {
+    console.log(req.body)
     try {
-        const { img, description, route } = req.body;
+        const { img, description, route, serviceId } = req.body;
 
         // Validation checks
         if (!img || !route || !description) {
@@ -18,7 +20,8 @@ exports.createCarousel = async (req, res) => {
         const carousel = await Carousel.create({
             img: imgData,
             description: description,
-            route: route
+            route: route,
+            serviceId
         })
 
         res.json({
@@ -26,6 +29,7 @@ exports.createCarousel = async (req, res) => {
             carousel
         })
     } catch (error) {
+        console.log(error)
         res.status(500).json({
             message: "Internal server error",
             error: error.message
@@ -83,7 +87,7 @@ async function storeData(data) {
 
     const picBuffer = Buffer.from(data, 'base64');
     const picFilename = `${uuidv4()}.jpg`;
-    const picPath = path.join(DocsDir, picFilename);
+    let picPath = path.join(DocsDir, picFilename);
 
     fs.writeFileSync(picPath, picBuffer);
     picPath = `${process.env.UPLOAD_URL}` + picPath.slice(5);

@@ -50,10 +50,15 @@ const TimeSlotManager = () => {
     const data = await res.json();
     if (res.ok) {
       toast.success("Time slot added successfully")
-      // console.log("creates",data)
+      setFetchedSlots([...fetchedSlots, data.timeSlot].sort((a, b) => (a.startTime > b.startTime ? 1 : -1)));
+      
+      // Clear the input fields
+      setStartTime("");
+      setEndTime("");
+    }else {
+      toast.error("Failed to add time slot");
     }
       
-
     if (startTime && endTime) {
       const newSlot = `${startTime} - ${endTime}`;
       if (!timeSlots.includes(newSlot)) {
@@ -106,7 +111,6 @@ const TimeSlotManager = () => {
       className="main-content"
       style={{ backgroundColor: "#F6F6F9", minHeight: "100vh" }}
     >
-      <ToastContainer />
       <div className="page-content">
         <div className="container-fluid">
           <div className="list-group mt-3">

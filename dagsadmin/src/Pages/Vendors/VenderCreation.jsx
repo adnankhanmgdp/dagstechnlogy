@@ -1,14 +1,16 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 const VenderCreation = () => {
 
   const [formData, setFormData] = useState({})
-  console.log("formData",formData);
+  const navigate = useNavigate();
+  // console.log("formData",formData);
 
   const handleChange = (e) => {
-    setFormData({...formData,[e.target.id]:e.target.value});
+    setFormData({ ...formData, [e.target.id]: e.target.value });
   }
 
   const token = localStorage.getItem("token");
@@ -27,7 +29,6 @@ const VenderCreation = () => {
   };
 
   const [vendorData, setVendorData] = useState({});
-  console.log("vendorDatais", vendorData);
 
   const handleCreateVendor = async (e) => {
     e.preventDefault();
@@ -43,48 +44,23 @@ const VenderCreation = () => {
           email: formData.email,
           phone: formData.phone,
           capacity: formData.capacity,
-          docType: "PAN",
+          docType: formData.documentType,
           imgData: formData.imgData,
           pincode: formData.pincode,
           address: formData.address,
         }),
       });
       const data = await res.json();
-      console.log("data", data);
       if (res.ok) {
         setVendorData(data.data);
 
-        const res2 = await fetch(
-          `${process.env.REACT_APP_API_URL}/createBankDetails`,
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${token}`,
-            },
-            body: JSON.stringify({
-              accountHolderName: formData.accountHolderName,
-              bankName: formData.bankName,
-              accountNumber: formData.accountNumber,
-              IFSC: formData.IFSC,
-              branch: formData.branch,
-              address: formData.bankAddress,
-              bankId: data.data.vendorId,
-            }),
-          },
-        );
-        const data2 = await res2.json();
-        console.log("bankdetail data is", data2);
-        if (res2.ok) {
-          toast.success("Vendor created successfully");
-        } else {
-          toast.warning(data2.message);
-        }
+        toast.success("Vendor created successfully! 😃")
+        navigate('/logistic/approvePartner')
       } else {
         toast.warning(data.message);
       }
     } catch (error) {
-      console.log("error: ", error);
+      toast.warning(error.message);
     }
   };
 
@@ -93,7 +69,6 @@ const VenderCreation = () => {
       style={{ background: "#F8F8FB", minHeight: "100vh" }}
       className="main-content"
     >
-      <ToastContainer />
       <div className="page-content">
         {/* main form */}
 
@@ -157,14 +132,14 @@ const VenderCreation = () => {
                           <div class="col-lg-6">
                             <div class="mb-3">
                               <label for="basicpill-email-input">
-                                PAN card
+                                Document Type
                               </label>
                               <input
                                 onChange={handleChange}
-                                type="number"
+                                type="text"
                                 class="form-control"
-                                id="document"
-                                placeholder="Enter PAN number"
+                                id="documentType"
+                                placeholder="Enter the type of Document"
                               />
                             </div>
                           </div>
@@ -240,7 +215,7 @@ const VenderCreation = () => {
 
                     {/* bank details form */}
 
-                    <div className="card p-3">
+                    {/* <div className="card p-3">
                       <h3 className="mt-1 mb-3">Bank Details</h3>
 
                       <section>
@@ -341,7 +316,7 @@ const VenderCreation = () => {
                           </div>
                         </div>
                       </section>
-                    </div>
+                    </div> */}
                     <button
                       onClick={handleCreateVendor}
                       className="createUserBtn mt-3"

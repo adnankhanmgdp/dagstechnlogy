@@ -21,7 +21,15 @@ const NotificationtSchema = new mongoose.Schema({
     },
     notificationFor: {
         type: String
-    }
+    },
+    createdAt: {
+        type: Date,
+        default: new Date(Date.now() + (5.5 * 60 * 60 * 1000)).toISOString()
+    },
+    orderDate: {
+        type: Date,
+        default: new Date(Date.now() + (5.5 * 60 * 60 * 1000)).toISOString() //time on which order is placed 
+    },
 }, { versionKey: false });
 
 module.exports = mongoose.model("Notification", NotificationtSchema);

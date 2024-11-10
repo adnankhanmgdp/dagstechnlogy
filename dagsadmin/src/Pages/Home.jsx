@@ -1,4 +1,4 @@
-import React,{useEffect,useState} from "react";
+import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import Chart from "react-apexcharts";
 
@@ -6,10 +6,12 @@ const Home = () => {
 
   const [currentTime, setCurrentTime] = useState(new Date());
   const [weekOrder, setWeekOrder] = useState([])
+  const [incomeDaily, setIncomeDaily] = useState([])
+  const [incomeMonthly, setIncomeMonthly] = useState([])
   const [weekName, setWeekName] = useState([]);
   const [monthsName, setMonthName] = useState([]);
   const [monthOrder, setMonthOrder] = useState([]);
-  const[monthlyIncome,setMonthlyIncome]=useState(0);
+  const [monthlyIncome, setMonthlyIncome] = useState(0);
 
 
   useEffect(() => {
@@ -60,82 +62,107 @@ const Home = () => {
   // Use the toLocaleDateString method with the weekday option to get the day name
   const dayName = today.toLocaleDateString("en-US", { weekday: "long" });
 
-   const chartOptions = {
-     chart: {
-       type: "bar",
-       height: 350,
-       toolbar: {
-         show: false,
-       },
-     },
-     plotOptions: {
-       bar: {
-         distributed: true, // Enable distributed mode
-         horizontal: false,
-         columnWidth: "55%",
-         endingShape: "rounded",
-       },
-     },
-     dataLabels: {
-       enabled: false,
-     },
-     legend: {
-       show: false,
-     },
-     xaxis: {
-       categories: monthsName,
-     },
-     colors: [
-       "#008FFB"
-     ],
-   };
+  const chartOptions = {
+    chart: {
+      type: "bar",
+      height: 350,
+      toolbar: {
+        show: false,
+      },
+    },
+    plotOptions: {
+      bar: {
+        distributed: true, // Enable distributed mode
+        horizontal: false,
+        columnWidth: "55%",
+        endingShape: "rounded",
+      },
+    },
+    tooltip:{
+      enabled:true,
+      followCursor: true,
+      onDatasetHover:{
+        highlightDataSeries: true
+      },
+      custom: function({series, seriesIndex, dataPointIndex, w}) {
+        return `<div style="height:50px" class="container bg-white"> Orders: ${series[seriesIndex][dataPointIndex]}
+        <br/>
+        Total Revenue: ₹ ${incomeMonthly[dataPointIndex]}
+        </div>`
+      }
+    },
+    dataLabels: {
+      enabled: false,
+    },
+    legend: {
+      show: false,
+    },
+    xaxis: {
+      categories: monthsName,
+    },
+    colors: [
+      "#008FFB"
+    ],
+  };
 
-   const chartSeries = [ //week
-     {
-       name: "Orders",
-       data: monthOrder,
-     },
-   ];
-  
-     const chartSeries2 = [ // month
-       {
-         name: "orders",
-         data: weekOrder,
-       },
-     ];
-  
-  
-     const chartOptions2 = {
-       chart: {
-         type: "bar",
-         height: 300,
-         toolbar: {
-           show: false,
-         },
-       },
-       plotOptions: {
-         bar: {
-           distributed: true, // Enable distributed mode
-           horizontal: false,
-           columnWidth: "55%",
-           endingShape: "rounded",
-         },
-       },
-       dataLabels: {
-         enabled: false,
-       },
-       legend: {
-         show: false,
-       },
-       xaxis: {
-         categories: weekName,
-       },
-       yaxis: {
-         min: 0,
-         max:10
-       },
-       colors: ["#008FFB"],
-     };
+  const chartSeries = [ //week
+    {
+      name: "Orders",
+      data: monthOrder,
+    },
+  ];
+
+  const chartSeries2 = [ // month
+    {
+      name: "orders",
+      data: weekOrder,
+    },
+  ];
+
+  const chartOptions2 = {
+    chart: {
+      type: "bar",
+      height: 300,
+      toolbar: {
+        show: false,
+      },
+    },
+    plotOptions: {
+      bar: {
+        distributed: true, // Enable distributed mode
+        horizontal: false,
+        columnWidth: "55%",
+        endingShape: "rounded",
+      },
+    },
+    dataLabels: {
+      enabled: false,
+    },
+    legend: {
+      show: false,
+    },
+    xaxis: {
+      categories: weekName,
+    },
+    yaxis: {
+      min: 0,
+      max: 10
+    },
+    tooltip:{
+      enabled:true,
+      followCursor: true,
+      onDatasetHover:{
+        highlightDataSeries: true
+      },
+      custom: function({series, seriesIndex, dataPointIndex, w}) {
+        return `<div style="height:50px" class="container bg-white">Total Orders: ${series[seriesIndex][dataPointIndex]}
+        <br/>
+        Total Revenue: ₹ ${incomeDaily[dataPointIndex]}
+        </div>`
+      }
+    },
+    colors: ["#008FFB"],
+  };
 
   const token = localStorage.getItem("token");
 
@@ -203,7 +230,7 @@ const Home = () => {
         const data = await res.json();
         if (res.ok) {
           setTodayOrderAmount(data.totalAmount);
-          
+
         }
       } catch (error) {
         console.log(error.message);
@@ -213,15 +240,15 @@ const Home = () => {
   }, []);
 
 
-   useEffect(() => {
+  useEffect(() => {
     const fetchOrders = async () => {
-      const today = new Date();
+      const today = new Date()
       const startDate = new Date(today);
-      startDate.setDate(today.getDate() - 7);
+      startDate.setDate(today.getDate() - 6);
 
       const endDate = new Date(today);
 
-      console.log("startDate",startDate.toISOString())
+      // console.log("startDate", startDate.toISOString())
 
       try {
         const response = await fetch(
@@ -233,8 +260,8 @@ const Home = () => {
               Authorization: `Bearer ${token}`,
             },
             body: JSON.stringify({
-              startDate: startDate.toISOString(),
-              endDate: endDate.toISOString(),
+              startDate: startDate,
+              endDate: endDate,
             }),
           },
         );
@@ -246,12 +273,13 @@ const Home = () => {
         const data = await response.json();
         setWeekOrder(data.orders);
         setWeekName(data.dayNames);
-        console.log(data.orders, "order by date range: week");
+        setIncomeDaily(data.income)
+        // console.log(data.orders, "order by date range: week");
       } catch (error) {
         console.log(error.message);
       }
     };
-     
+
     const fetchOrdersMonth = async () => {
       const today = new Date();
       const endDate = new Date(today);
@@ -260,7 +288,7 @@ const Home = () => {
       const startDate = new Date(today);
       startDate.setFullYear(startDate.getFullYear() - 1); // Set startDate to 1 year before today
 
-      console.log("startDate", startDate.toISOString());
+      // console.log("startDate", startDate.toISOString());
 
       try {
         const response = await fetch(
@@ -269,7 +297,7 @@ const Home = () => {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
-              Authorization:`Bearer ${token}`
+              Authorization: `Bearer ${token}`
             },
             body: JSON.stringify({
               startMonth: startDate.toISOString(),
@@ -285,64 +313,65 @@ const Home = () => {
         const data = await response.json();
         setMonthOrder(data.orderCounts);
         setMonthName(data.monthNames);
-        console.log(data.orders, "order by date range: week");
+        setIncomeMonthly(data.income)
+        // console.log(data.orders, "order by date range: week");
       } catch (error) {
         console.log(error.message);
       }
     };
-     
-     const fetchMonthlyIncome = async () => {
-       const today = new Date();
 
-       // Set endDate to today's date with end time
-       const endDate = new Date(today);
-       endDate.setHours(23, 59, 59, 999);
+    const fetchMonthlyIncome = async () => {
+      const today = new Date();
 
-       // Set startDate to one month before today
-       const startDate = new Date(today);
-       startDate.setMonth(startDate.getMonth() - 1);
+      // Set endDate to today's date with end time
+      const endDate = new Date(today);
+      endDate.setHours(23, 59, 59, 999);
 
-       // Format dates to ISO format with full date and time
-       const formatDateToISO = (date) => {
-         return date.toISOString();
-       };
+      // Set startDate to one month before today
+      const startDate = new Date(today);
+      startDate.setMonth(startDate.getMonth() - 1);
 
-       const startDateFormatted = formatDateToISO(startDate);
-       const endDateFormatted = formatDateToISO(endDate);
+      // Format dates to ISO format with full date and time
+      const formatDateToISO = (date) => {
+        return date.toISOString();
+      };
 
-       try {
-         const response = await fetch(
-           `${process.env.REACT_APP_API_URL}/monthlyIncome`,
-           {
-             method: "POST",
-             headers: {
-               "Content-Type": "application/json",
-               Authorization: `Bearer ${token}`,
-             },
-             body: JSON.stringify({
-               startDate: startDateFormatted,
-               endDate: endDateFormatted,
-             }),
-           },
-         );
+      const startDateFormatted = formatDateToISO(startDate);
+      const endDateFormatted = formatDateToISO(endDate);
 
-         const data = await response.json();
-         console.log("data",data)
-         setMonthlyIncome(data.monthly);
-         console.log(data.orders, "order by date range: month");
-       } catch (error) {
-         console.log(error.message);
-       }
-     };
+      try {
+        const response = await fetch(
+          `${process.env.REACT_APP_API_URL}/monthlyIncome`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({
+              startDate: startDateFormatted,
+              endDate: endDateFormatted,
+            }),
+          },
+        );
 
-     // Example call
-     fetchMonthlyIncome();
+        const data = await response.json();
+        // console.log("data", data)
+        setMonthlyIncome(data.monthly);
+        // console.log(data.orders, "order by date range: month");
+      } catch (error) {
+        console.log(error.message);
+      }
+    };
 
-     fetchOrders();
-     fetchOrdersMonth();
-   }, []);
+    // Example call
+    fetchMonthlyIncome();
 
-  const[week,setWeek] = useState(true)
+    fetchOrders();
+    fetchOrdersMonth();
+  }, []);
+
+  const [week, setWeek] = useState(true)
 
   return (
     <>
@@ -370,9 +399,9 @@ const Home = () => {
 
             <div className="row">
               <div className="col-xl-4">
-                <div class="card border-0 pt-3 pb-3">
-                  <div class="card-body">
-                    <h4 class="card-title pb-2 pt-2">
+                <div className="card border-0 pt-3 pb-3">
+                  <div className="card-body">
+                    <h4 className="card-title pb-2 pt-2">
                       <b>
                         <i>
                           {formattedTime}{" "}
@@ -380,12 +409,12 @@ const Home = () => {
                         </i>
                       </b>
                     </h4>
-                    <h6 class="card-subtitle mb-2 text-muted">
+                    <h6 className="card-subtitle mb-2 text-muted">
                       <span style={{ fontSize: "medium" }}>
                         {formattedDate}
                       </span>
                     </h6>
-                    <p class="card-text">
+                    <p className="card-text">
                       <span style={{ fontSize: "smaller" }}>{dayName}</span>
                     </p>
                   </div>
@@ -393,12 +422,12 @@ const Home = () => {
 
                 <div className="card mb-4 mt-5 border-0">
                   <div className="card-body">
-                    <h4 className="card-title mb-4">Monthly Earning</h4>
+                    <h4 className="card-title mb-4">Monthly Revenue</h4>
                     <div className="row">
                       <div className="col-sm-6">
                         <p className="text-muted">This month</p>
-                        <h3>₹{ monthlyIncome}</h3>
-                        
+                        <h3>₹{monthlyIncome}</h3>
+
                       </div>
                       <div className="col-sm-6">
                         <div className="mt-4 mt-sm-0">
@@ -416,7 +445,9 @@ const Home = () => {
                     </p>
                   </div>
                 </div>
+
               </div>
+
               <div className="col-xl-8">
                 <div className="row mb-4">
                   <div className="col-md-4">
@@ -538,6 +569,7 @@ const Home = () => {
                   </div>
                 </div>
               </div>
+
             </div>
             {/* <!-- end row --> */}
 
@@ -550,119 +582,6 @@ const Home = () => {
         {/* <!-- End Page-content --> */}
 
         {/* <!-- Transaction Modal --> */}
-        <div
-          className="modal fade transaction-detailModal"
-          tabindex="-1"
-          role="dialog"
-          aria-labelledby="transaction-detailModalLabel"
-          aria-hidden="true"
-        >
-          <div className="modal-dialog modal-dialog-centered" role="document">
-            <div className="modal-content">
-              <div className="modal-header">
-                <h5 className="modal-title" id="transaction-detailModalLabel">
-                  Order Details
-                </h5>
-                <button
-                  type="button"
-                  className="btn-close"
-                  data-bs-dismiss="modal"
-                  aria-label="Close"
-                ></button>
-              </div>
-              <div className="modal-body">
-                <p className="mb-2">
-                  Product id: <span className="text-primary">#SK2540</span>
-                </p>
-                <p className="mb-4">
-                  Billing Name:{" "}
-                  <span className="text-primary">Neal Matthews</span>
-                </p>
-
-                <div className="table-responsive">
-                  <table className="table align-middle table-nowrap">
-                    <thead>
-                      <tr>
-                        <th scope="col">Product</th>
-                        <th scope="col">Product Name</th>
-                        <th scope="col">Price</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <tr>
-                        <th scope="row">
-                          <div>
-                            <img
-                              src="/assets/images/product/img-7.png"
-                              alt=""
-                              className="avatar-sm"
-                            />
-                          </div>
-                        </th>
-                        <td>
-                          <div>
-                            <h5 className="text-truncate font-size-14">
-                              Wireless Headphone (Black)
-                            </h5>
-                            <p className="text-muted mb-0">₹ 225 x 1</p>
-                          </div>
-                        </td>
-                        <td>₹ 255</td>
-                      </tr>
-                      <tr>
-                        <th scope="row">
-                          <div>
-                            <img
-                              src="assets/images/product/img-4.png"
-                              alt=""
-                              className="avatar-sm"
-                            />
-                          </div>
-                        </th>
-                        <td>
-                          <div>
-                            <h5 className="text-truncate font-size-14">
-                              Phone patterned cases
-                            </h5>
-                            <p className="text-muted mb-0">₹ 145 x 1</p>
-                          </div>
-                        </td>
-                        <td>₹ 145</td>
-                      </tr>
-                      <tr>
-                        <td colspan="2">
-                          <h6 className="m-0 text-right">Sub Total:</h6>
-                        </td>
-                        <td>₹ 400</td>
-                      </tr>
-                      <tr>
-                        <td colspan="2">
-                          <h6 className="m-0 text-right">Shipping:</h6>
-                        </td>
-                        <td>Free</td>
-                      </tr>
-                      <tr>
-                        <td colspan="2">
-                          <h6 className="m-0 text-right">Total:</h6>
-                        </td>
-                        <td>₹ 400</td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-              <div className="modal-footer">
-                <button
-                  type="button"
-                  className="btn btn-secondary"
-                  data-bs-dismiss="modal"
-                >
-                  Close
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
         {/* <!-- end modal --> */}
 
         {/* <!-- subscribeModal --> */}
